@@ -1,0 +1,68 @@
+[
+  {
+    "id": "score_fd71754e2f25d163",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_95b87498df54834a",
+    "email": "darianseselovsky@gmail.com",
+    "score": 0,
+    "result": "finalizado",
+    "createdAt": "2026-05-22T22:46:23.848Z"
+  },
+  {
+    "id": "score_46f07bef48144be6",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_95b87498df54834a",
+    "email": "darianseselovsky@gmail.com",
+    "score": 20,
+    "result": "finalizado",
+    "createdAt": "2026-05-22T22:46:48.955Z"
+  },
+  {
+    "id": "score_cd6bdc48171a7e0e",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_95b87498df54834a",
+    "email": "darianseselovsky@gmail.com",
+    "score": 0,
+    "result": "finalizado",
+    "createdAt": "2026-05-22T22:47:04.636Z"
+  },
+  {
+    "id": "score_86ba74a118dd112a",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_95b87498df54834a",
+    "email": "darianseselovsky@gmail.com",
+    "score": 90,
+    "result": "finalizado",
+    "createdAt": "2026-05-22T22:48:27.960Z"
+  },
+  {
+    "id": "score_f1fc33b715ede939",
+    "game": "snake",
+    "mode": "multiplayer",
+    "matchCode": "DSVNF",
+    "userId": "user_95b87498df54834a",
+    "email": "darianseselovsky@gmail.com",
+    "score": 0,
+    "result": "perdió",
+    "createdAt": "2026-05-22T22:52:06.841Z"
+  },
+  {
+    "id": "score_487e6b63eed56adf",
+    "game": "snake",
+    "mode": "multiplayer",
+    "matchCode": "DSVNF",
+    "userId": "user_49fd9e155fdb70e0",
+    "email": "franciscorobledo0012@gmail.com",
+    "score": 160,
+    "result": "ganó",
+    "createdAt": "2026-05-22T22:52:06.850Z"
+  }
+]

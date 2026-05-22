@@ -1,0 +1,3 @@
+
+[2026-05-22T22:52:06.853Z] SNAKE MULTIPLAYER | Código: DSVNF | J1: darianseselovsky@gmail.com Score: 0 | J2: franciscorobledo0012@gmail.com Score: 160 | Ganador: franciscorobledo0012@gmail.com
+[2026-05-22T22:54:52.649Z] SNAKE MULTIPLAYER | Código: 7VB6V | J1: darianseselovsky@gmail.com Score: - | J2: - Score: - | Cancelada: rival desconectado
