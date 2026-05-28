@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laberinto Arcade</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">multiplayer local</p>
+        <h1>Laberinto Arcade</h1>
+      </div>
+      <button id="themeToggle" class="icon-button" type="button" title="Cambiar tema">☼</button>
+    </header>
+
+    <main>
+      <section id="authView" class="view auth-grid">
+        <div class="panel auth-panel">
+          <h2>Entrar para jugar</h2>
+          <p class="muted">Usa tu email y un codigo temporal. En desarrollo, si no hay SMTP, el codigo aparece en la consola del servidor.</p>
+          <label>Email</label>
+          <input id="authEmail" type="email" placeholder="jugador@gmail.com" autocomplete="email">
+          <div class="row">
+            <button id="requestRegisterBtn" type="button">Registrarme</button>
+            <button id="requestLoginBtn" type="button" class="secondary">Iniciar sesion</button>
+          </div>
+          <label>Codigo de 6 digitos</label>
+          <input id="authCode" type="text" inputmode="numeric" maxlength="6" placeholder="123456">
+          <button id="verifyCodeBtn" type="button">Verificar codigo</button>
+          <p id="authMessage" class="message"></p>
+        </div>
+        <div class="panel feature-panel">
+          <h2>Juego web adaptativo</h2>
+          <ul>
+            <li>Modo 1 jugador como come-puntos o fantasma.</li>
+            <li>Salas con codigo para jugar en la misma red WiFi.</li>
+            <li>Servidor autoritativo en multijugador.</li>
+            <li>Rankings guardados con archivos locales.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="menuView" class="view hidden">
+        <div class="dashboard">
+          <div class="panel menu-panel">
+            <p class="eyebrow">usuario</p>
+            <h2 id="userEmailLabel"></h2>
+            <div class="button-grid">
+              <button id="singlePlayerBtn" type="button">Jugar 1 jugador</button>
+              <button id="createRoomBtn" type="button">Crear partida multijugador</button>
+              <button id="joinRoomBtn" type="button" class="secondary">Unirse con codigo</button>
+              <button id="logoutBtn" type="button" class="danger">Cerrar sesion</button>
+            </div>
+          </div>
+          <div class="panel ranking-panel">
+            <h3>Top 3 personal</h3>
+            <ol id="personalRanking"></ol>
+          </div>
+          <div class="panel ranking-panel">
+            <h3>Top 10 general local</h3>
+            <ol id="generalRanking"></ol>
+          </div>
+        </div>
+      </section>
+
+      <section id="lobbyView" class="view hidden">
+        <div class="panel lobby-panel">
+          <div class="lobby-head">
+            <div>
+              <p class="eyebrow">sala</p>
+              <h2 id="lobbyCode">-----</h2>
+            </div>
+            <button id="leaveLobbyBtn" type="button" class="secondary">Salir</button>
+          </div>
+          <div id="lobbyInfo" class="lobby-info"></div>
+          <button id="startRoomBtn" type="button">Iniciar partida</button>
+          <p id="lobbyMessage" class="message"></p>
+        </div>
+      </section>
+
+      <section id="gameView" class="view hidden">
+        <div class="game-layout">
+          <aside class="panel status-panel">
+            <p class="eyebrow" id="gameModeLabel">partida</p>
+            <h2 id="gameTitle">Nivel 1</h2>
+            <div class="stat-grid">
+              <span>Score</span><strong id="scoreLabel">0</strong>
+              <span>Vidas</span><strong id="livesLabel">3</strong>
+              <span>Puntos</span><strong id="pelletsLabel">0</strong>
+            </div>
+            <p id="gameMessage" class="message"></p>
+            <button id="backToMenuBtn" type="button" class="secondary">Volver al menu</button>
+          </aside>
+          <div class="canvas-wrap">
+            <canvas id="gameCanvas" width="840" height="560"></canvas>
+            <div class="touch-controls" aria-label="Controles tactiles">
+              <button data-dir="up" type="button">↑</button>
+              <button data-dir="left" type="button">←</button>
+              <button data-dir="down" type="button">↓</button>
+              <button data-dir="right" type="button">→</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <button id="modalClose" class="modal-close" type="button">×</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/levels.js"></script>
+  <script src="js/bots.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/rankings.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/pacman.js"></script>
+  <script src="js/socket.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

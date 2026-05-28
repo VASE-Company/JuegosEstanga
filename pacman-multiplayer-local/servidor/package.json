@@ -1,0 +1,16 @@
+{
+  "name": "pacman-multiplayer-local-servidor",
+  "version": "1.0.0",
+  "description": "Servidor local para Laberinto Arcade multiplayer con Express y Socket.IO",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.18.3",
+    "nodemailer": "^6.9.13",
+    "socket.io": "^4.7.5"
+  }
+}
