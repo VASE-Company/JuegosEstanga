@@ -1,18 +1,26 @@
-const SESSION_KEY = "snakeUser";
+const SESSION_KEY = "arcade_user";
 
 export function getCurrentUser() {
   try {
-    return JSON.parse(localStorage.getItem(SESSION_KEY));
+    const session = JSON.parse(localStorage.getItem(SESSION_KEY));
+    return session?.user || null;
   } catch {
     return null;
   }
 }
 
 export function setCurrentUser(user) {
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ id: user.id, email: user.email }));
+  const current = JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ ...current, user: { id: user.id, email: user.email } }));
 }
 
-export function logout() {
+export async function logout() {
+  try {
+    const session = JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");
+    if (session?.token) {
+      await fetch("/api/auth/logout", { method: "POST", headers: { Authorization: `Bearer ${session.token}` } });
+    }
+  } catch {}
   localStorage.removeItem(SESSION_KEY);
 }
 
@@ -35,6 +43,7 @@ export async function verifyCode(email, code, type) {
   });
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || "No se pudo verificar el código.");
-  setCurrentUser(data.user);
+  if (data?.token) {`r`n    const current = JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");`r`n    localStorage.setItem(SESSION_KEY, JSON.stringify({ ...current, token: data.token, user: data.user }));`r`n  } else {`r`n    setCurrentUser(data.user);`r`n  }
   return data.user;
 }
+

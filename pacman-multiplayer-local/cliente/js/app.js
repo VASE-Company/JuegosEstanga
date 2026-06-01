@@ -9,7 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
     UI.show("menu");
     Rankings.load(Auth.user.email);
   } else {
-    UI.show("auth");
+    window.location.href = "/";
+    return;
   }
 
   document.getElementById("singlePlayerBtn").addEventListener("click", () => {

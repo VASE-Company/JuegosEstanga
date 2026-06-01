@@ -32,5 +32,5 @@ export function leaveRoom(codigo) {
 }
 
 export function askRankings(email) {
-  getSocket().emit("pedir-rankings", { email });
+  getSocket().emit("pedir-rankings-snake", { email });
 }

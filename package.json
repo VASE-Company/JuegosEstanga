@@ -1,0 +1,9 @@
+{
+  "name": "juegos-estanga-launcher",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "node pacman-multiplayer-local/servidor/server.js",
+    "start": "node pacman-multiplayer-local/servidor/server.js"
+  }
+}

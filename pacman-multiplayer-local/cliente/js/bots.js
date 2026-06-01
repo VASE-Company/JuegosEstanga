@@ -14,16 +14,23 @@ const BotAI = {
       return !state.walls.has(`${next.x},${next.y}`) && next.x >= 0 && next.y >= 0 && next.x < state.width && next.y < state.height;
     });
   },
-  choose(state, actor, target, flee = false) {
+  choose(state, actor, target, flee = false, isPacman = false) {
     const dirs = this.legal(state, actor);
     if (!dirs.length) return actor.direction || "left";
-    dirs.sort((a, b) => {
+    const opposite = { up: "down", down: "up", left: "right", right: "left" };
+    const avoidReverse = dirs.filter((dir) => dir !== opposite[actor.direction]);
+    const candidates = avoidReverse.length ? avoidReverse : dirs;
+    candidates.sort((a, b) => {
       const na = { x: actor.x + this.dirs[a].x, y: actor.y + this.dirs[a].y };
       const nb = { x: actor.x + this.dirs[b].x, y: actor.y + this.dirs[b].y };
       return flee ? this.distance(nb, target) - this.distance(na, target) : this.distance(na, target) - this.distance(nb, target);
     });
-    if (Math.random() < 0.18 && dirs[1]) return dirs[1];
-    return dirs[0];
+    if (isPacman) {
+      if (Math.random() < 0.1 && candidates[1]) return candidates[1];
+      return candidates[0];
+    }
+    if (Math.random() < 0.12 && candidates[1]) return candidates[1];
+    return candidates[0];
   },
   nearestPellet(state, actor) {
     const dots = [...state.pellets, ...state.powerPellets];

@@ -1,1 +1,28 @@
-[]
+[
+  {
+    "id": "score_mpvu7wyd_8loso1",
+    "game": "pacman",
+    "mode": "singleplayer",
+    "role": "pacman",
+    "level": 1,
+    "matchCode": null,
+    "userId": "user_mpvo0ud1_5n6dqh",
+    "email": "darianseselovsky@gmail.com",
+    "score": 120,
+    "result": "perdió",
+    "createdAt": "2026-06-01T23:26:17.749Z"
+  },
+  {
+    "id": "score_mpvv75rt_zulvs9",
+    "game": "pacman",
+    "mode": "singleplayer",
+    "role": "pacman",
+    "level": 1,
+    "matchCode": null,
+    "userId": "user_mpvo0ud1_5n6dqh",
+    "email": "darianseselovsky@gmail.com",
+    "score": 0,
+    "result": "perdió",
+    "createdAt": "2026-06-01T23:53:42.137Z"
+  }
+]

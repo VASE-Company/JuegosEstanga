@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juegos Estanga</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="panel auth-panel panel-view is-active" id="authPanel">
+      <p class="eyebrow">acceso unificado</p>
+      <h1>Juegos Estanga</h1>
+      <p class="muted">Iniciá sesión una sola vez para jugar en ambos mundos.</p>
+
+      <form id="authForm" class="stack" autocomplete="on">
+        <label for="emailInput">Email</label>
+        <input id="emailInput" type="email" placeholder="jugador@gmail.com" required>
+
+        <div class="segmented" role="group" aria-label="Tipo de acceso">
+          <button class="segment active" data-auth-type="register" type="button">Registrarme</button>
+          <button class="segment" data-auth-type="login" type="button">Iniciar sesión</button>
+        </div>
+
+        <button class="primary" type="submit">Pedir código</button>
+      </form>
+
+      <form id="codeForm" class="stack hidden" autocomplete="one-time-code">
+        <label for="codeInput">Código de 6 dígitos</label>
+        <input id="codeInput" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" placeholder="123456" required>
+        <button class="primary" type="submit">Verificar código</button>
+        <button class="ghost" id="backBtn" type="button">Cambiar email</button>
+      </form>
+
+      <p id="message" class="message" aria-live="polite"></p>
+    </section>
+
+    <section class="selector-panel panel-view is-hidden" id="selectorPanel">
+      <h2 class="selector-title">Juegos Estanga</h2>
+      <div class="choice-row">
+        <div class="game-choice">
+          <h3>La Banda Infinita</h3>
+          <a class="game-btn left" href="/pacman">Jugar</a>
+        </div>
+        <div class="game-choice">
+          <h3>Araña Run</h3>
+          <a class="game-btn right" href="/snake">Jugar</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

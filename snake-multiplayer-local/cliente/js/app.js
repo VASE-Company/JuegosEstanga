@@ -36,11 +36,14 @@ let activeRoomCode = null;
 let multiplayerActiveTurn = false;
 let turnFinished = false;
 
+if (!user?.id || !user?.email) {
+  window.location.href = "/";
+}
+
 function requireUser() {
   user = getCurrentUser();
   if (!user?.id || !user?.email) {
-    showToast("Iniciá sesión para jugar.", "error");
-    showView("authView");
+    window.location.href = "/";
     return false;
   }
   return true;
@@ -56,7 +59,7 @@ async function loadRankings() {
 function showDashboard() {
   user = getCurrentUser();
   if (!user) {
-    showView("authView");
+    window.location.href = "/";
     return;
   }
   userEmail.textContent = user.email;
@@ -215,10 +218,10 @@ joinForm.addEventListener("submit", async (event) => {
 });
 
 document.getElementById("logoutBtn").addEventListener("click", () => {
-  logout();
-  user = null;
-  showToast("Sesión cerrada.");
-  showView("authView");
+  logout().finally(() => {
+    user = null;
+    window.location.href = "/";
+  });
 });
 
 document.getElementById("themeToggle").addEventListener("click", () => {
@@ -340,3 +343,5 @@ socket.on("rankings-actualizados", () => {
 
 applyTheme(localStorage.getItem("snakeTheme") || "light");
 showDashboard();
+
+

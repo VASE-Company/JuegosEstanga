@@ -5,9 +5,12 @@ const PacmanGame = {
   role: "pacman",
   state: null,
   input: "left",
+  queuedInput: null,
   timer: null,
   multiplayerCode: null,
   lastSingleTick: 0,
+  mapImage: null,
+  mapImageReady: false,
 
   init() {
     this.canvas = document.getElementById("gameCanvas");
@@ -36,10 +39,17 @@ const PacmanGame = {
     document.querySelectorAll(".touch-controls button").forEach((button) => {
       button.addEventListener("click", () => this.setInput(button.dataset.dir));
     });
+    this.mapImage = new Image();
+    this.mapImage.onload = () => {
+      this.mapImageReady = true;
+      this.render();
+    };
+    this.mapImage.src = "assets/4c5b8791-e288-46bc-99d6-9fcc5f4cd43e.png";
   },
 
   setInput(direction) {
     this.input = direction;
+    this.queuedInput = direction;
     if (this.mode === "multiplayer" && this.multiplayerCode) {
       Multiplayer.sendInput(this.multiplayerCode, direction);
     }
@@ -108,15 +118,15 @@ const PacmanGame = {
     });
 
     if (this.role === "pacman") {
-      this.move(state.pacman, this.input);
+      this.move(state.pacman, this.input, true);
     } else {
       const danger = state.ghosts.find((ghost) => !ghost.vulnerable && BotAI.distance(ghost, state.pacman) <= 3);
       const target = danger || BotAI.nearestPellet(state, state.pacman);
-      this.move(state.pacman, BotAI.choose(state, state.pacman, target, Boolean(danger)));
+      this.move(state.pacman, BotAI.choose(state, state.pacman, target, Boolean(danger), true));
     }
 
     state.ghosts.forEach((ghost, index) => {
-      if (this.role === "ghost" && index === 0) this.move(ghost, this.input);
+      if (this.role === "ghost" && index === 0) this.move(ghost, this.input, true);
       else this.move(ghost, BotAI.choose(state, ghost, state.pacman, ghost.vulnerable));
     });
 
@@ -221,7 +231,19 @@ const PacmanGame = {
     this.timer = null;
   },
 
-  move(actor, direction) {
+  move(actor, direction, useQueue = false) {
+    if (useQueue && this.queuedInput) {
+      const queuedDelta = BotAI.dirs[this.queuedInput];
+      if (queuedDelta) {
+        const qx = actor.x + queuedDelta.x;
+        const qy = actor.y + queuedDelta.y;
+        if (qx >= 0 && qy >= 0 && qx < this.state.width && qy < this.state.height && !this.state.walls.has(`${qx},${qy}`)) {
+          direction = this.queuedInput;
+          this.input = this.queuedInput;
+          this.queuedInput = null;
+        }
+      }
+    }
     const delta = BotAI.dirs[direction] || BotAI.dirs[actor.direction] || BotAI.dirs.left;
     const nx = actor.x + delta.x;
     const ny = actor.y + delta.y;
@@ -257,8 +279,16 @@ const PacmanGame = {
     this.canvas.width = tile * state.width;
     this.canvas.height = tile * state.height;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    ctx.fillStyle = "#080a12";
-    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    if (this.mapImageReady && this.mapImage) {
+      ctx.globalAlpha = 0.92;
+      ctx.drawImage(this.mapImage, 0, 0, this.canvas.width, this.canvas.height);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "rgba(3, 8, 18, 0.28)";
+      ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    } else {
+      ctx.fillStyle = "#080a12";
+      ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    }
 
     const walls = state.walls instanceof Set ? state.walls : new Set(state.walls || []);
     walls.forEach((key) => {

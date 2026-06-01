@@ -14,10 +14,13 @@ const UI = {
       localStorage.setItem("pacman_theme", document.body.classList.contains("dark") ? "dark" : "light");
     });
     document.getElementById("modalClose").addEventListener("click", () => this.closeModal());
+    this.renderIcons();
   },
   show(viewName) {
     Object.values(this.views).forEach((view) => view.classList.add("hidden"));
     this.views[viewName].classList.remove("hidden");
+    document.body.classList.toggle("menu-bg", viewName === "menu");
+    this.renderIcons();
   },
   message(id, text, isError = false) {
     const element = document.getElementById(id);
@@ -59,5 +62,8 @@ const UI = {
     document.getElementById("livesLabel").textContent = state.livesPacman ?? "-";
     document.getElementById("pelletsLabel").textContent = state.pelletsRemaining ?? 0;
     document.getElementById("gameMessage").textContent = state.message || "";
+  },
+  renderIcons() {
+    if (window.lucide?.createIcons) window.lucide.createIcons();
   }
 };
