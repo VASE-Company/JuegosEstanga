@@ -6,6 +6,10 @@ const codeInput = document.getElementById("codeInput");
 const message = document.getElementById("message");
 const authPanel = document.getElementById("authPanel");
 const selectorPanel = document.getElementById("selectorPanel");
+const bind = (id, eventName, handler) => {
+  const element = document.getElementById(id);
+  if (element) element.addEventListener(eventName, handler);
+};
 
 let authType = "register";
 let pendingEmail = "";
@@ -103,13 +107,13 @@ codeForm.addEventListener("submit", async (event) => {
   }
 });
 
-document.getElementById("backBtn").addEventListener("click", () => {
+bind("backBtn", "click", () => {
   codeForm.classList.add("hidden");
   authForm.classList.remove("hidden");
   setMessage("Podés corregir el email y volver a pedir el código.");
 });
 
-document.getElementById("logoutBtn").addEventListener("click", logoutAll);
+bind("logoutBtn", "click", logoutAll);
 
 (function init() {
   const session = getSession();

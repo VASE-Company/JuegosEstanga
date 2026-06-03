@@ -6,13 +6,26 @@ const Auth = {
   allowedDomains: ["gmail.com", "hotmail.com", "outlook.com"],
   init() {
     this.user = this.getUser();
-    document.getElementById("requestRegisterBtn").addEventListener("click", () => this.requestCode("register"));
-    document.getElementById("requestLoginBtn").addEventListener("click", () => this.requestCode("login"));
-    document.getElementById("verifyCodeBtn").addEventListener("click", () => this.verifyCode());
-    document.getElementById("logoutBtn").addEventListener("click", () => this.logout());
-    document.getElementById("authEmail").addEventListener("input", () => this.validateEmailLive());
-    this.setStep("mail");
+    const bind = (id, eventName, handler) => {
+      const element = document.getElementById(id);
+      if (element) element.addEventListener(eventName, handler);
+    };
+    bind("requestRegisterBtn", "click", () => this.requestCode("register"));
+    bind("requestLoginBtn", "click", () => this.requestCode("login"));
+    bind("verifyCodeBtn", "click", () => this.verifyCode());
+    bind("logoutBtn", "click", () => this.logout());
+    bind("authEmail", "input", () => this.validateEmailLive());
+    this.resetAuthForm();
     this.validateEmailLive();
+  },
+  resetAuthForm() {
+    const emailInput = document.getElementById("authEmail");
+    const codeInput = document.getElementById("authCode");
+    if (emailInput && !this.user) emailInput.value = "";
+    if (codeInput) codeInput.value = "";
+    this.pendingType = null;
+    this.pendingEmail = null;
+    this.setStep("mail");
   },
   getUser() {
     try {
@@ -40,6 +53,8 @@ const Auth = {
     }
     localStorage.removeItem(this.sessionKey);
     this.user = null;
+    this.pendingType = null;
+    this.pendingEmail = null;
     window.location.href = "/";
   },
   email() {
@@ -109,6 +124,7 @@ const Auth = {
     this.pendingType = type;
     this.pendingEmail = this.email();
     this.setStep("mail");
+    document.getElementById("authCode").value = "";
     UI.message("authMessage", "Solicitando codigo...");
     try {
       const response = await fetch("/api/auth/request-code", {
@@ -120,6 +136,7 @@ const Auth = {
       UI.message("authMessage", data.message, !response.ok);
       if (response.ok) {
         this.setStep("code");
+        document.getElementById("authCode").value = "";
         UI.message("authMessage", "Codigo enviado. Paso 2: ingresalo para verificar.", false);
       }
     } catch {
@@ -150,6 +167,7 @@ const Auth = {
       }
       this.setUser(data.user);
       this.setStep("mail");
+      document.getElementById("authCode").value = "";
       this.pendingEmail = null;
       this.pendingType = null;
     } catch {

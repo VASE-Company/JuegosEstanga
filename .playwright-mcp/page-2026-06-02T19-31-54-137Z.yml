@@ -1,0 +1,25 @@
+- main [ref=e2]:
+  - generic [ref=e3]:
+    - paragraph [ref=e4]: acceso unificado
+    - heading "Juegos Estanga" [level=1] [ref=e5]
+    - paragraph [ref=e6]: Iniciá sesión una sola vez para jugar en ambos mundos.
+    - generic [ref=e7]:
+      - generic [ref=e8]: Email
+      - textbox "Email" [ref=e9]:
+        - /placeholder: jugador@gmail.com
+      - group "Tipo de acceso" [ref=e10]:
+        - button "Registrarme" [ref=e11] [cursor=pointer]
+        - button "Iniciar sesión" [ref=e12] [cursor=pointer]
+      - button "Pedir código" [ref=e13] [cursor=pointer]
+    - paragraph [ref=e14]
+  - generic:
+    - heading "Juegos Estanga" [level=2]
+    - generic:
+      - generic:
+        - heading "La Banda Infinita" [level=3]
+        - link "Jugar":
+          - /url: /pacman
+      - generic:
+        - heading "Araña Run" [level=3]
+        - link "Jugar":
+          - /url: /snake

@@ -1,4 +1,4 @@
-﻿@font-face {
+@font-face {
   font-family: "Arcade Estanga";
   src: url("/assets/Fonts/ARCADE_I.TTF") format("truetype");
   font-weight: 400;
@@ -10,10 +10,10 @@
   --text: #f5f8ff;
   --muted: #c6d4ec;
   --glass: rgba(5, 16, 35, 0.58);
-  --stroke: rgba(153, 193, 255, 0.38);
-  --cyan: #67e5ff;
-  --blue: #6aa8ff;
-  --gold: #ffd96b;
+  --stroke: rgba(255, 105, 121, 0.28);
+  --cyan: #ff8a8a;
+  --blue: #7a101d;
+  --gold: #ff8a8a;
   --danger: #ff7092;
 }
 
@@ -24,7 +24,7 @@ body {
   min-height: 100vh;
   font-family: "Montreal Neue", "Neue Montreal", "Rajdhani", "Segoe UI", sans-serif;
   color: var(--text);
-  background: linear-gradient(rgba(2, 8, 18, 0.62), rgba(2, 8, 18, 0.78)), url('/assets/hero-portal.jpg') center/cover fixed no-repeat;
+  background: linear-gradient(rgba(2, 8, 18, 0.72), rgba(2, 8, 18, 0.88)), url('/assets/hero-portal.jpg') center/cover fixed no-repeat;
 }
 
 .shell {
@@ -47,6 +47,19 @@ body {
 .panel-view.is-hidden { opacity: 0; pointer-events: none; transform: translateY(18px) scale(0.98); position: absolute; }
 .panel-view.is-active { opacity: 1; transform: translateY(0) scale(1); }
 
+html.has-session #authPanel {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(18px) scale(0.98);
+  position: absolute;
+}
+
+html.has-session #selectorPanel {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
 .auth-panel { max-width: 580px; padding: 30px; }
 .eyebrow {
   margin: 0 0 0.35rem;
@@ -54,7 +67,7 @@ body {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   font-weight: 800;
-  color: var(--cyan);
+  color: #ff6b6b;
 }
 
 h1 {
@@ -63,7 +76,7 @@ h1 {
   font-size: clamp(1.5rem, 3.2vw, 2.3rem);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  text-shadow: 0 0 18px rgba(103, 229, 255, 0.34), 0 0 32px rgba(255, 217, 107, 0.18);
+  text-shadow: 0 0 18px rgba(255, 72, 95, 0.3), 0 0 32px rgba(100, 10, 22, 0.2);
 }
 
 .muted { margin: 0 0 1.05rem; color: var(--muted); font-size: 1.02rem; }
@@ -84,8 +97,8 @@ input {
 
 input:focus {
   outline: none;
-  border-color: var(--cyan);
-  box-shadow: 0 0 0 3px rgba(103, 229, 255, 0.2);
+  border-color: #ff6b6b;
+  box-shadow: 0 0 0 3px rgba(255, 72, 95, 0.2);
 }
 
 button {
@@ -96,12 +109,12 @@ button {
   font-weight: 800;
 }
 
-.primary { background: linear-gradient(130deg, var(--gold), #f1ae0e); color: #111c2d; }
+.primary { background: linear-gradient(130deg, #ff8a8a, #7f0f1f); color: #111c2d; }
 .ghost { background: rgba(24, 50, 86, 0.86); border-color: var(--stroke); color: var(--text); }
 
 .segmented { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .segment { background: rgba(19, 44, 80, 0.92); border-color: var(--stroke); color: var(--text); }
-.segment.active { background: linear-gradient(130deg, var(--cyan), var(--blue)); color: #07172a; }
+.segment.active { background: linear-gradient(130deg, #ff8a8a, #7f0f1f); color: #07172a; }
 
 .message { min-height: 1.35rem; margin: 0.65rem 0 0; color: var(--muted); font-weight: 700; }
 .message.error { color: var(--danger); }
@@ -119,7 +132,7 @@ button {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #f3f8ff;
-  text-shadow: 0 0 18px rgba(103, 229, 255, 0.3);
+  text-shadow: 0 0 18px rgba(255, 72, 95, 0.3);
 }
 
 .choice-row {
@@ -155,12 +168,12 @@ button {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #0d1729;
-  background: linear-gradient(135deg, #ffe590, #f2b312);
+  background: linear-gradient(135deg, #ff8a8a, #7f0f1f);
   box-shadow: 0 16px 30px rgba(242, 179, 18, 0.35);
 }
 
 .game-btn.right {
-  background: linear-gradient(135deg, #8df0ff, #66a8ff);
+  background: linear-gradient(135deg, #ff5c72, #5d0b17);
   box-shadow: 0 16px 30px rgba(102, 168, 255, 0.38);
 }
 

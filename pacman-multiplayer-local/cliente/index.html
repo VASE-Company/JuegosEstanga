@@ -4,15 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LA BANDA INFINITA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=Montserrat:wght@500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <h1 class="brand-title">Juegos Estanga</h1>
-      <button id="themeToggle" class="icon-button" type="button" title="Cambiar tema" aria-label="Cambiar tema">
-        <i data-lucide="sun-medium"></i>
-      </button>
+      <h1 class="brand-title" aria-hidden="true"></h1>
     </header>
 
     <main>
@@ -25,7 +25,7 @@
             <div id="stepCode" class="step-badge">2. Codigo</div>
           </div>
           <label>Email</label>
-          <input id="authEmail" type="email" placeholder="jugador@gmail.com" autocomplete="email">
+          <input id="authEmail" type="email" placeholder="jugador@gmail.com" autocomplete="off" autocapitalize="none" spellcheck="false">
           <ul id="emailChecklist" class="mail-checklist">
             <li id="mailRuleAt">Debe contener @</li>
             <li id="mailRuleFormat">Debe tener formato valido</li>
@@ -36,7 +36,7 @@
             <button id="requestLoginBtn" type="button" class="secondary">Iniciar sesion</button>
           </div>
           <label>Codigo de 6 digitos</label>
-          <input id="authCode" type="text" inputmode="numeric" maxlength="6" placeholder="123456">
+          <input id="authCode" type="text" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="off" autocapitalize="none" spellcheck="false">
           <button id="verifyCodeBtn" type="button">Verificar codigo</button>
           <p id="authMessage" class="message"></p>
         </div>
@@ -50,24 +50,53 @@
       </section>
 
       <section id="menuView" class="view hidden">
-        <div class="dashboard">
-          <div class="menu-panel">
-            <p class="eyebrow">usuario</p>
-            <h2 id="userEmailLabel"></h2>
-            <div class="button-grid">
-              <button id="singlePlayerBtn" type="button"><i data-lucide="gamepad-2"></i><span>Jugar 1 jugador</span></button>
-              <button id="createRoomBtn" type="button"><i data-lucide="users-round"></i><span>Crear partida multijugador</span></button>
-              <button id="joinRoomBtn" type="button" class="secondary"><i data-lucide="log-in"></i><span>Unirse con codigo</span></button>
-              <button id="logoutBtn" type="button" class="danger"><i data-lucide="log-out"></i><span>Cerrar sesion</span></button>
+        <div class="menu-shell">
+          <nav class="menu-navbar">
+            <a class="menu-back" href="/" aria-label="Volver al selector de juegos">
+              <i data-lucide="arrow-left"></i>
+              <span>Volver al selector</span>
+            </a>
+            <div class="menu-brand">
+              <p class="eyebrow">Juegos Estanga</p>
+              <strong>La Banda Infinita</strong>
             </div>
-          </div>
-          <div class="ranking-panel">
-            <h3><i data-lucide="medal"></i><span>Top 3 personal</span></h3>
-            <ol id="personalRanking"></ol>
-          </div>
-          <div class="ranking-panel">
-            <h3><i data-lucide="trophy"></i><span>Top 10 general local</span></h3>
-            <ol id="generalRanking"></ol>
+            <div class="menu-nav-actions">
+              <a id="changeGameBtn" class="menu-action-link" href="/">
+                <i data-lucide="gamepad-2"></i>
+                <span>Cambiar juego</span>
+              </a>
+              <button id="logoutBtn" type="button" class="secondary">
+                <i data-lucide="log-out"></i>
+                <span>Salir</span>
+              </button>
+            </div>
+          </nav>
+          <section class="menu-profile-card">
+            <div class="profile-avatar" id="userInitialsLabel">UE</div>
+            <div class="profile-copy">
+              <p class="eyebrow">perfil activo</p>
+              <h2 id="userEmailLabel"></h2>
+              <p class="muted">Elegí un modo de juego o cambiate a otro título de Juegos Estanga.</p>
+            </div>
+          </section>
+          <div class="dashboard">
+            <div class="menu-panel">
+              <p class="eyebrow">modos</p>
+              <h2>Elegí cómo querés jugar</h2>
+              <div class="button-grid">
+                <button id="singlePlayerBtn" type="button"><i data-lucide="gamepad-2"></i><span>Jugar 1 jugador</span></button>
+                <button id="createRoomBtn" type="button"><i data-lucide="users-round"></i><span>Crear partida multijugador</span></button>
+                <button id="joinRoomBtn" type="button" class="secondary"><i data-lucide="log-in"></i><span>Unirse con codigo</span></button>
+              </div>
+            </div>
+            <div class="ranking-panel">
+              <h3><i data-lucide="medal"></i><span>Top 3 personal</span></h3>
+              <ol id="personalRanking"></ol>
+            </div>
+            <div class="ranking-panel">
+              <h3><i data-lucide="trophy"></i><span>Top 10 general local</span></h3>
+              <ol id="generalRanking"></ol>
+            </div>
           </div>
         </div>
       </section>
@@ -88,30 +117,48 @@
       </section>
 
       <section id="gameView" class="view hidden">
-        <div class="game-layout">
-          <aside class="panel status-panel">
-            <p class="eyebrow" id="gameModeLabel">partida</p>
-            <h2 id="gameTitle">Nivel 1</h2>
-            <div class="stat-grid">
-              <span>Score</span><strong id="scoreLabel">0</strong>
-              <span>Vidas</span><strong id="livesLabel">3</strong>
-              <span>Puntos</span><strong id="pelletsLabel">0</strong>
+        <div class="game-scene">
+          <div class="hud-overlay">
+            <div class="hud-card">
+              <p class="eyebrow" id="gameModeLabel">partida</p>
+              <h2 id="gameTitle">Nivel 1</h2>
+              <div class="map-badge" aria-live="polite">
+                <img src="assets/monumentalicono.png" alt="" aria-hidden="true">
+                <span id="mapLabel">Más Monumental</span>
+              </div>
+              <div class="hud-stats">
+                <div class="hud-stat hud-stat-score"><span>Score</span><strong id="scoreLabel">0</strong></div>
+                <div class="hud-stat hud-stat-lives"><span>Vidas</span><strong id="livesLabel">3</strong></div>
+                <div class="hud-stat hud-stat-points"><span>Puntos</span><strong id="pelletsLabel">0</strong></div>
+              </div>
+              <div class="hud-actions">
+                <button id="pauseBtn" type="button" class="secondary">Pausar</button>
+              </div>
+              <p id="gameMessage" class="message"></p>
+              <button id="backToMenuBtn" type="button" class="secondary">Volver al menu</button>
             </div>
-            <p id="gameMessage" class="message"></p>
-            <button id="backToMenuBtn" type="button" class="secondary">Volver al menu</button>
-          </aside>
+          </div>
           <div class="canvas-wrap">
             <canvas id="gameCanvas" width="840" height="560"></canvas>
-            <div class="touch-controls" aria-label="Controles tactiles">
-              <button data-dir="up" type="button">â†‘</button>
-              <button data-dir="left" type="button">â†</button>
-              <button data-dir="down" type="button">â†“</button>
-              <button data-dir="right" type="button">â†’</button>
-            </div>
+          </div>
+          <div id="countdownOverlay" class="countdown-overlay hidden" aria-live="polite"></div>
+          <div class="touch-controls" aria-label="Controles tactiles">
+            <button data-dir="up" type="button" aria-label="Arriba"><i data-lucide="chevron-up"></i></button>
+            <button data-dir="left" type="button" aria-label="Izquierda"><i data-lucide="chevron-left"></i></button>
+            <button data-dir="down" type="button" aria-label="Abajo"><i data-lucide="chevron-down"></i></button>
+            <button data-dir="right" type="button" aria-label="Derecha"><i data-lucide="chevron-right"></i></button>
           </div>
         </div>
       </section>
     </main>
+  </div>
+
+  <div id="gameLoadingOverlay" class="game-loading hidden" aria-live="polite">
+    <div class="game-loading-card">
+      <i data-lucide="loader-circle"></i>
+      <strong>Cargando partido</strong>
+      <span>Preparando el estadio y los personajes...</span>
+    </div>
   </div>
 
   <div id="modal" class="modal hidden">
@@ -123,14 +170,14 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="js/levels.js"></script>
-  <script src="js/bots.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/rankings.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/pacman.js"></script>
-  <script src="js/socket.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/levels.js?v=20260602"></script>
+  <script src="js/bots.js?v=20260602"></script>
+  <script src="js/ui.js?v=20260602"></script>
+  <script src="js/rankings.js?v=20260602"></script>
+  <script src="js/auth.js?v=20260602"></script>
+  <script src="js/pacman.js?v=20260602"></script>
+  <script src="js/socket.js?v=20260602"></script>
+  <script src="js/app.js?v=20260602"></script>
 </body>
 </html>
 

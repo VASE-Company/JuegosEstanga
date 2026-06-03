@@ -1,9 +1,12 @@
-const LEVELS = [
+﻿const LEVELS = [
   {
     id: 1,
-    name: "Nivel 1 - Inicio",
-    speed: 1,
-    ghostSpeed: 1,
+    name: "Nivel 1 - Monumental",
+    mapName: "Más Monumental",
+    background: "assets/fondo1.png",
+    speed: 1.02,
+    ghostSpeed: 0.76,
+    powerPelletDuration: 6500,
     lives: 3,
     map: [
       "#####################",
@@ -19,9 +22,12 @@ const LEVELS = [
   },
   {
     id: 2,
-    name: "Nivel 2 - Cruces",
-    speed: 1,
-    ghostSpeed: 1.1,
+    name: "Nivel 2 - Monumental de noche",
+    mapName: "Más Monumental",
+    background: "assets/fondo2.jpg",
+    speed: 1.08,
+    ghostSpeed: 1,
+    powerPelletDuration: 6000,
     lives: 3,
     map: [
       "#######################",
@@ -40,8 +46,11 @@ const LEVELS = [
   {
     id: 3,
     name: "Nivel 3 - Tuneles",
-    speed: 1.05,
-    ghostSpeed: 1.18,
+    mapName: "Más Monumental",
+    background: "assets/hero-pacman.jpg",
+    speed: 1.16,
+    ghostSpeed: 1.1,
+    powerPelletDuration: 5500,
     lives: 3,
     map: [
       "#########################",
@@ -62,8 +71,11 @@ const LEVELS = [
   {
     id: 4,
     name: "Nivel 4 - Presion",
-    speed: 1.08,
-    ghostSpeed: 1.28,
+    mapName: "Más Monumental",
+    background: "assets/hero-pacman.jpg",
+    speed: 1.22,
+    ghostSpeed: 1.18,
+    powerPelletDuration: 5000,
     lives: 3,
     map: [
       "###########################",
@@ -84,8 +96,11 @@ const LEVELS = [
   {
     id: 5,
     name: "Nivel 5 - Final",
-    speed: 1.12,
-    ghostSpeed: 1.38,
+    mapName: "Más Monumental",
+    background: "assets/hero-pacman.jpg",
+    speed: 1.28,
+    ghostSpeed: 1.28,
+    powerPelletDuration: 4500,
     lives: 3,
     map: [
       "#############################",
@@ -132,3 +147,4 @@ function parseLevel(level) {
     ghostStarts
   };
 }
+

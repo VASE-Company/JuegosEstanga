@@ -14,7 +14,7 @@ const BotAI = {
       return !state.walls.has(`${next.x},${next.y}`) && next.x >= 0 && next.y >= 0 && next.x < state.width && next.y < state.height;
     });
   },
-  choose(state, actor, target, flee = false, isPacman = false) {
+  choose(state, actor, target, flee = false, isPacman = false, wobble = 0.12) {
     const dirs = this.legal(state, actor);
     if (!dirs.length) return actor.direction || "left";
     const opposite = { up: "down", down: "up", left: "right", right: "left" };
@@ -25,11 +25,12 @@ const BotAI = {
       const nb = { x: actor.x + this.dirs[b].x, y: actor.y + this.dirs[b].y };
       return flee ? this.distance(nb, target) - this.distance(na, target) : this.distance(na, target) - this.distance(nb, target);
     });
+    const randomness = Math.max(0, Math.min(0.28, wobble));
     if (isPacman) {
-      if (Math.random() < 0.1 && candidates[1]) return candidates[1];
+      if (Math.random() < randomness && candidates[1]) return candidates[1];
       return candidates[0];
     }
-    if (Math.random() < 0.12 && candidates[1]) return candidates[1];
+    if (Math.random() < randomness && candidates[1]) return candidates[1];
     return candidates[0];
   },
   nearestPellet(state, actor) {

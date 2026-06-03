@@ -1,4 +1,4 @@
-const UI = {
+﻿const UI = {
   views: {},
   init() {
     this.views = {
@@ -7,19 +7,19 @@ const UI = {
       lobby: document.getElementById("lobbyView"),
       game: document.getElementById("gameView")
     };
-    const savedTheme = localStorage.getItem("pacman_theme") || "dark";
-    document.body.classList.toggle("dark", savedTheme === "dark");
-    document.getElementById("themeToggle").addEventListener("click", () => {
-      document.body.classList.toggle("dark");
-      localStorage.setItem("pacman_theme", document.body.classList.contains("dark") ? "dark" : "light");
-    });
-    document.getElementById("modalClose").addEventListener("click", () => this.closeModal());
+    const bind = (id, eventName, handler) => {
+      const element = document.getElementById(id);
+      if (element) element.addEventListener(eventName, handler);
+    };
+    document.body.classList.add("dark");
+    bind("modalClose", "click", () => this.closeModal());
     this.renderIcons();
   },
   show(viewName) {
     Object.values(this.views).forEach((view) => view.classList.add("hidden"));
     this.views[viewName].classList.remove("hidden");
     document.body.classList.toggle("menu-bg", viewName === "menu");
+    document.body.classList.toggle("game-mode", viewName === "game");
     this.renderIcons();
   },
   message(id, text, isError = false) {
@@ -30,13 +30,33 @@ const UI = {
   openModal(html) {
     document.getElementById("modalContent").innerHTML = html;
     document.getElementById("modal").classList.remove("hidden");
+    this.renderIcons();
   },
   closeModal() {
     document.getElementById("modal").classList.add("hidden");
     document.getElementById("modalContent").innerHTML = "";
   },
+  setLoading(isLoading, message = "Preparando el estadio y los personajes...") {
+    const overlay = document.getElementById("gameLoadingOverlay");
+    if (!overlay) return;
+    const text = overlay.querySelector(".game-loading-card span");
+    if (text) text.textContent = message;
+    overlay.classList.toggle("hidden", !isLoading);
+    this.renderIcons();
+  },
   setMenuUser(user) {
     document.getElementById("userEmailLabel").textContent = user.email;
+    const initials = String(user.email || "")
+      .split("@")[0]
+      .split(/[._-]/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "UE";
+    const initialsLabel = document.getElementById("userInitialsLabel");
+    if (initialsLabel) initialsLabel.textContent = initials;
   },
   renderLobby(lobby, currentUser) {
     document.getElementById("lobbyCode").textContent = lobby.codigo;
@@ -57,13 +77,38 @@ const UI = {
   },
   updateHud(state, label) {
     document.getElementById("gameModeLabel").textContent = label || "partida";
-    document.getElementById("gameTitle").textContent = state.levelName || `Nivel ${state.level}`;
+    document.getElementById("gameTitle").textContent = state.status === "finished"
+      ? `Resultado ${state.levelName || `Nivel ${state.level}`}`
+      : state.levelName || `Nivel ${state.level}`;
+    const hudCard = document.querySelector(".hud-card");
+    if (hudCard) hudCard.classList.toggle("is-result", state.status !== "playing");
+    const mapLabel = document.getElementById("mapLabel");
+    if (mapLabel) mapLabel.textContent = "Más Monumental";
     document.getElementById("scoreLabel").textContent = state.scorePacman || 0;
-    document.getElementById("livesLabel").textContent = state.livesPacman ?? "-";
+    const lives = Math.max(0, state.livesPacman ?? 0);
+    const heartPath = "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.03L12 21.35Z";
+    const hearts = Array.from({ length: 3 }, (_, index) => {
+      const active = index < lives;
+      const clipId = `heartClip${index}`;
+      return `
+        <svg class="life-heart ${active ? "is-active" : "is-empty"}" viewBox="0 0 24 24" aria-hidden="true">
+          <defs>
+            <clipPath id="${clipId}">
+              <path d="${heartPath}"></path>
+            </clipPath>
+          </defs>
+          <path class="heart-base" d="${heartPath}"></path>
+          ${active ? `<g clip-path="url(#${clipId})"><rect class="heart-band" x="-3" y="9.3" width="30" height="5.2" transform="rotate(-27 12 12)"></rect></g>` : ""}
+        </svg>
+      `;
+    }).join("");
+    document.getElementById("livesLabel").innerHTML = `<span class="lives-hearts" aria-label="Vidas restantes">${hearts}</span>`;
     document.getElementById("pelletsLabel").textContent = state.pelletsRemaining ?? 0;
     document.getElementById("gameMessage").textContent = state.message || "";
+    this.renderIcons();
   },
   renderIcons() {
     if (window.lucide?.createIcons) window.lucide.createIcons();
   }
 };
+
