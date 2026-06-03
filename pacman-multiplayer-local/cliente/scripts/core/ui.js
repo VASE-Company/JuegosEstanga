@@ -81,9 +81,23 @@
       ? `Resultado ${state.levelName || `Nivel ${state.level}`}`
       : state.levelName || `Nivel ${state.level}`;
     const hudCard = document.querySelector(".hud-card");
-    if (hudCard) hudCard.classList.toggle("is-result", state.status !== "playing");
-    const mapLabel = document.getElementById("mapLabel");
-    if (mapLabel) mapLabel.textContent = "Más Monumental";
+    const hudOverlay = document.querySelector(".hud-overlay");
+    const isResult = state.status !== "playing";
+    if (hudCard) hudCard.classList.toggle("is-result", isResult);
+    if (hudOverlay) hudOverlay.classList.toggle("is-result", isResult);
+    const resultButton = document.getElementById("backToMenuBtn");
+    if (resultButton) {
+      const isSingleplayerResult = isResult && window.PacmanGame?.mode === "singleplayer";
+      resultButton.textContent = isSingleplayerResult ? "Reiniciar partida" : "Volver al menu";
+    }
+    const resultVisual = document.getElementById("resultVisual");
+    const resultVisualImage = document.getElementById("resultVisualImage");
+    const isLoss = isResult && String(state.result || "").startsWith("perdi");
+    if (resultVisual) resultVisual.classList.toggle("hidden", !isLoss);
+    if (resultVisualImage) {
+      resultVisualImage.src = "assets/images/characters/pacman-pierde.png";
+      resultVisualImage.alt = isLoss ? "Pac-Man perdiendo vida" : "";
+    }
     document.getElementById("scoreLabel").textContent = state.scorePacman || 0;
     const lives = Math.max(0, state.livesPacman ?? 0);
     const heartPath = "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.03L12 21.35Z";

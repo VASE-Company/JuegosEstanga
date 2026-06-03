@@ -1,62 +1,46 @@
-﻿document.addEventListener("DOMContentLoaded", () => {
-  UI.init();
-  Auth.init();
-  PacmanGame.init();
-  Multiplayer.init();
-  const bind = (id, eventName, handler) => {
-    const element = document.getElementById(id);
-    if (element) element.addEventListener(eventName, handler);
-  };
-
-  if (Auth.user) {
-    UI.setMenuUser(Auth.user);
-    UI.show("menu");
-    Rankings.load(Auth.user.email);
-  } else {
-    window.location.href = "/";
-    return;
-  }
-
-  bind("singlePlayerBtn", "click", () => {
-    const characters = [
+const GameModals = {
+  getCharacters() {
+    return [
       {
         role: "pacman",
         character: "pacman",
         name: "Pac-Man",
         description: "El clásico protagonista",
-        image: "assets/pacman.png"
+        image: "assets/images/characters/pacman-derecha.png"
       },
       {
         role: "ghost",
         character: "boca",
         name: "Boca",
         description: "El fantasma más rápido",
-        image: "assets/bocafantasma.png"
+        image: "assets/images/characters/bocafantasma.png"
       },
       {
         role: "ghost",
         character: "independiente",
         name: "Independiente",
         description: "Velocidad media alta",
-        image: "assets/independientefantasma.png"
+        image: "assets/images/characters/independientefantasma.png"
       },
       {
         role: "ghost",
         character: "racing",
         name: "Racing",
         description: "Movimiento ágil",
-        image: "assets/racingfantasma.png"
+        image: "assets/images/characters/racingfantasma.png"
       },
       {
         role: "ghost",
         character: "sanlorenzo",
         name: "San Lorenzo",
         description: "El más lento y pesado",
-        image: "assets/sanlorenzofantasma.png"
+        image: "assets/images/characters/sanlorenzofantasma.png"
       }
     ];
-    let selectedIndex = 0;
-    UI.openModal(`
+  },
+
+  buildCharacterPicker() {
+    return `
       <div class="character-picker">
         <p class="eyebrow">selector visual</p>
         <h2>Elegí tu personaje</h2>
@@ -78,43 +62,11 @@
           </div>
         </div>
       </div>
-    `);
-    UI.renderIcons();
-    const selectorImage = document.getElementById("selectorImage");
-    const selectorName = document.getElementById("selectorName");
-    const selectorDescription = document.getElementById("selectorDescription");
-    const selectorPlayBtn = document.getElementById("selectorPlayBtn");
-    const updateSelector = () => {
-      const character = characters[selectedIndex];
-      if (!character) return;
-      if (selectorImage) {
-        selectorImage.src = character.image;
-        selectorImage.alt = character.name;
-      }
-      if (selectorName) selectorName.textContent = character.name;
-      if (selectorDescription) selectorDescription.textContent = character.description;
-    };
-    const chooseCharacter = () => {
-      const character = characters[selectedIndex];
-      if (!character) return;
-      UI.closeModal();
-      PacmanGame.startSingle(character.role, character.character);
-    };
-    bind("characterPrev", "click", () => {
-      selectedIndex = (selectedIndex - 1 + characters.length) % characters.length;
-      updateSelector();
-    });
-    bind("characterNext", "click", () => {
-      selectedIndex = (selectedIndex + 1) % characters.length;
-      updateSelector();
-    });
-    bind("selectorPlayBtn", "click", chooseCharacter);
-    updateSelector();
-    UI.renderIcons();
-  });
+    `;
+  },
 
-  bind("createRoomBtn", "click", () => {
-    UI.openModal(`
+  buildCreateRoom() {
+    return `
       <div class="room-modal">
         <div class="room-modal-header">
           <div>
@@ -165,44 +117,23 @@
           <button id="confirmCreateRoom" type="button"><i data-lucide="rocket"></i><span>Crear partida</span></button>
         </div>
       </div>
-    `);
-    UI.renderIcons();
-    bind("confirmCreateRoom", "click", () => {
-      Multiplayer.createRoom({
-        nivelInicial: Number(document.getElementById("createLevel").value),
-        role: document.getElementById("createRole").value,
-        maxFantasmasHumanos: Number(document.getElementById("createMaxGhosts").value),
-        allowBots: document.getElementById("createAllowBots").checked
-      });
-    });
-  });
+    `;
+  },
 
-  bind("joinRoomBtn", "click", () => {
-    UI.openModal(`
-      <h2>Unirse a sala</h2>
-      <label>Codigo</label>
-      <input id="joinCode" maxlength="5" placeholder="K7A2P">
-      <label>Rol</label>
-      <select id="joinRole">
-        <option value="ghost">Fantasma</option>
-        <option value="pacman">Pac-Man</option>
-      </select>
-      <button id="confirmJoinRoom" type="button">Unirme</button>
-    `);
-    bind("confirmJoinRoom", "click", () => {
-      Multiplayer.joinRoom({
-        codigo: document.getElementById("joinCode").value.trim().toUpperCase(),
-        role: document.getElementById("joinRole").value
-      });
-    });
-  });
+  buildJoinRoom() {
+    return `
+      <div class="join-room-modal">
+        <h2>Unirse a sala</h2>
+        <label>Codigo</label>
+        <input id="joinCode" maxlength="5" placeholder="K7A2P">
+        <label>Rol</label>
+        <select id="joinRole">
+          <option value="ghost">Fantasma</option>
+          <option value="pacman">Pac-Man</option>
+        </select>
+        <button id="confirmJoinRoom" type="button">Unirme</button>
+      </div>
+    `;
+  }
+};
 
-  bind("startRoomBtn", "click", () => Multiplayer.startRoom());
-  bind("leaveLobbyBtn", "click", () => Multiplayer.leaveLobby());
-  bind("backToMenuBtn", "click", () => {
-    Multiplayer.abandonGame();
-    PacmanGame.stop();
-    UI.show("menu");
-    if (Auth.user) Rankings.load(Auth.user.email);
-  });
-});

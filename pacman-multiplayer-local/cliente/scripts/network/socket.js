@@ -10,10 +10,17 @@ const Multiplayer = {
     this.socket.on("partida-iniciada-pacman", (state) => PacmanGame.startMultiplayer(state, state.codigo));
     this.socket.on("game-state-pacman", (state) => PacmanGame.applyServerState(state));
     this.socket.on("nivel-completado-pacman", (payload) => {
+      PacmanAudio.playVictory();
       UI.message("gameMessage", `Nivel ${payload.level} completo. Entrando al nivel ${payload.nextLevel}.`);
     });
     this.socket.on("partida-finalizada-pacman", (state) => {
       PacmanGame.applyServerState(state);
+      const userWon = state?.winner === "Pac-Man"
+        ? Auth.user?.email && state?.pacman?.email === Auth.user.email
+        : state?.winner === "Fantasmas"
+          ? Boolean((state?.ghosts || []).some((ghost) => ghost.email === Auth.user?.email))
+          : false;
+      if (userWon) PacmanAudio.playVictory();
       Rankings.load(Auth.user.email);
     });
     this.socket.on("rival-desconectado-pacman", ({ message }) => {

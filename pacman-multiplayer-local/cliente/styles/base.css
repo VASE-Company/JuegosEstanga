@@ -1,0 +1,141 @@
+:root {
+  --bg: #041022;
+  --bg-soft: #0b1c39;
+  --panel: rgba(7, 19, 43, 0.84);
+  --panel-strong: rgba(10, 26, 58, 0.95);
+  --text: #eef7ff;
+  --muted: #9cc3e8;
+  --primary: #ff485f;
+  --primary-strong: #b40f2d;
+  --accent: #ff6b6b;
+  --accent-2: #7a101d;
+  --danger: #ff5c7d;
+  --success: #3de0a1;
+  --shadow: 0 24px 60px rgba(2, 7, 20, 0.5);
+  --border: rgba(255, 105, 121, 0.24);
+}
+
+body.dark {
+  --bg: #020913;
+  --bg-soft: #081429;
+  --panel: rgba(4, 14, 33, 0.9);
+  --panel-strong: rgba(6, 20, 44, 0.95);
+  --text: #eef7ff;
+  --muted: #a0bfe0;
+  --primary: #ff485f;
+  --primary-strong: #e5a200;
+  --accent: #ff6b6b;
+  --accent-2: #7a101d;
+  --danger: #ff5f80;
+  --success: #3de0a1;
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  --border: rgba(255, 105, 121, 0.24);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Inter", "Montserrat", "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255, 72, 95, 0.15), transparent 22rem),
+    radial-gradient(circle at 88% 14%, rgba(120, 16, 29, 0.16), transparent 24rem),
+    linear-gradient(170deg, var(--bg), var(--bg-soft));
+  color: var(--text);
+}
+
+body.menu-bg {
+  background:
+    linear-gradient(rgba(2, 8, 18, 0.5), rgba(2, 8, 18, 0.75)),
+    url("../assets/images/backgrounds/hero-pacman.jpg") center/cover fixed no-repeat;
+}
+
+body.game-mode {
+  overflow: hidden;
+}
+
+body.game-mode .app-shell {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+}
+
+body.game-mode .view {
+  margin-top: 0;
+}
+
+body.game-mode .topbar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  left: 12px;
+  z-index: 10;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+body.game-mode .topbar .icon-button {
+  pointer-events: auto;
+}
+
+body.game-mode main {
+  margin-top: 0;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(transparent 96%, rgba(255, 255, 255, 0.04));
+  background-size: 100% 6px;
+  opacity: 0.3;
+}
+
+button, input, select { font: inherit; }
+
+button {
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding: 0.95rem 1.08rem;
+  background: linear-gradient(130deg, var(--primary), var(--primary-strong));
+  color: #101727;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  box-shadow: 0 12px 25px rgba(180, 15, 45, 0.28);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+button:hover { transform: translateY(-1px); box-shadow: 0 15px 28px rgba(180, 15, 45, 0.35); }
+button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+button.secondary {
+  background: linear-gradient(130deg, rgba(25, 49, 93, 0.95), rgba(31, 74, 135, 0.95));
+  color: var(--text);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+button.danger { background: linear-gradient(130deg, #ff5c7d, #ff3e67); color: white; }
+
+input, select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.95rem 1rem;
+  background: rgba(6, 19, 41, 0.85);
+  color: var(--text);
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 72, 95, 0.15);
+}
+
+label { display: block; margin: 1rem 0 0.35rem; color: var(--muted); font-weight: 700; }
+
+.app-shell { width: min(1280px, calc(100% - 48px)); margin: 0 auto; padding: 28px 0 44px; }
+

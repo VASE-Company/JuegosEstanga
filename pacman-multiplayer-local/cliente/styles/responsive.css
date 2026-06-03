@@ -1,0 +1,93 @@
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .auth-grid, .dashboard { grid-template-columns: 1fr; }
+  .menu-navbar {
+    flex-wrap: wrap;
+  }
+  .menu-brand {
+    width: 100%;
+    order: 3;
+  }
+  .menu-nav-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .menu-profile-card {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-shell { width: min(100% - 16px, 1180px); padding-top: 12px; }
+  .topbar { align-items: flex-start; }
+  .row { flex-direction: column; }
+  .row button { width: 100%; }
+  .panel { padding: 16px; }
+  .menu-profile-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .profile-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+  }
+  .game-scene { min-height: 100dvh; }
+  .canvas-wrap { height: 100dvh; }
+  .hud-overlay {
+    left: 10px;
+    right: 10px;
+    top: 10px;
+  }
+  .hud-card { width: min(100%, 320px); padding: 14px 14px 12px; }
+  .hud-card.is-result {
+    width: min(calc(100vw - 20px), 420px);
+    padding: 18px 18px 16px;
+  }
+  .result-visual img {
+    width: min(180px, 52vw);
+  }
+  .hud-overlay.is-result {
+    padding: 10px;
+  }
+  .modal-box {
+    width: min(calc(100vw - 18px), 520px);
+    padding: 18px;
+  }
+  .room-modal-header {
+    flex-direction: column;
+  }
+  .room-grid {
+    grid-template-columns: 1fr;
+  }
+  .room-footer button {
+    width: 100%;
+    min-width: 0;
+  }
+  .character-stage {
+    padding: 6px 0 0;
+  }
+  .selector-card {
+    width: min(100%, 350px);
+    padding: 16px 14px 14px;
+  }
+  .selector-nav { gap: 10px; }
+  .selector-arrow { height: 44px; }
+  .touch-controls { right: 10px; bottom: 10px; width: min(300px, calc(100vw - 20px)); }
+  .hud-actions { margin-top: 0.65rem; }
+}
+
+
+.brand-title {
+  margin: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -7,7 +7,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=Montserrat:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="styles/base.css?v=20260603">
+  <link rel="stylesheet" href="styles/layout.css?v=20260603">
+  <link rel="stylesheet" href="styles/game.css?v=20260603">
+  <link rel="stylesheet" href="styles/modals.css?v=20260603">
+  <link rel="stylesheet" href="styles/responsive.css?v=20260603">
 </head>
 <body>
   <div class="app-shell">
@@ -41,7 +45,7 @@
           <p id="authMessage" class="message"></p>
         </div>
         <div class="panel feature-panel hero-panel">
-          <img src="assets/hero-pacman.jpg" alt="Portada de LA BANDA INFINITA">
+          <img src="assets/images/backgrounds/hero-pacman.jpg" alt="Portada de LA BANDA INFINITA">
           <div class="hero-caption">
             <h2>LA BANDA INFINITA</h2>
             <p>River, Boca, Racing, Independiente y San Lorenzo en una apertura epica para comenzar la partida.</p>
@@ -76,13 +80,13 @@
             <div class="profile-copy">
               <p class="eyebrow">perfil activo</p>
               <h2 id="userEmailLabel"></h2>
-              <p class="muted">Elegí un modo de juego o cambiate a otro título de Juegos Estanga.</p>
+              <p class="muted">Eleg� un modo de juego o cambiate a otro t�tulo de Juegos Estanga.</p>
             </div>
           </section>
           <div class="dashboard">
             <div class="menu-panel">
               <p class="eyebrow">modos</p>
-              <h2>Elegí cómo querés jugar</h2>
+              <h2>Eleg� c�mo quer�s jugar</h2>
               <div class="button-grid">
                 <button id="singlePlayerBtn" type="button"><i data-lucide="gamepad-2"></i><span>Jugar 1 jugador</span></button>
                 <button id="createRoomBtn" type="button"><i data-lucide="users-round"></i><span>Crear partida multijugador</span></button>
@@ -122,10 +126,8 @@
             <div class="hud-card">
               <p class="eyebrow" id="gameModeLabel">partida</p>
               <h2 id="gameTitle">Nivel 1</h2>
-              <div class="map-badge" aria-live="polite">
-                <img src="assets/monumentalicono.png" alt="" aria-hidden="true">
-                <span id="mapLabel">Más Monumental</span>
-              </div>
+
+
               <div class="hud-stats">
                 <div class="hud-stat hud-stat-score"><span>Score</span><strong id="scoreLabel">0</strong></div>
                 <div class="hud-stat hud-stat-lives"><span>Vidas</span><strong id="livesLabel">3</strong></div>
@@ -133,6 +135,9 @@
               </div>
               <div class="hud-actions">
                 <button id="pauseBtn" type="button" class="secondary">Pausar</button>
+              </div>
+              <div id="resultVisual" class="result-visual hidden" aria-hidden="true">
+                <img id="resultVisualImage" src="assets/images/characters/pacman-pierde.png" alt="">
               </div>
               <p id="gameMessage" class="message"></p>
               <button id="backToMenuBtn" type="button" class="secondary">Volver al menu</button>
@@ -163,21 +168,28 @@
 
   <div id="modal" class="modal hidden">
     <div class="modal-box">
-      <button id="modalClose" class="modal-close" type="button">Ã—</button>
+      <button id="modalClose" class="modal-close" type="button">×</button>
       <div id="modalContent"></div>
     </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="js/levels.js?v=20260602"></script>
-  <script src="js/bots.js?v=20260602"></script>
-  <script src="js/ui.js?v=20260602"></script>
-  <script src="js/rankings.js?v=20260602"></script>
-  <script src="js/auth.js?v=20260602"></script>
-  <script src="js/pacman.js?v=20260602"></script>
-  <script src="js/socket.js?v=20260602"></script>
-  <script src="js/app.js?v=20260602"></script>
+  <script src="scripts/core/levels.js?v=20260603"></script>
+  <script src="scripts/core/bots.js?v=20260603"></script>
+  <script src="scripts/core/ui.js?v=20260603"></script>
+  <script src="scripts/core/rankings.js?v=20260603"></script>
+  <script src="scripts/core/auth.js?v=20260603"></script>
+  <script src="scripts/game/audio.js?v=20260603"></script>
+  <script src="scripts/game/pacman-core.js?v=20260603"></script>
+  <script src="scripts/game/pacman-flow.js?v=20260603"></script>
+  <script src="scripts/game/pacman-movement.js?v=20260603"></script>
+  <script src="scripts/game/pacman-render.js?v=20260603"></script>
+  <script src="scripts/game/pacman.js?v=20260603"></script>
+  <script src="scripts/network/socket.js?v=20260603"></script>
+  <script src="scripts/network/modals.js?v=20260603"></script>
+  <script src="scripts/network/app.js?v=20260603"></script>
 </body>
 </html>
+
 

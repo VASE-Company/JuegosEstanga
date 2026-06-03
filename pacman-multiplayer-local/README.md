@@ -138,7 +138,7 @@ Mensajes posibles:
 
 ## Niveles
 
-Hay 5 mapas reales en `cliente/js/levels.js` y una copia en el servidor para multiplayer:
+Hay 5 mapas reales en `cliente/scripts/core/levels.js` y una copia en el servidor para multiplayer:
 
 1. Inicio: mapa simple, baja velocidad.
 2. Cruces: mas intersecciones y fantasmas algo mas rapidos.
@@ -187,8 +187,12 @@ Este proyecto esta pensado para desarrollo local y entrega escolar. Guardar dato
 pacman-multiplayer-local/
 ├── servidor/
 │   ├── server.js
-│   ├── package.json
-│   ├── .env.example
+│   └── scripts/
+│       ├── app.js
+│       ├── game/
+│       ├── lib/
+│       ├── routes/
+│       └── socket/
 │   └── data/
 │       ├── users.json
 │       ├── scores.json
@@ -196,17 +200,25 @@ pacman-multiplayer-local/
 │       └── matches.txt
 └── cliente/
     ├── index.html
-    ├── css/
-    │   └── styles.css
-    └── js/
-        ├── app.js
-        ├── auth.js
-        ├── socket.js
-        ├── pacman.js
-        ├── levels.js
-        ├── bots.js
-        ├── rankings.js
-        └── ui.js
+    ├── styles/
+    │   ├── base.css
+    │   ├── game.css
+    │   ├── layout.css
+    │   ├── modals.css
+    │   └── responsive.css
+    ├── scripts/
+    │   ├── core/
+    │   ├── game/
+    │   │   ├── pacman-core.js
+    │   │   ├── pacman-flow.js
+    │   │   ├── pacman-movement.js
+    │   │   ├── pacman-render.js
+    │   │   └── pacman.js
+    │   └── network/
+    │       ├── app.js
+    │       ├── modals.js
+    │       └── socket.js
+    └── assets/
 ```
 
 ## Endpoints
@@ -241,3 +253,4 @@ Servidor a cliente:
 - `rival-desconectado-pacman`
 - `error-partida`
 - `rankings-actualizados`
+

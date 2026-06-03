@@ -14,7 +14,7 @@ const BotAI = {
       return !state.walls.has(`${next.x},${next.y}`) && next.x >= 0 && next.y >= 0 && next.x < state.width && next.y < state.height;
     });
   },
-  choose(state, actor, target, flee = false, isPacman = false, wobble = 0.12) {
+  choose(state, actor, target, flee = false, isPacman = false, wobble = 0.12, skill = 1) {
     const dirs = this.legal(state, actor);
     if (!dirs.length) return actor.direction || "left";
     const opposite = { up: "down", down: "up", left: "right", right: "left" };
@@ -25,7 +25,8 @@ const BotAI = {
       const nb = { x: actor.x + this.dirs[b].x, y: actor.y + this.dirs[b].y };
       return flee ? this.distance(nb, target) - this.distance(na, target) : this.distance(na, target) - this.distance(nb, target);
     });
-    const randomness = Math.max(0, Math.min(0.28, wobble));
+    const smartness = Math.max(0.1, Math.min(1, skill));
+    const randomness = Math.max(0, Math.min(0.45, wobble * (1.2 - smartness)));
     if (isPacman) {
       if (Math.random() < randomness && candidates[1]) return candidates[1];
       return candidates[0];

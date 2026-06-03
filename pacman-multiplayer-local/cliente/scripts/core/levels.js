@@ -1,12 +1,12 @@
-ï»¿const LEVELS = [
+const LEVELS = [
   {
     id: 1,
     name: "Nivel 1 - Monumental",
-    mapName: "MÃ¡s Monumental",
-    background: "assets/fondo1.png",
+    mapName: "Más Monumental / tranquilo",
+    background: "assets/images/backgrounds/fondo1.png",
     speed: 1.02,
-    ghostSpeed: 0.76,
-    powerPelletDuration: 6500,
+    ghostSpeed: 0.58,
+    powerPelletDuration: 7200,
     lives: 3,
     map: [
       "#####################",
@@ -23,11 +23,11 @@
   {
     id: 2,
     name: "Nivel 2 - Monumental de noche",
-    mapName: "MÃ¡s Monumental",
-    background: "assets/fondo2.jpg",
+    mapName: "Más Monumental / noche",
+    background: "assets/images/backgrounds/fondo2.jpg",
     speed: 1.08,
-    ghostSpeed: 1,
-    powerPelletDuration: 6000,
+    ghostSpeed: 0.9,
+    powerPelletDuration: 6200,
     lives: 3,
     map: [
       "#######################",
@@ -45,12 +45,12 @@
   },
   {
     id: 3,
-    name: "Nivel 3 - Tuneles",
-    mapName: "MÃ¡s Monumental",
-    background: "assets/hero-pacman.jpg",
+    name: "Nivel 3 - Túneles",
+    mapName: "Más Monumental / túneles",
+    background: "assets/images/backgrounds/hero-pacman.jpg",
     speed: 1.16,
-    ghostSpeed: 1.1,
-    powerPelletDuration: 5500,
+    ghostSpeed: 1.04,
+    powerPelletDuration: 5600,
     lives: 3,
     map: [
       "#########################",
@@ -70,9 +70,9 @@
   },
   {
     id: 4,
-    name: "Nivel 4 - Presion",
-    mapName: "MÃ¡s Monumental",
-    background: "assets/hero-pacman.jpg",
+    name: "Nivel 4 - Presión",
+    mapName: "Más Monumental / presión",
+    background: "assets/images/backgrounds/hero-pacman.jpg",
     speed: 1.22,
     ghostSpeed: 1.18,
     powerPelletDuration: 5000,
@@ -96,8 +96,8 @@
   {
     id: 5,
     name: "Nivel 5 - Final",
-    mapName: "MÃ¡s Monumental",
-    background: "assets/hero-pacman.jpg",
+    mapName: "Más Monumental / final",
+    background: "assets/images/backgrounds/hero-pacman.jpg",
     speed: 1.28,
     ghostSpeed: 1.28,
     powerPelletDuration: 4500,
@@ -147,4 +147,5 @@ function parseLevel(level) {
     ghostStarts
   };
 }
+
 
