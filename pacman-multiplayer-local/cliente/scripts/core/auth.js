@@ -40,8 +40,10 @@ const Auth = {
     const session = JSON.parse(localStorage.getItem(this.sessionKey) || "{}");
     localStorage.setItem(this.sessionKey, JSON.stringify({ ...session, user }));
     UI.setMenuUser(user);
-    UI.show("menu");
-    Rankings.load(user.email);
+    UI.playEntryTransition(() => {
+      UI.show("menu");
+      Rankings.load(user.email);
+    });
   },
   logout() {
     const session = JSON.parse(localStorage.getItem(this.sessionKey) || "{}");

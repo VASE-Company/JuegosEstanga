@@ -29,18 +29,18 @@ const Multiplayer = {
     });
     this.socket.on("error-partida", ({ message }) => {
       UI.message("lobbyMessage", message || "Error de partida.", true);
-      alert(message || "Error de partida.");
+      UI.toast(message || "Error de partida.");
     });
     this.socket.on("rankings-actualizados", (data) => Rankings.render(data));
   },
 
   createRoom(config) {
-    if (!Auth.user) return alert("Debes iniciar sesion.");
+    if (!Auth.user) return UI.toast("Debes iniciar sesion.");
     this.socket.emit("crear-partida-pacman", { ...config, userId: Auth.user.id, email: Auth.user.email });
   },
 
   joinRoom(config) {
-    if (!Auth.user) return alert("Debes iniciar sesion.");
+    if (!Auth.user) return UI.toast("Debes iniciar sesion.");
     this.socket.emit("unirse-partida-pacman", { ...config, userId: Auth.user.id, email: Auth.user.email });
   },
 

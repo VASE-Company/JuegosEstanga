@@ -7,13 +7,22 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=Montserrat:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/base.css?v=20260603">
-  <link rel="stylesheet" href="styles/layout.css?v=20260603">
-  <link rel="stylesheet" href="styles/game.css?v=20260603">
-  <link rel="stylesheet" href="styles/modals.css?v=20260603">
-  <link rel="stylesheet" href="styles/responsive.css?v=20260603">
+  <link rel="stylesheet" href="styles/base.css?v=20260604.8">
+  <link rel="stylesheet" href="styles/layout.css?v=20260604.8">
+  <link rel="stylesheet" href="styles/game.css?v=20260604.8">
+  <link rel="stylesheet" href="styles/modals.css?v=20260604.8">
+  <link rel="stylesheet" href="styles/responsive.css?v=20260604.8">
 </head>
 <body>
+  <div id="entryTransition" class="entry-transition hidden" aria-hidden="true">
+    <div class="entry-transition-reveal"></div>
+    <div class="entry-transition-hero">
+      <div class="entry-transition-copy">
+        <p>LA BANDA INFINITA</p>
+        <strong>Juegos Estanga</strong>
+      </div>
+    </div>
+  </div>
   <div class="app-shell">
     <header class="topbar">
       <h1 class="brand-title" aria-hidden="true"></h1>
@@ -64,6 +73,9 @@
               <p class="eyebrow">Juegos Estanga</p>
               <strong>La Banda Infinita</strong>
             </div>
+            <button id="menuNavToggle" class="menu-nav-toggle" type="button" aria-label="Abrir menu" aria-expanded="false">
+              <i data-lucide="menu"></i>
+            </button>
             <div class="menu-nav-actions">
               <a id="changeGameBtn" class="menu-action-link" href="/">
                 <i data-lucide="gamepad-2"></i>
@@ -80,13 +92,13 @@
             <div class="profile-copy">
               <p class="eyebrow">perfil activo</p>
               <h2 id="userEmailLabel"></h2>
-              <p class="muted">Elegí un modo de juego o cambiate a otro título de Juegos Estanga.</p>
+              <p class="muted">ElegÃ­ un modo de juego o cambiate a otro tÃ­tulo de Juegos Estanga.</p>
             </div>
           </section>
           <div class="dashboard">
             <div class="menu-panel">
               <p class="eyebrow">modos</p>
-              <h2>Elegí cómo querés jugar</h2>
+              <h2>ElegÃ­ cÃ³mo querÃ©s jugar</h2>
               <div class="button-grid">
                 <button id="singlePlayerBtn" type="button"><i data-lucide="gamepad-2"></i><span>Jugar 1 jugador</span></button>
                 <button id="createRoomBtn" type="button"><i data-lucide="users-round"></i><span>Crear partida multijugador</span></button>
@@ -124,23 +136,37 @@
         <div class="game-scene">
           <div class="hud-overlay">
             <div class="hud-card">
-              <p class="eyebrow" id="gameModeLabel">partida</p>
-              <h2 id="gameTitle">Nivel 1</h2>
-
-
-              <div class="hud-stats">
-                <div class="hud-stat hud-stat-score"><span>Score</span><strong id="scoreLabel">0</strong></div>
-                <div class="hud-stat hud-stat-lives"><span>Vidas</span><strong id="livesLabel">3</strong></div>
-                <div class="hud-stat hud-stat-points"><span>Puntos</span><strong id="pelletsLabel">0</strong></div>
+              <div id="resultVisual" class="result-visual hidden">
+                <img id="resultVisualImage" alt="" src="assets/images/backgrounds/hero-pacman.jpg">
               </div>
-              <div class="hud-actions">
-                <button id="pauseBtn" type="button" class="secondary">Pausar</button>
-              </div>
-              <div id="resultVisual" class="result-visual hidden" aria-hidden="true">
-                <img id="resultVisualImage" src="assets/images/characters/pacman-pierde.png" alt="">
+              <div class="hud-strip">
+                <div class="hud-side hud-side-left">
+                  <div class="hud-stat hud-stat-score"><span>Score</span><strong id="scoreLabel">0</strong></div>
+                  <div class="hud-stat hud-stat-points"><span>Faltan</span><strong id="pelletsLabel">0</strong></div>
+                </div>
+                <div class="hud-side hud-side-right">
+                  <div class="hud-stat hud-stat-lives"><span>Vidas</span><strong id="livesLabel">3</strong></div>
+                  <div class="hud-actions">
+                    <button id="pauseBtn" type="button" class="secondary">
+                      <i data-lucide="pause"></i>
+                      <span>Pausar</span>
+                    </button>
+                    <button id="nextLevelBtn" type="button" class="secondary hidden">
+                      <i data-lucide="arrow-right-circle"></i>
+                      <span>Siguiente nivel</span>
+                    </button>
+                    <button id="restartLevelBtn" type="button" class="secondary hidden">
+                      <i data-lucide="rotate-ccw"></i>
+                      <span>Reiniciar</span>
+                    </button>
+                    <button id="backToMenuBtn" type="button" class="secondary">
+                      <i data-lucide="log-out"></i>
+                      <span>Salir</span>
+                    </button>
+                  </div>
+                </div>
               </div>
               <p id="gameMessage" class="message"></p>
-              <button id="backToMenuBtn" type="button" class="secondary">Volver al menu</button>
             </div>
           </div>
           <div class="canvas-wrap">
@@ -175,20 +201,20 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="scripts/core/levels.js?v=20260603"></script>
-  <script src="scripts/core/bots.js?v=20260603"></script>
-  <script src="scripts/core/ui.js?v=20260603"></script>
-  <script src="scripts/core/rankings.js?v=20260603"></script>
-  <script src="scripts/core/auth.js?v=20260603"></script>
-  <script src="scripts/game/audio.js?v=20260603"></script>
-  <script src="scripts/game/pacman-core.js?v=20260603"></script>
-  <script src="scripts/game/pacman-flow.js?v=20260603"></script>
-  <script src="scripts/game/pacman-movement.js?v=20260603"></script>
-  <script src="scripts/game/pacman-render.js?v=20260603"></script>
-  <script src="scripts/game/pacman.js?v=20260603"></script>
-  <script src="scripts/network/socket.js?v=20260603"></script>
-  <script src="scripts/network/modals.js?v=20260603"></script>
-  <script src="scripts/network/app.js?v=20260603"></script>
+  <script src="scripts/core/levels.js?v=20260604.8"></script>
+  <script src="scripts/core/bots.js?v=20260604.8"></script>
+  <script src="scripts/core/ui.js?v=20260604.8"></script>
+  <script src="scripts/core/rankings.js?v=20260604.8"></script>
+  <script src="scripts/core/auth.js?v=20260604.8"></script>
+  <script src="scripts/game/audio.js?v=20260604.8"></script>
+  <script src="scripts/game/pacman-core.js?v=20260604.8"></script>
+  <script src="scripts/game/pacman-flow.js?v=20260604.8"></script>
+  <script src="scripts/game/pacman-movement.js?v=20260604.8"></script>
+  <script src="scripts/game/pacman-render.js?v=20260604.8"></script>
+  <script src="scripts/game/pacman.js?v=20260604.8"></script>
+  <script src="scripts/network/socket.js?v=20260604.8"></script>
+  <script src="scripts/network/modals.js?v=20260604.8"></script>
+  <script src="scripts/network/app.js?v=20260604.8"></script>
 </body>
 </html>
 

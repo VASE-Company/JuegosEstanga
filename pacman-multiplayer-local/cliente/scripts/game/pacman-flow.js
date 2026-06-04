@@ -1,4 +1,4 @@
-var PacmanFlow = {
+﻿var PacmanFlow = {
   setInput(direction) {
     if (this.paused || this.isCountdownActive()) return;
     this.input = direction;
@@ -20,33 +20,34 @@ var PacmanFlow = {
     this.multiplayerCode = null;
     this.loadingUntil = Date.now() + 900;
     UI.setLoading(true, "Preparando el estadio y los personajes...");
-    this.loadSingleLevel(1, 0, null);
-    UI.updateHud(this.state, `1 jugador como ${role === "pacman" ? "Pac-Man" : "Fantasma"}`);
-    this.render();
-    UI.show("game");
-    const pauseButton = document.getElementById("pauseBtn");
-    if (pauseButton) pauseButton.textContent = "Pausar";
-    const backgroundKey = this.getBackgroundKey(this.state);
-    const assetKeys = [
-      backgroundKey,
-      "pacman-right",
-      "pacman-left",
-      "pacman-up",
-      "pacman-down",
-      "pacman-loss",
-      "pellet",
-      "powerPellet",
-      ...((this.state.ghosts || []).flatMap((ghost) => [ghost.club, `${ghost.club}-vulnerable`]))
-    ];
-    await Promise.all([
-      this.waitForAssets(assetKeys),
-      new Promise((resolve) => setTimeout(resolve, 900))
-    ]);
-    UI.setLoading(false);
-    requestAnimationFrame(() => {
+    try {
+      this.loadSingleLevel(1, 0);
+      UI.updateHud(this.state, `1 jugador como ${role === "pacman" ? "Pac-Man" : "Fantasma"}`);
       this.render();
-      this.timer = setInterval(() => this.tickSingle(), 1000 / 16);
-    });
+      UI.show("game");
+      const pauseButton = document.getElementById("pauseBtn");
+      if (pauseButton) pauseButton.innerHTML = '<i data-lucide="pause"></i><span>Pausar</span>';
+      UI.renderIcons();
+      const backgroundKey = this.getBackgroundKey(this.state);
+      const assetKeys = [
+        backgroundKey,
+        "pacman-right",
+        "pacman-left",
+        "pacman-up",
+        "pacman-down",
+        "pacman-loss",
+        "pellet",
+        "powerPellet",
+        ...((this.state.ghosts || []).flatMap((ghost) => [ghost.club, `${ghost.club}-vulnerable`]))
+      ];
+      await Promise.all([
+        this.waitForAssets(assetKeys),
+        new Promise((resolve) => setTimeout(resolve, 900))
+      ]);
+    } finally {
+      UI.setLoading(false);
+    }
+    this.startSingleLoop();
   },
 
   restartSingle() {
@@ -54,7 +55,16 @@ var PacmanFlow = {
     this.startSingle(this.role, this.singleCharacter);
   },
 
-  loadSingleLevel(levelId, scoreCarry, livesCarry) {
+  restartCurrentSingleLevel() {
+    if (!this.state || this.mode !== "singleplayer") return;
+    const currentLevel = this.state.level || 1;
+    this.loadSingleLevel(currentLevel, 0);
+    UI.updateHud(this.state, `1 jugador como ${this.role === "pacman" ? "Pac-Man" : "Fantasma"}`);
+    this.render();
+    this.startSingleLoop();
+  },
+
+  loadSingleLevel(levelId, scoreCarry) {
     // aca armamos el estado del nivel para no recalcular todo en cada tick.
     if (this.levelTransitionTimer) {
       clearTimeout(this.levelTransitionTimer);
@@ -63,17 +73,20 @@ var PacmanFlow = {
     const level = LEVELS[levelId - 1] || LEVELS[0];
     const parsed = parseLevel(level);
     const ghostHouse = this.getGhostHouse(parsed);
+    const ghostStarts = this.getGhostStarts(parsed);
     const orderedGhostProfiles = this.getOrderedGhostProfiles();
     const pacmanInterval = Math.max(90, Math.round(170 / Math.max(0.95, level.speed || 1)));
     const ghostIntervalBase = Math.max(95, Math.round((this.role === "ghost" ? 210 : 220) / Math.max(0.95, level.ghostSpeed || 1)));
     const ghostSkill = Math.max(0.18, Math.min(1, 0.2 + (level.id - 1) * 0.2));
-    const countdownMs = this.mode === "singleplayer" ? 3200 : 0;
-    const introMs = this.mode === "singleplayer" ? 1300 : 0;
+    const countdownMs = this.mode === "singleplayer" ? 4200 : 0;
+    const introMs = this.mode === "singleplayer" ? 1000 : 0;
     this.state = {
       status: "playing",
       level: level.id,
       levelName: level.name,
       mapName: level.mapName || "Monumental",
+      playerRole: this.role,
+      playerCharacter: this.singleCharacter,
       background: level.background || "assets/images/backgrounds/hero-pacman.jpg",
       pacmanInterval,
       ghostIntervalBase,
@@ -85,13 +98,16 @@ var PacmanFlow = {
       width: parsed.width,
       height: parsed.height,
       walls: parsed.walls,
-      scorePacman: scoreCarry || 0,
-      livesPacman: livesCarry ?? level.lives,
+      totalPotentialPoints: parsed.pellets.length * 10 + parsed.powerPellets.length * 50,
+      scorePacman: this.role === "pacman" ? (scoreCarry || 0) : 0,
+      scoreGhost: this.role === "ghost" ? (scoreCarry || 0) : 0,
+      livesPacman: level.lives,
       pellets: parsed.pellets,
       powerPellets: parsed.powerPellets,
       pelletsRemaining: parsed.pellets.length + parsed.powerPellets.length,
       vulnerableUntil: 0,
       ghostCombo: 0,
+      ghostDeaths: 0,
       comboFeedback: null,
       lifeLossUntil: 0,
       pendingResetAfterLifeLoss: false,
@@ -112,7 +128,7 @@ var PacmanFlow = {
         email: this.role === "pacman" ? Auth.user.email : "Pac-Man Bot",
         isBot: this.role !== "pacman"
       },
-      ghosts: ghostHouse.slots.slice(0, 4).map((start, index) => {
+      ghosts: ghostStarts.slice(0, 4).map((start, index) => {
         const profile = orderedGhostProfiles[index] || orderedGhostProfiles[index % orderedGhostProfiles.length];
         return {
           id: `ghost_${index + 1}`,
@@ -135,6 +151,7 @@ var PacmanFlow = {
           released: index === 0,
           releaseAt: index * this.releaseDelayMs,
           vulnerable: false,
+          eatenAtVulnerableUntil: 0,
           isBot: !(this.role === "ghost" && index === 0),
           email: this.role === "ghost" && index === 0 ? Auth.user.email : `Bot ${index + 1}`,
           score: 0
@@ -142,9 +159,70 @@ var PacmanFlow = {
       }),
       ghostHouse,
       winner: null,
-      message: ""
+      message: "",
+      resultType: null,
+      pendingNextLevel: null,
+      pendingScore: null
     };
+    document.querySelector(".hud-overlay")?.classList.remove("is-closing");
+    document.querySelector(".hud-card")?.classList.remove("is-closing");
     PacmanAudio.syncFromState(this.state);
+  },
+
+  calculateGhostScore(state = this.state) {
+    if (!state) return 0;
+    const missedPoints = Math.max(0, (state.totalPotentialPoints || 0) - (state.scorePacman || 0));
+    const deathPenalty = Math.max(0, state.ghostDeaths || 0) * 200;
+    return Math.max(0, missedPoints - deathPenalty);
+  },
+
+  syncGhostScore(state = this.state) {
+    if (!state || this.role !== "ghost") return 0;
+    state.scoreGhost = this.calculateGhostScore(state);
+    return state.scoreGhost;
+  },
+
+  showLevelResult(kind, score, message, nextLevel = null) {
+    if (!this.state) return;
+    this.stopTimerOnly();
+    if (this.levelTransitionTimer) {
+      clearTimeout(this.levelTransitionTimer);
+      this.levelTransitionTimer = null;
+    }
+    this.state.status = "finished";
+    this.state.resultType = kind;
+    this.state.pendingNextLevel = nextLevel;
+    this.state.pendingScore = score;
+    this.state.result = kind === "defeat" ? "perdió" : "ganó";
+    this.state.message = message;
+    this.state.winner = kind === "defeat" ? "Rival" : (this.role === "pacman" ? "Pac-Man" : "Fantasma");
+    if (kind === "defeat") {
+      PacmanAudio.playDefeat();
+    } else {
+      PacmanAudio.playVictory();
+    }
+    UI.updateHud(this.state, kind === "defeat" ? "Derrota" : "Victoria");
+    this.render();
+  },
+
+  advancePendingLevel() {
+    if (!this.state || !this.state.pendingNextLevel) return;
+    const nextLevel = this.state.pendingNextLevel;
+    const nextScore = this.state.pendingScore ?? this.state.scorePacman ?? 0;
+    const hudOverlay = document.querySelector(".hud-overlay");
+    const hudCard = document.querySelector(".hud-card");
+    hudOverlay?.classList.add("is-closing");
+    hudCard?.classList.add("is-closing");
+    setTimeout(() => {
+      this.loadSingleLevel(nextLevel, nextScore);
+      this.startSingleLoop();
+    }, 180);
+  },
+
+  startSingleLoop() {
+    if (this.timer) clearInterval(this.timer);
+    this.render();
+    this.timer = setInterval(() => this.tickSingle(), 1000 / 16);
   },
 
   tickSingle() {
@@ -170,7 +248,7 @@ var PacmanFlow = {
       state.pendingResetAfterLifeLoss = false;
       state.pendingGameOver = false;
       if (shouldFinish) {
-        this.finishSingle("perdiÃ³", state.scorePacman, "Se terminaron tus vidas.");
+        this.finishSingle("perdió", state.scorePacman, "Perdiste. Se terminaron tus vidas.");
         return;
       }
       this.resetPositions();
@@ -232,7 +310,7 @@ var PacmanFlow = {
 
     for (const ghost of state.ghosts) {
       if (ghost.x === state.pacman.x && ghost.y === state.pacman.y) {
-        if (ghost.vulnerable) {
+        if (ghost.released && ghost.vulnerable && ghost.eatenAtVulnerableUntil !== state.vulnerableUntil) {
           state.ghostCombo = (state.ghostCombo || 0) + 1;
           const comboPoints = state.ghostCombo * 200;
           state.scorePacman += comboPoints;
@@ -251,11 +329,17 @@ var PacmanFlow = {
           ghost.moveStartedAt = now;
           ghost.released = false;
           ghost.vulnerable = false;
+          ghost.eatenAtVulnerableUntil = state.vulnerableUntil;
           ghost.releaseAt = now + this.releaseDelayMs;
           ghost.lastMoveAt = now;
+          state.ghostDeaths += 1;
+          this.syncGhostScore(state);
         } else if (this.role === "ghost") {
-          ghost.score += ghost.email === Auth.user.email ? 300 : 0;
-          this.finishSingle("ganÃƒÂ³", Math.max(300, ghost.score + state.level * 120), "Atrapaste al Pac-Man bot.");
+          if (state.level >= 5) {
+            this.finishSingle("ganó", this.calculateGhostScore(state), "Ganaste. Atrapaste al Pac-Man bot.");
+            return;
+          }
+          this.showLevelResult("victory", this.calculateGhostScore(state), "Pasaste al siguiente nivel.", state.level + 1);
           return;
         } else {
           state.livesPacman -= 1;
@@ -273,40 +357,27 @@ var PacmanFlow = {
 
     if (state.pelletsRemaining <= 0) {
       if (this.role === "ghost") {
-        this.finishSingle("perdiÃ³", Math.max(0, state.ghosts[0].score), "El Pac-Man bot limpio el nivel.");
+        this.finishSingle("perdió", this.calculateGhostScore(state), "Perdiste. El Pac-Man bot limpió el nivel.");
         return;
       }
       if (state.level >= 5) {
-        this.finishSingle("ganÃ³", state.scorePacman + state.livesPacman * 250 + 1000, "Completaste los 5 niveles.");
+        this.finishSingle("ganó", state.scorePacman + state.livesPacman * 250 + 1000, "Ganaste. Completaste los 5 niveles.");
         return;
       }
       const nextScore = state.scorePacman + 500;
-      const lives = state.livesPacman;
-      PacmanAudio.playVictory();
-      this.levelTransitionTimer = setTimeout(() => {
-        this.levelTransitionTimer = null;
-        this.loadSingleLevel(state.level + 1, nextScore, lives);
-      }, 1200);
+      this.showLevelResult("victory", nextScore, "Pasaste al siguiente nivel.", state.level + 1);
       return;
     }
 
+    this.syncGhostScore(state);
     UI.updateHud(state, `1 jugador como ${this.role === "pacman" ? "Pac-Man" : "Fantasma"}`);
     this.render();
   },
 
   async finishSingle(result, score, message) {
-    this.state.status = "finished";
-    this.state.message = message;
-    this.state.result = result;
-    if (String(result).startsWith("gan")) {
-      PacmanAudio.playVictory();
-    } else {
-      PacmanAudio.stopAmbient();
-    }
-    this.state.winner = result === "ganÃ³" ? (this.role === "pacman" ? "Pac-Man" : "Fantasma") : "Rival";
-    this.stopTimerOnly();
-    UI.updateHud(this.state, "resultado");
-    this.render();
+    const kind = String(result).startsWith("gan") ? "victory" : "defeat";
+    const finalScore = this.role === "ghost" ? this.calculateGhostScore(this.state) : score;
+    this.showLevelResult(kind, finalScore, message);
     try {
       await fetch("/api/scores/pacman", {
         method: "POST",
@@ -335,27 +406,31 @@ var PacmanFlow = {
     this.pauseStartedAt = 0;
     this.loadingUntil = Date.now() + 900;
     UI.setLoading(true, "Sincronizando la partida...");
-    this.applyServerState(state);
-    UI.show("game");
-    const pauseButton = document.getElementById("pauseBtn");
-    if (pauseButton) pauseButton.textContent = "Pausar";
-    const backgroundKey = this.getBackgroundKey(this.state);
-    const assetKeys = [
-      backgroundKey,
-      "pacman-right",
-      "pacman-left",
-      "pacman-up",
-      "pacman-down",
-      "pacman-loss",
-      "pellet",
-      "powerPellet",
-      ...((this.state.ghosts || []).flatMap((ghost) => [ghost.club, `${ghost.club}-vulnerable`]))
-    ];
-    await Promise.all([
-      this.waitForAssets(assetKeys),
-      new Promise((resolve) => setTimeout(resolve, 900))
-    ]);
-    UI.setLoading(false);
+    try {
+      this.applyServerState(state);
+      UI.show("game");
+      const pauseButton = document.getElementById("pauseBtn");
+      if (pauseButton) pauseButton.innerHTML = '<i data-lucide="pause"></i><span>Pausar</span>';
+      UI.renderIcons();
+      const backgroundKey = this.getBackgroundKey(this.state);
+      const assetKeys = [
+        backgroundKey,
+        "pacman-right",
+        "pacman-left",
+        "pacman-up",
+        "pacman-down",
+        "pacman-loss",
+        "pellet",
+        "powerPellet",
+        ...((this.state.ghosts || []).flatMap((ghost) => [ghost.club, `${ghost.club}-vulnerable`]))
+      ];
+      await Promise.all([
+        this.waitForAssets(assetKeys),
+        new Promise((resolve) => setTimeout(resolve, 900))
+      ]);
+    } finally {
+      UI.setLoading(false);
+    }
   },
 
   applyServerState(serverState) {
@@ -376,6 +451,8 @@ var PacmanFlow = {
       this.levelTransitionTimer = null;
     }
     PacmanAudio.stopAmbient();
+    PacmanAudio.stopVictory();
+    PacmanAudio.stopDefeat();
     this.multiplayerCode = null;
     this.paused = false;
     this.pauseStartedAt = 0;
@@ -408,11 +485,13 @@ var PacmanFlow = {
           resolve();
           return;
         }
-        requestAnimationFrame(check);
+        setTimeout(check, 32);
       };
       check();
     });
   },
 
 };
+
+
 

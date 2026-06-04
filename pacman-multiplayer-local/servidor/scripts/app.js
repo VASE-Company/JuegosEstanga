@@ -203,16 +203,28 @@ function createGameState(room) {
   const pacmanPlayer = room.jugadores.pacman;
   const humanGhosts = room.jugadores.fantasmas.slice(0, room.maxFantasmasHumanos);
   const totalGhosts = room.allowBots ? Math.min(5, Math.max(parsed.ghostStarts.length, humanGhosts.length)) : humanGhosts.length;
+  
+  const ghostClubs = ["boca", "independiente", "racing", "sanlorenzo"];
+  const humanChosenClubs = humanGhosts.map(h => h.character).filter(Boolean);
+  const availableClubsForBots = ghostClubs.filter(club => !humanChosenClubs.includes(club));
+
   const ghosts = [];
   for (let i = 0; i < totalGhosts; i += 1) {
     const start = parsed.ghostStarts[i % parsed.ghostStarts.length];
     const human = humanGhosts[i] || null;
+    let club = "";
+    if (human) {
+      club = human.character || "boca";
+    } else {
+      club = availableClubsForBots.shift() || ghostClubs[i % ghostClubs.length];
+    }
     ghosts.push({
       id: `ghost_${i + 1}`,
       x: start.x,
       y: start.y,
       startX: start.x,
       startY: start.y,
+      club: club,
       direction: ["left", "right", "up", "down"][i % 4],
       vulnerable: false,
       isBot: !human,
@@ -540,6 +552,32 @@ app.get("/api/rankings/pacman", async (req, res) => {
   });
 });
 
+app.get("/api/rooms/check", (req, res) => {
+  const codigo = String(req.query.codigo || "").trim().toUpperCase();
+  const room = rooms.get(codigo);
+  if (!room) {
+    return res.status(404).json({ error: "La sala no existe." });
+  }
+  if (room.estado !== "lobby") {
+    return res.status(400).json({ error: "La partida ya inicio." });
+  }
+  const takenCharacters = [];
+  if (room.jugadores.pacman) {
+    takenCharacters.push(room.jugadores.pacman.character || "pacman");
+  }
+  (room.jugadores.fantasmas || []).forEach((ghost) => {
+    if (ghost.character) {
+      takenCharacters.push(ghost.character);
+    }
+  });
+  res.json({
+    codigo: room.codigo,
+    takenCharacters,
+    maxGhosts: room.maxFantasmasHumanos,
+    currentGhosts: room.jugadores.fantasmas.length
+  });
+});
+
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, message: "Servidor funcionando" });
 });
@@ -658,6 +696,7 @@ io.on("connection", (socket) => {
     try {
       const user = await assertRegistered(payload.userId, payload.email);
       const role = payload.role === "ghost" ? "ghost" : "pacman";
+      const character = payload.character || (role === "pacman" ? "pacman" : "boca");
       const codigo = generateRoomCode();
       const room = {
         codigo,
@@ -676,10 +715,10 @@ io.on("connection", (socket) => {
         interval: null,
         createdAt: new Date().toISOString()
       };
-      const player = { userId: user.id, email: user.email, socketId: socket.id };
+      const player = { userId: user.id, email: user.email, socketId: socket.id, character };
       if (role === "pacman") room.jugadores.pacman = player;
       else room.jugadores.fantasmas.push(player);
-      room.sockets[socket.id] = { userId: user.id, email: user.email, role };
+      room.sockets[socket.id] = { userId: user.id, email: user.email, role, character };
       rooms.set(codigo, room);
       socket.join(codigo);
       socket.emit("partida-creada-pacman", lobbyPayload(room));
@@ -697,8 +736,15 @@ io.on("connection", (socket) => {
       if (!room) throw new Error("La sala no existe.");
       if (room.estado !== "lobby") throw new Error("La partida ya inicio.");
       if (Object.values(room.sockets).some((player) => player.userId === user.id)) throw new Error("Ya estas en esta sala.");
+      
       const role = payload.role === "ghost" ? "ghost" : "pacman";
-      const player = { userId: user.id, email: user.email, socketId: socket.id };
+      const character = payload.character || (role === "pacman" ? "pacman" : "boca");
+      
+      const isTaken = (room.jugadores.pacman && room.jugadores.pacman.character === character) ||
+        (room.jugadores.fantasmas || []).some(ghost => ghost.character === character);
+      if (isTaken) throw new Error(`El personaje ${character} ya esta siendo usado por otro jugador.`);
+
+      const player = { userId: user.id, email: user.email, socketId: socket.id, character };
       if (role === "pacman") {
         if (room.jugadores.pacman) throw new Error("Ya hay un Pac-Man humano.");
         room.jugadores.pacman = player;
@@ -708,7 +754,7 @@ io.on("connection", (socket) => {
         }
         room.jugadores.fantasmas.push(player);
       }
-      room.sockets[socket.id] = { userId: user.id, email: user.email, role };
+      room.sockets[socket.id] = { userId: user.id, email: user.email, role, character };
       socket.join(codigo);
       socket.emit("jugador-unido-pacman", lobbyPayload(room));
       io.to(codigo).emit("lobby-actualizado-pacman", lobbyPayload(room));

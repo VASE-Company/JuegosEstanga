@@ -1,17 +1,22 @@
 .game-scene {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas: "canvas";
+  gap: 0;
+  align-items: stretch;
+  padding: 0;
   position: relative;
   width: 100%;
   min-height: 100dvh;
   overflow: hidden;
 }
 .hud-overlay {
+  grid-area: canvas;
   position: absolute;
-  top: 16px;
-  left: 16px;
-  right: 16px;
-  z-index: 3;
-  display: flex;
-  justify-content: flex-start;
+  inset: 12px 12px auto 12px;
+  z-index: 12;
+  display: block;
+  width: auto;
   pointer-events: none;
 }
 .hud-overlay.is-result {
@@ -21,95 +26,200 @@
   display: grid;
   place-items: center;
   justify-content: center;
+  background: rgba(2, 7, 16, 0.82);
+  backdrop-filter: blur(12px);
+  z-index: 50;
+  transition: opacity 160ms ease, backdrop-filter 160ms ease;
+}
+.hud-overlay.is-result.is-closing {
+  opacity: 0;
+  backdrop-filter: blur(2px);
 }
 .hud-card {
-  width: min(360px, 100%);
-  padding: 18px 20px 16px;
-  border-radius: 24px;
-  background: rgba(6, 8, 10, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.42);
-  backdrop-filter: blur(10px);
+  width: 100%;
+  padding: 16px 18px 14px;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
   pointer-events: auto;
 }
 .hud-card.is-result {
-  width: min(560px, 100%);
   position: relative;
   left: auto;
   top: auto;
   transform: none;
+  width: min(560px, 100%);
   padding: 26px 28px 24px;
   border-radius: 28px;
   background: linear-gradient(180deg, rgba(11, 12, 15, 0.94), rgba(33, 8, 16, 0.92));
   border: 1px solid rgba(255, 105, 121, 0.18);
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+  transition: transform 180ms ease, opacity 180ms ease, filter 180ms ease;
 }
-.hud-card.is-result .hud-stats,
-.hud-card.is-result .hud-actions,
+.hud-card.is-result.is-closing {
+  transform: translateY(10px) scale(0.985);
+  opacity: 0;
+  filter: blur(3px);
+}
+.game-scene.is-result .canvas-wrap {
+  opacity: 0.18;
+  filter: blur(1.4px) saturate(0.7);
+  pointer-events: none;
+}
+.game-scene.is-result .touch-controls {
+  opacity: 0.22;
+  pointer-events: none;
+}
+.game-scene.is-countdown-active .hud-overlay {
+  opacity: 0;
+  pointer-events: none;
+}
+.game-scene.is-countdown-active .touch-controls {
+  opacity: 0.18;
+  pointer-events: none;
+}
 .hud-card.is-result #pauseBtn {
   display: none;
 }
-.hud-card.is-result #gameTitle {
-  margin-bottom: 0.3rem;
-  font-size: clamp(1.7rem, 3vw, 2.45rem);
+.hud-card.is-result .hud-stat-points {
+  display: none;
 }
-.hud-card.is-result #gameModeLabel {
-  text-align: center;
-}
-.result-visual {
-  display: grid;
-  place-items: center;
-  margin: 0.5rem 0 0.8rem;
-}
-.result-visual img {
-  width: min(240px, 58vw);
-  max-width: 100%;
-  height: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 14px 26px rgba(0, 0, 0, 0.35));
+.hud-card.is-result .hud-stat-lives {
+  display: none;
 }
 .hud-card.is-result #gameMessage {
-  margin: 0.45rem 0 0.95rem;
-  font-size: 1.02rem;
+  margin: 1rem 0 0;
+  padding: 0.9rem 1rem 0;
+  font-size: 1.12rem;
+  font-weight: 900;
   color: rgba(255, 232, 236, 0.94);
   line-height: 1.45;
   text-align: center;
 }
-.hud-card.is-result #backToMenuBtn {
+.result-visual {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 18px;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 105, 121, 0.2);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.4);
+  background: rgba(2, 7, 16, 0.92);
+}
+.result-visual img {
+  display: block;
+  width: 100%;
+  height: clamp(120px, 18vw, 210px);
+  object-fit: contain;
+  object-position: center;
+}
+.hud-card.is-result .result-visual.hidden {
+  display: none;
+}
+.hud-card.is-result .hud-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.hud-card.is-result .hud-side-left {
   width: 100%;
 }
-.hud-stats { display: grid; gap: 10px; margin-top: 0.25rem; }
+.hud-card.is-result .hud-side-right {
+  width: 100%;
+  align-items: stretch;
+}
+.hud-card.is-result .hud-actions {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  justify-content: stretch;
+}
+.hud-card.is-result .hud-actions button {
+  min-width: 0;
+  width: 100%;
+}
+.hud-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.hud-side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.hud-side-left {
+  flex: 1 1 auto;
+  justify-content: flex-start;
+}
+.hud-side-right {
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+}
+.hud-stats { display: contents; }
 .hud-stat {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 0.55rem 0.75rem;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(7, 18, 35, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+.hud-stat-lives {
+  background: rgba(10, 16, 26, 0.88);
 }
 .hud-stat-score {
-  background: linear-gradient(135deg, rgba(255, 72, 95, 0.14), rgba(255, 72, 95, 0.06));
+  min-width: 122px;
 }
 .hud-stat-score strong,
 .hud-stat-points strong {
   font-variant-numeric: tabular-nums;
 }
 .hud-stat-score strong {
-  font-size: 1.28rem;
+  font-size: 1.34rem;
   font-weight: 900;
   letter-spacing: 0.04em;
 }
-.hud-stat span { color: var(--muted); font-weight: 700; }
-.hud-stat strong { font-size: 1.05rem; }
+.hud-stat span { color: rgba(255, 232, 236, 0.8); font-weight: 800; }
+.hud-stat strong { font-size: 1.08rem; color: #fff; }
 .hud-actions {
   display: flex;
   gap: 10px;
-  margin: 0.8rem 0 0.55rem;
+  margin: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
 }
 .hud-actions button {
-  flex: 1;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.88rem;
+}
+.hud-actions button.hidden {
+  display: none !important;
+}
+.hud-actions button svg {
+  width: 18px;
+  height: 18px;
 }
 .lives-hearts {
   display: inline-flex;
@@ -139,9 +249,15 @@
   fill: #ff3f54;
 }
 .canvas-wrap {
+  grid-area: canvas;
   width: 100%;
   min-width: 0;
+  min-height: 0;
   height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 .countdown-overlay {
   position: absolute;
@@ -151,32 +267,92 @@
   z-index: 4;
   pointer-events: none;
   font-family: "Arcade Estanga", "Orbitron", "Press Start 2P", monospace;
-  font-size: clamp(2.5rem, 9vw, 7rem);
+  padding: 16px;
   color: #fff;
-  text-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 24px rgba(255, 72, 95, 0.55);
+  text-shadow: none;
 }
 .countdown-overlay::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.35));
+  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.54));
 }
-.countdown-overlay > span {
+.countdown-card {
   position: relative;
+  min-width: min(360px, 100%);
+  padding: 18px 24px 16px;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 112, 128, 0.28);
+  background: linear-gradient(180deg, rgba(13, 14, 18, 0.84), rgba(44, 10, 19, 0.88));
+  backdrop-filter: blur(12px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  text-align: center;
+}
+.countdown-badge {
+  font-family: "Inter", sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 194, 201, 0.92);
+}
+.countdown-number {
+  font-family: "Arcade Estanga", "Orbitron", "Press Start 2P", monospace;
+  font-size: clamp(3rem, 10vw, 7.5rem);
+  line-height: 0.92;
+  letter-spacing: 0.08em;
+  color: #fff;
+  text-shadow: none;
+}
+.countdown-hint {
+  font-family: "Inter", sans-serif;
+  font-size: 0.94rem;
+  line-height: 1.35;
+  color: rgba(255, 232, 236, 0.88);
+}
+.countdown-card-paused .countdown-number {
+  font-size: clamp(2.4rem, 7vw, 5rem);
+  letter-spacing: 0.2em;
 }
 .countdown-overlay.is-paused {
-  font-size: clamp(2rem, 7vw, 5rem);
+  font-size: inherit;
+}
+@media (max-width: 560px) {
+  .countdown-card {
+    min-width: min(300px, 100%);
+    padding: 16px 18px 14px;
+    border-radius: 24px;
+  }
+  .countdown-badge {
+    font-size: 0.74rem;
+  }
+  .countdown-number {
+    font-size: clamp(2.4rem, 18vw, 5.4rem);
+  }
+  .countdown-hint {
+    font-size: 0.82rem;
+  }
 }
 canvas {
   display: block;
-  width: 100%;
-  height: 100%;
-  max-height: none;
+  /* Aspect ratio 840:560 = 3:2 — se adapta al espacio disponible */
+  width: min(100vw, calc(100dvh * (840 / 560)));
+  height: min(100dvh, calc(100vw * (560 / 840)));
+  max-width: 100vw;
+  max-height: 100dvh;
   background: radial-gradient(circle at 50% 45%, rgba(12, 30, 64, 0.45), rgba(4, 9, 17, 0.96));
   border: 1px solid var(--border);
-  border-radius: 0;
+  border-radius: 24px;
   box-shadow: var(--shadow);
   image-rendering: auto;
+  transition: filter 180ms ease, opacity 180ms ease;
+}
+.canvas-wrap .is-countdown-active,
+canvas.is-countdown-active {
+  filter: brightness(0.58) saturate(0.72) blur(1.6px);
+  opacity: 0.88;
 }
 
 .touch-controls {
@@ -206,3 +382,5 @@ canvas {
 .touch-controls [data-dir="right"] { grid-column: 3; }
 
 .modal { position: fixed; inset: 0; display: grid; place-items: center; padding: 18px; background: rgba(0, 0, 0, 0.6); z-index: 20; }
+
+
