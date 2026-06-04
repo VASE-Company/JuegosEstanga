@@ -32,6 +32,7 @@ const canvas = document.getElementById("snakeCanvas");
 const restartBtn = document.getElementById("restartBtn");
 const backMenuBtn = document.getElementById("backMenuBtn");
 const pauseBtn = document.getElementById("pauseBtn");
+const scrollTopBtn = document.getElementById("scrollTopBtn");
 const musicToggle = document.getElementById("musicToggle");
 const fullscreenToggle = document.getElementById("fullscreenToggle");
 const gameMusic = document.getElementById("gameMusic");
@@ -316,6 +317,14 @@ fullscreenToggle.addEventListener("click", toggleFullscreen);
 document.addEventListener("fullscreenchange", () => {
   setFullscreenState(Boolean(document.fullscreenElement));
   game?.draw();
+});
+scrollTopBtn.addEventListener("click", () => {
+  const target = document.fullscreenElement || document.scrollingElement || document.documentElement;
+  if (target === document.documentElement || target === document.body) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+  target.scrollTo?.({ top: 0, behavior: "smooth" });
 });
 
 document.getElementById("closeModalBtn").addEventListener("click", closeRoomModal);

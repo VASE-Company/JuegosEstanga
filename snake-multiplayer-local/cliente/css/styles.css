@@ -461,7 +461,7 @@ canvas {
   grid-template-areas:
     "top top top"
     "left arena right"
-    "controls dpad objective"
+    ". dpad objective"
     "actions actions actions";
   gap: 14px;
   align-items: start;
@@ -504,7 +504,6 @@ canvas {
 }
 
 .mode-card strong,
-.controls-info strong,
 .objective-panel strong {
   color: var(--game-text);
   font-size: 0.92rem;
@@ -580,7 +579,6 @@ canvas {
 .player-panel .eyebrow,
 .trophies-panel .eyebrow,
 .record-panel .eyebrow,
-.controls-info .eyebrow,
 .objective-panel .eyebrow {
   color: var(--game-accent);
   text-align: center;
@@ -643,17 +641,6 @@ canvas {
   font-size: 0.82rem;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.player-panel span {
-  width: 56px;
-  padding: 2px 0 4px;
-  border-radius: 6px;
-  background: linear-gradient(90deg, transparent, rgba(200, 16, 46, 0.72), transparent);
-  color: #ffffff;
-  font-size: 2rem;
-  font-weight: 900;
-  line-height: 1;
 }
 
 .arena-panel {
@@ -742,33 +729,6 @@ canvas {
   opacity: 0.45;
 }
 
-.controls-info {
-  grid-area: controls;
-  min-height: 170px;
-  display: grid;
-  align-content: center;
-  gap: 14px;
-}
-
-.controls-info div {
-  display: grid;
-  grid-template-columns: 56px 1fr;
-  gap: 10px;
-  align-items: center;
-}
-
-.keycap {
-  min-height: 42px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--game-card-border);
-  border-radius: 6px;
-  background: var(--game-control-bg);
-  color: var(--game-control-text);
-  font-size: 0.78rem;
-  font-weight: 900;
-}
-
 .game-view .game-controls {
   grid-area: dpad;
   width: min(360px, 100%);
@@ -795,7 +755,6 @@ canvas {
 
 .game-view .control.up { grid-column: 2; grid-row: 1; }
 .game-view .control.left { grid-column: 1; grid-row: 2; }
-.game-view .control.center { grid-column: 2; grid-row: 2; cursor: default; }
 .game-view .control.right { grid-column: 3; grid-row: 2; }
 .game-view .control.down { grid-column: 2; grid-row: 3; }
 
@@ -891,6 +850,40 @@ canvas {
   transform: translate(-50%, 0);
 }
 
+.scroll-top-button {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 70;
+  width: 52px;
+  min-width: 52px;
+  height: 52px;
+  min-height: 52px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--secondary) 42%, var(--line));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: var(--text);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.2);
+}
+
+.scroll-top-button:hover {
+  border-color: color-mix(in srgb, var(--gold) 56%, var(--line));
+  color: var(--gold);
+}
+
+.scroll-top-button svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .hidden {
   display: none !important;
 }
@@ -904,7 +897,6 @@ canvas {
       "dpad"
       "left"
       "right"
-      "controls"
       "objective"
       "actions";
   }
@@ -1017,6 +1009,15 @@ canvas {
   .game-view .control img {
     width: 76px;
     height: 76px;
+  }
+
+  .scroll-top-button {
+    right: 10px;
+    bottom: 10px;
+    width: 46px;
+    min-width: 46px;
+    height: 46px;
+    min-height: 46px;
   }
 }
 

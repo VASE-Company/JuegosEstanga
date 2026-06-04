@@ -120,9 +120,8 @@
             </section>
             <section class="hud-panel player-panel">
               <p class="eyebrow">Jugador</p>
-              <img src="./assets/julian-trophy-hunter/heads/head_up.png" alt="Julian Alvarez">
+              <img src="./assets/julian-trophy-hunter/heads/head_down.png" alt="Julian Alvarez">
               <strong id="playerEmailShort">Julian Alvarez</strong>
-              <span>19</span>
             </section>
           </aside>
 
@@ -149,21 +148,12 @@
             <button class="pause-button" id="pauseBtn" type="button">Pausa</button>
           </aside>
 
-          <section class="hud-panel controls-info">
-            <p class="eyebrow">Controles</p>
-            <div><span class="keycap">← ↑ ↓ →</span><strong>Flechas para moverte</strong></div>
-            <div><span class="keycap">P</span><strong>Pausa</strong></div>
-          </section>
-
           <div class="game-controls" id="touchControls" aria-label="Controles tactiles">
             <button class="control up" data-direction="up" aria-label="Arriba">
               <img src="./assets/julian-trophy-hunter/ui/dpad_up.png" alt="">
             </button>
             <button class="control left" data-direction="left" aria-label="Izquierda">
               <img src="./assets/julian-trophy-hunter/ui/dpad_left.png" alt="">
-            </button>
-            <button class="control center" type="button" aria-label="Centro">
-              <img src="./assets/julian-trophy-hunter/ui/dpad_center.png" alt="">
             </button>
             <button class="control right" data-direction="right" aria-label="Derecha">
               <img src="./assets/julian-trophy-hunter/ui/dpad_right.png" alt="">
@@ -204,6 +194,12 @@
   </div>
 
   <div class="toast" id="toast" aria-live="polite"></div>
+  <button class="scroll-top-button" id="scrollTopBtn" type="button" aria-label="Volver arriba" title="Volver arriba">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 19V5"></path>
+      <path d="m5 12 7-7 7 7"></path>
+    </svg>
+  </button>
   <audio id="gameMusic" preload="auto" loop src="./assets/julian-trophy-hunter/audio/game-theme.mp3"></audio>
 
   <script src="/socket.io/socket.io.js"></script>

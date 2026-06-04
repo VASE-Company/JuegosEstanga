@@ -515,5 +515,27 @@
     "score": 20,
     "result": "perdió",
     "createdAt": "2026-06-04T19:56:33.687Z"
+  },
+  {
+    "id": "score_f126e7f633f0516f",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_b79115c1f49480e0",
+    "email": "alexisvallejos805@gmail.com",
+    "score": 60,
+    "result": "finalizado",
+    "createdAt": "2026-06-04T20:15:45.971Z"
+  },
+  {
+    "id": "score_c4bcca02b3016e9b",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_b79115c1f49480e0",
+    "email": "alexisvallejos805@gmail.com",
+    "score": 70,
+    "result": "finalizado",
+    "createdAt": "2026-06-04T20:16:14.055Z"
   }
 ]
