@@ -414,5 +414,44 @@
     "score": 0,
     "result": "perdió",
     "createdAt": "2026-06-04T19:19:47.240Z"
+  },
+  {
+    "id": "score_mpzxjovt_8wxaio",
+    "game": "pacman",
+    "mode": "singleplayer",
+    "role": "pacman",
+    "level": 1,
+    "matchCode": null,
+    "userId": "user_mpzloa2b_k3a443",
+    "email": "darianseselovsky@gmail.com",
+    "score": 970,
+    "result": "perdió",
+    "createdAt": "2026-06-04T20:10:30.713Z"
+  },
+  {
+    "id": "score_mpzxms6q_bux23g",
+    "game": "pacman",
+    "mode": "singleplayer",
+    "role": "pacman",
+    "level": 1,
+    "matchCode": null,
+    "userId": "user_mpzloa2b_k3a443",
+    "email": "darianseselovsky@gmail.com",
+    "score": 590,
+    "result": "perdió",
+    "createdAt": "2026-06-04T20:12:54.962Z"
+  },
+  {
+    "id": "score_mpzxn5by_v48s19",
+    "game": "pacman",
+    "mode": "singleplayer",
+    "role": "pacman",
+    "level": 1,
+    "matchCode": null,
+    "userId": "user_mpzloa2b_k3a443",
+    "email": "darianseselovsky@gmail.com",
+    "score": 300,
+    "result": "perdió",
+    "createdAt": "2026-06-04T20:13:11.998Z"
   }
 ]

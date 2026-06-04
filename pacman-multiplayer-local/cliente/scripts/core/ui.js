@@ -199,10 +199,8 @@
       let resultAlt = "Pantalla de resultado";
       if (state.resultType === "defeat") {
         resultImage = state.playerRole === "pacman"
-          ? "assets/images/characters/pacman-pierde.png"
-          : state.playerCharacter && state.playerCharacter !== "pacman"
-            ? `assets/images/characters/${state.playerCharacter}fantasma-perseguido.png`
-            : "assets/images/backgrounds/hero-pacman.jpg";
+          ? (state.playerCharacterDefeatImage || "assets/images/characters/pacman-pierde.png")
+          : (state.playerCharacterVulnerableImage || "assets/images/backgrounds/hero-pacman.jpg");
         resultAlt = state.playerRole === "pacman" ? "Pac-Man derrotado" : "Fantasma perseguido";
       } else if (state.resultType === "victory") {
         resultImage = state.pendingNextLevel

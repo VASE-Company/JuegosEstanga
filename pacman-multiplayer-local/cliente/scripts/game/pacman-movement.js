@@ -6,24 +6,23 @@ var PacmanMovement = {
     const titleHeight = isMobile ? 38 : isCompact ? 50 : 62;
     const plaqueWidth = isMobile
       ? canvasWidth - outerPadding * 2
-      : Math.max(180, Math.floor(canvasWidth * (isCompact ? 0.18 : 0.22) * levelScale));
+      : Math.max(180, Math.floor(canvasWidth * (isCompact ? 0.18 : 0.22)));
     const plaqueHeight = isMobile ? 82 : isCompact ? 148 : 236;
-    const mapX = isMobile ? outerPadding : plaqueWidth + outerPadding;
+    const density = isMobile ? 1.02 : isCompact ? 0.84 : 0.72;
+    const levelScale = isMobile
+      ? (state.level === 1 ? 1 : density)
+      : (state.level === 1 ? 0.82 : density);
+    const availableWidth = Math.max(120, canvasWidth - outerPadding * 2);
+    const availableHeight = Math.max(120, canvasHeight - outerPadding * 2 - (isMobile ? 92 : titleHeight + 12));
+    const tile = Math.max(isMobile ? 12 : isCompact ? 11 : 14, Math.floor(Math.min(availableWidth / state.width, availableHeight / state.height) * levelScale));
+    const mapWidth = tile * state.width;
+    const mapHeight = tile * state.height;
+    const mapX = isMobile ? Math.max(outerPadding, Math.floor((canvasWidth - mapWidth) / 2)) : plaqueWidth + outerPadding;
     const mapY = isMobile
-      ? Math.max(220, Math.floor(canvasHeight * 0.32))
+      ? Math.max(84, Math.floor((canvasHeight - mapHeight) / 2) - 10)
       : isCompact
         ? (state.level === 1 ? 92 : 72)
         : (state.level === 1 ? 78 : 64);
-    const mapPaddingRight = outerPadding;
-    const mapPaddingBottom = outerPadding;
-    const availableWidth = Math.max(120, canvasWidth - mapX - mapPaddingRight);
-    const availableHeight = Math.max(120, canvasHeight - mapY - mapPaddingBottom);
-    const density = isMobile ? 1.08 : isCompact ? 0.84 : 0.72;
-    const levelScale = isMobile
-      ? (state.level === 1 ? 0.98 : density)
-      : (state.level === 1 ? 0.82 : density);
-    const tile = Math.max(isMobile ? 12 : isCompact ? 11 : 14, Math.floor(Math.min(availableWidth / state.width, availableHeight / state.height) * levelScale));
-    const mapHeight = tile * state.height;
     return {
       isMobile,
       outerPadding,
@@ -34,7 +33,7 @@ var PacmanMovement = {
       plaqueHeight,
       mapX,
       mapY,
-      mapWidth: tile * state.width,
+      mapWidth,
       mapHeight,
       tile
     };
@@ -44,6 +43,32 @@ var PacmanMovement = {
     if (!state?.background) return "fondo1";
     const value = state.background.replace(/^assets\//, "");
     return value.endsWith("fondo2.jpg") ? "fondo2" : value.endsWith("fondo1.png") ? "fondo1" : value.endsWith("hero-pacman.jpg") ? "hero" : value;
+  },
+
+  getCharacterVisuals(character) {
+    const catalog = {
+      pacman: {
+        normal: "assets/images/characters/pacman-derecha.png",
+        defeated: "assets/images/characters/pacman-pierde.png"
+      },
+      boca: {
+        normal: "assets/images/characters/bocafantasma.png",
+        vulnerable: "assets/images/characters/bocafantasma-perseguido.png"
+      },
+      independiente: {
+        normal: "assets/images/characters/independientefantasma.png",
+        vulnerable: "assets/images/characters/independientefantasma-perseguido.png"
+      },
+      racing: {
+        normal: "assets/images/characters/racingfantasma.png",
+        vulnerable: "assets/images/characters/racingfantasma-perseguido.png"
+      },
+      sanlorenzo: {
+        normal: "assets/images/characters/sanlorenzofantasma.png",
+        vulnerable: "assets/images/characters/sanlorenzofantasma-perseguido.png"
+      }
+    };
+    return catalog[character] || catalog.pacman;
   },
 
   getGhostStarts(parsed) {

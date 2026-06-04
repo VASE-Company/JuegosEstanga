@@ -18,10 +18,10 @@ var PacmanGame = window.PacmanGame || {
   loadingUntil: 0,
   releaseDelayMs: 2200,
   ghostProfiles: [
-    { club: "boca", asset: "assets/images/characters/bocafantasma.png", speed: 1.35, wobble: 0.04 },
-    { club: "independiente", asset: "assets/images/characters/independientefantasma.png", speed: 1.15, wobble: 0.07 },
-    { club: "racing", asset: "assets/images/characters/racingfantasma.png", speed: 0.98, wobble: 0.1 },
-    { club: "sanlorenzo", asset: "assets/images/characters/sanlorenzofantasma.png", speed: 0.84, wobble: 0.12 }
+    { club: "boca", asset: "assets/images/characters/bocafantasma.png", vulnerableAsset: "assets/images/characters/bocafantasma-perseguido.png", speed: 1.35, wobble: 0.04 },
+    { club: "independiente", asset: "assets/images/characters/independientefantasma.png", vulnerableAsset: "assets/images/characters/independientefantasma-perseguido.png", speed: 1.15, wobble: 0.07 },
+    { club: "racing", asset: "assets/images/characters/racingfantasma.png", vulnerableAsset: "assets/images/characters/racingfantasma-perseguido.png", speed: 0.98, wobble: 0.1 },
+    { club: "sanlorenzo", asset: "assets/images/characters/sanlorenzofantasma.png", vulnerableAsset: "assets/images/characters/sanlorenzofantasma-perseguido.png", speed: 0.84, wobble: 0.12 }
   ],
   init() {
     Object.assign(this, PacmanCore, PacmanFlow, PacmanMovement, PacmanRender);

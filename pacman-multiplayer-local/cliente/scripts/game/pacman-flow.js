@@ -40,10 +40,8 @@
         "powerPellet",
         ...((this.state.ghosts || []).flatMap((ghost) => [ghost.club, `${ghost.club}-vulnerable`]))
       ];
-      await Promise.all([
-        this.waitForAssets(assetKeys),
-        new Promise((resolve) => setTimeout(resolve, 900))
-      ]);
+      this.waitForAssets(assetKeys).catch(() => {});
+      await new Promise((resolve) => setTimeout(resolve, 900));
     } finally {
       UI.setLoading(false);
     }
@@ -80,6 +78,7 @@
     const ghostSkill = Math.max(0.18, Math.min(1, 0.2 + (level.id - 1) * 0.2));
     const countdownMs = this.mode === "singleplayer" ? 4200 : 0;
     const introMs = this.mode === "singleplayer" ? 1000 : 0;
+    const playerVisuals = this.getCharacterVisuals(this.singleCharacter);
     this.state = {
       status: "playing",
       level: level.id,
@@ -94,6 +93,9 @@
       introDuration: introMs,
       introEndsAt: introMs ? Date.now() + introMs : 0,
       countdownEndsAt: countdownMs ? Date.now() + countdownMs : 0,
+      playerCharacterImage: playerVisuals.normal,
+      playerCharacterVulnerableImage: playerVisuals.vulnerable || playerVisuals.defeated || playerVisuals.normal,
+      playerCharacterDefeatImage: playerVisuals.defeated || playerVisuals.normal,
       powerPelletDuration: level.powerPelletDuration || 6500,
       width: parsed.width,
       height: parsed.height,
@@ -424,10 +426,8 @@
         "powerPellet",
         ...((this.state.ghosts || []).flatMap((ghost) => [ghost.club, `${ghost.club}-vulnerable`]))
       ];
-      await Promise.all([
-        this.waitForAssets(assetKeys),
-        new Promise((resolve) => setTimeout(resolve, 900))
-      ]);
+      this.waitForAssets(assetKeys).catch(() => {});
+      await new Promise((resolve) => setTimeout(resolve, 900));
     } finally {
       UI.setLoading(false);
     }

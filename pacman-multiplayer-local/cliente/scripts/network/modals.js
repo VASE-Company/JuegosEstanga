@@ -13,28 +13,32 @@ const GameModals = {
         character: "boca",
         name: "Boca",
         description: "El fantasma más rápido",
-        image: "assets/images/characters/bocafantasma.png"
+        image: "assets/images/characters/bocafantasma.png",
+        vulnerableImage: "assets/images/characters/bocafantasma-perseguido.png"
       },
       {
         role: "ghost",
         character: "independiente",
         name: "Independiente",
         description: "Velocidad media alta",
-        image: "assets/images/characters/independientefantasma.png"
+        image: "assets/images/characters/independientefantasma.png",
+        vulnerableImage: "assets/images/characters/independientefantasma-perseguido.png"
       },
       {
         role: "ghost",
         character: "racing",
         name: "Racing",
         description: "Movimiento ágil",
-        image: "assets/images/characters/racingfantasma.png"
+        image: "assets/images/characters/racingfantasma.png",
+        vulnerableImage: "assets/images/characters/racingfantasma-perseguido.png"
       },
       {
         role: "ghost",
         character: "sanlorenzo",
         name: "San Lorenzo",
         description: "El más lento y pesado",
-        image: "assets/images/characters/sanlorenzofantasma.png"
+        image: "assets/images/characters/sanlorenzofantasma.png",
+        vulnerableImage: "assets/images/characters/sanlorenzofantasma-perseguido.png"
       }
     ];
   },
