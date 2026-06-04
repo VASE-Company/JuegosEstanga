@@ -13,7 +13,7 @@ const BASE_TICK_MS = 190;
 const MIN_TICK_MS = 125;
 const GRID_WIDTH = 18;
 const GRID_HEIGHT = 12;
-const HEAD_SCALE_INSET = -0.18;
+const HEAD_SCALE_INSET = -0.32;
 const TROPHY_SCALE_INSET = -0.2;
 const MAP_FIELD = {
   left: 96 / 1402,

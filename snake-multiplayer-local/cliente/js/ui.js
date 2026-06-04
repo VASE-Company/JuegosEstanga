@@ -22,6 +22,14 @@ const icons = {
       <path d="M9 18V5l8-1.45M20 12.5V3l-2.2.4"></path>
       <circle cx="6" cy="18" r="3"></circle>
       <path d="m3 3 18 18"></path>
+    </svg>`,
+  fullscreen: `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path>
+    </svg>`,
+  fullscreenExit: `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M8 3v5H3M16 3v5h5M8 21v-5H3M16 21v-5h5"></path>
     </svg>`
 };
 
@@ -87,4 +95,14 @@ export function setMusicState(isPlaying) {
     isPlaying ? "Mutear musica" : "Escuchar musica"
   );
   document.getElementById("musicToggle").title = isPlaying ? "Mutear musica" : "Escuchar musica";
+}
+
+export function setFullscreenState(isFullscreen) {
+  document.getElementById("fullscreenIcon").innerHTML = isFullscreen ? icons.fullscreenExit : icons.fullscreen;
+  document.getElementById("fullscreenLabel").textContent = isFullscreen ? "Salir" : "Pantalla";
+  document.getElementById("fullscreenToggle").setAttribute(
+    "aria-label",
+    isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"
+  );
+  document.getElementById("fullscreenToggle").title = isFullscreen ? "Salir de pantalla completa" : "Pantalla completa";
 }
