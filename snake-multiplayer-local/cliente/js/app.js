@@ -7,6 +7,7 @@ import {
   closeRoomModal,
   openRoomModal,
   setControlsEnabled,
+  setFullscreenState,
   setGameMode,
   setGameStatus,
   setMusicState,
@@ -26,11 +27,13 @@ const gameRankingList = document.getElementById("gameRankingList");
 const bestScoreValue = document.getElementById("bestScoreValue");
 const bestMatchValue = document.getElementById("bestMatchValue");
 const playerEmailShort = document.getElementById("playerEmailShort");
+const gameView = document.getElementById("gameView");
 const canvas = document.getElementById("snakeCanvas");
 const restartBtn = document.getElementById("restartBtn");
 const backMenuBtn = document.getElementById("backMenuBtn");
 const pauseBtn = document.getElementById("pauseBtn");
 const musicToggle = document.getElementById("musicToggle");
+const fullscreenToggle = document.getElementById("fullscreenToggle");
 const gameMusic = document.getElementById("gameMusic");
 const joinForm = document.getElementById("joinForm");
 const joinCodeInput = document.getElementById("joinCodeInput");
@@ -120,6 +123,19 @@ async function toggleMusic() {
     musicPlaying = false;
     setMusicState(false);
     showToast("El navegador bloqueo la musica. Toca el boton de musica otra vez.", "error");
+  }
+}
+
+async function toggleFullscreen() {
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+      return;
+    }
+    const target = gameView.classList.contains("hidden") ? document.documentElement : gameView;
+    await target.requestFullscreen();
+  } catch (error) {
+    showToast("No se pudo activar pantalla completa en este navegador.", "error");
   }
 }
 
@@ -296,6 +312,11 @@ gameMusic.addEventListener("pause", () => {
   musicPlaying = false;
   setMusicState(false);
 });
+fullscreenToggle.addEventListener("click", toggleFullscreen);
+document.addEventListener("fullscreenchange", () => {
+  setFullscreenState(Boolean(document.fullscreenElement));
+  game?.draw();
+});
 
 document.getElementById("closeModalBtn").addEventListener("click", closeRoomModal);
 document.getElementById("roomModal").addEventListener("click", (event) => {
@@ -419,6 +440,7 @@ socket.on("rankings-actualizados", () => {
 
 applyTheme(localStorage.getItem("snakeTheme") || "dark");
 setMusicState(false);
+setFullscreenState(false);
 if (user?.id && user?.email) {
   showDashboard();
 } else {

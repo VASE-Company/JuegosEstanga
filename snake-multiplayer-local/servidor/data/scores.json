@@ -482,5 +482,38 @@
     "score": 10,
     "result": "finalizado",
     "createdAt": "2026-06-04T19:41:46.614Z"
+  },
+  {
+    "id": "score_a417b8c2975b640c",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_b79115c1f49480e0",
+    "email": "alexisvallejos805@gmail.com",
+    "score": 30,
+    "result": "finalizado",
+    "createdAt": "2026-06-04T19:51:19.141Z"
+  },
+  {
+    "id": "score_33836ce9744e6b17",
+    "game": "snake",
+    "mode": "multiplayer",
+    "matchCode": "TFQ6S",
+    "userId": "user_6a8c7eb08bcf173c",
+    "email": "alexisvallejos803@gmail.com",
+    "score": 30,
+    "result": "ganó",
+    "createdAt": "2026-06-04T19:56:33.678Z"
+  },
+  {
+    "id": "score_824f26451fe50d50",
+    "game": "snake",
+    "mode": "multiplayer",
+    "matchCode": "TFQ6S",
+    "userId": "user_b79115c1f49480e0",
+    "email": "alexisvallejos805@gmail.com",
+    "score": 20,
+    "result": "perdió",
+    "createdAt": "2026-06-04T19:56:33.687Z"
   }
 ]

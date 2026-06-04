@@ -13,6 +13,17 @@
   --gold: #efb52d;
   --danger: #b42318;
   --shadow: 0 18px 44px rgba(15, 23, 42, 0.12);
+  --game-bg: linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(226, 232, 240, 0.98)), #eef2f7;
+  --game-card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(238, 242, 247, 0.98));
+  --game-card-border: rgba(11, 31, 85, 0.18);
+  --game-text: #081634;
+  --game-muted: #526070;
+  --game-accent: #c8102e;
+  --game-gold: #d99712;
+  --game-canvas-bg: #dbe8f2;
+  --game-control-bg: #e6edf7;
+  --game-control-text: #081634;
+  --game-shadow: 0 20px 48px rgba(15, 23, 42, 0.18);
 }
 
 body.dark {
@@ -30,6 +41,17 @@ body.dark {
   --gold: #ffd66b;
   --danger: #ff8a7c;
   --shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
+  --game-bg: linear-gradient(180deg, rgba(4, 15, 34, 0.92), rgba(1, 9, 22, 0.98)), #041022;
+  --game-card-bg: linear-gradient(180deg, rgba(9, 26, 57, 0.92), rgba(4, 15, 34, 0.96));
+  --game-card-border: rgba(96, 122, 173, 0.42);
+  --game-text: #f8fafc;
+  --game-muted: #a8b7d4;
+  --game-accent: #ff334a;
+  --game-gold: #f7b51d;
+  --game-canvas-bg: #061228;
+  --game-control-bg: #13213f;
+  --game-control-text: #ffffff;
+  --game-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
 }
 
 * { box-sizing: border-box; }
@@ -117,7 +139,7 @@ p {
 }
 
 body.dark .topbar h1 {
-  color: #f8fafc;
+  color: var(--text);
 }
 
 .utility-controls {
@@ -425,13 +447,11 @@ canvas {
   min-height: calc(100dvh - 20px);
   margin-top: 0;
   padding: clamp(10px, 1.5vw, 18px);
-  border: 1px solid rgba(73, 94, 139, 0.42);
+  border: 1px solid var(--game-card-border);
   border-radius: 8px;
-  background:
-    linear-gradient(180deg, rgba(4, 15, 34, 0.92), rgba(1, 9, 22, 0.98)),
-    #041022;
-  color: #f8fafc;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+  background: var(--game-bg);
+  color: var(--game-text);
+  box-shadow: var(--game-shadow);
 }
 
 .hunter-layout {
@@ -459,9 +479,9 @@ canvas {
 .score-card,
 .hud-panel,
 .arena-status {
-  border: 1px solid rgba(96, 122, 173, 0.42);
+  border: 1px solid var(--game-card-border);
   border-radius: 8px;
-  background: linear-gradient(180deg, rgba(9, 26, 57, 0.92), rgba(4, 15, 34, 0.96));
+  background: var(--game-card-bg);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 14px 30px rgba(0, 0, 0, 0.18);
 }
 
@@ -486,7 +506,7 @@ canvas {
 .mode-card strong,
 .controls-info strong,
 .objective-panel strong {
-  color: #ffffff;
+  color: var(--game-text);
   font-size: 0.92rem;
   line-height: 1.35;
   text-transform: uppercase;
@@ -516,7 +536,7 @@ canvas {
 
 .brand-lockup h2 {
   margin: 0;
-  color: #ffffff;
+  color: var(--game-text);
   font-size: clamp(1.8rem, 4vw, 3.8rem);
   line-height: 0.9;
   text-transform: uppercase;
@@ -524,7 +544,7 @@ canvas {
 
 .brand-lockup p {
   margin-top: 4px;
-  color: #f7b51d;
+  color: var(--game-gold);
   font-size: clamp(1.1rem, 2.7vw, 2.1rem);
   font-weight: 900;
   line-height: 0.95;
@@ -538,7 +558,7 @@ canvas {
 }
 
 .score-card strong {
-  color: #ffffff;
+  color: var(--game-text);
   font-size: clamp(2rem, 5vw, 3.1rem);
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -562,7 +582,7 @@ canvas {
 .record-panel .eyebrow,
 .controls-info .eyebrow,
 .objective-panel .eyebrow {
-  color: #ff334a;
+  color: var(--game-accent);
   text-align: center;
 }
 
@@ -576,16 +596,16 @@ canvas {
   min-height: 42px;
   padding: 7px 0;
   border: 0;
-  border-bottom: 1px solid rgba(96, 122, 173, 0.22);
+  border-bottom: 1px solid color-mix(in srgb, var(--game-card-border) 65%, transparent);
   border-radius: 0;
   background: transparent;
-  color: #dbe6ff;
+  color: var(--game-text);
   font-size: 0.76rem;
 }
 
 .ranking-list.compact li strong:last-child {
   grid-column: 2;
-  color: #f7b51d;
+  color: var(--game-gold);
 }
 
 .ranking-list.compact span {
@@ -596,7 +616,7 @@ canvas {
 
 .ranking-list.compact .empty {
   display: block;
-  color: #a8b7d4;
+  color: var(--game-muted);
   line-height: 1.4;
 }
 
@@ -619,7 +639,7 @@ canvas {
 .player-panel strong {
   max-width: 100%;
   overflow: hidden;
-  color: #ffffff;
+  color: var(--game-text);
   font-size: 0.82rem;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -653,7 +673,7 @@ canvas {
   max-width: calc(100% - 48px);
   transform: translateX(-50%);
   padding: 7px 14px;
-  color: #ffffff;
+  color: var(--game-text);
   font-size: 0.8rem;
   font-weight: 900;
   text-align: center;
@@ -661,11 +681,11 @@ canvas {
 }
 
 .game-view .canvas-wrap {
-  width: 100%;
+  width: min(100%, 820px);
   margin: 0;
   border: 0;
   border-radius: 8px;
-  background: #061228;
+  background: var(--game-canvas-bg);
   box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
 }
 
@@ -680,7 +700,7 @@ canvas {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #ffffff;
+  color: var(--game-text);
   font-size: 1.35rem;
   font-variant-numeric: tabular-nums;
 }
@@ -694,26 +714,27 @@ canvas {
 .ball-icon {
   width: 28px;
   height: 28px;
-  border: 3px solid #f8fafc;
+  border: 3px solid var(--game-text);
+  border-color: var(--game-text);
   border-radius: 999px;
   background:
-    linear-gradient(45deg, transparent 43%, #f8fafc 44%, #f8fafc 56%, transparent 57%),
-    linear-gradient(-45deg, transparent 43%, #f8fafc 44%, #f8fafc 56%, transparent 57%),
-    #111827;
+    linear-gradient(45deg, transparent 43%, var(--game-text) 44%, var(--game-text) 56%, transparent 57%),
+    linear-gradient(-45deg, transparent 43%, var(--game-text) 44%, var(--game-text) 56%, transparent 57%),
+    var(--game-control-bg);
 }
 
 .pause-button {
   width: 100%;
   min-height: 58px;
-  border: 1px solid rgba(96, 122, 173, 0.42);
-  background: linear-gradient(180deg, rgba(9, 26, 57, 0.96), rgba(4, 15, 34, 0.98));
-  color: #ffffff;
+  border: 1px solid var(--game-card-border);
+  background: var(--game-card-bg);
+  color: var(--game-text);
   text-transform: uppercase;
 }
 
 .pause-button.paused {
-  border-color: rgba(247, 181, 29, 0.62);
-  color: #f7b51d;
+  border-color: color-mix(in srgb, var(--game-gold) 68%, var(--game-card-border));
+  color: var(--game-gold);
 }
 
 .pause-button:disabled {
@@ -740,10 +761,10 @@ canvas {
   min-height: 42px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(219, 230, 255, 0.34);
+  border: 1px solid var(--game-card-border);
   border-radius: 6px;
-  background: #13213f;
-  color: #ffffff;
+  background: var(--game-control-bg);
+  color: var(--game-control-text);
   font-size: 0.78rem;
   font-weight: 900;
 }
@@ -785,7 +806,7 @@ canvas {
 }
 
 .objective-panel span {
-  color: #f7b51d;
+  color: var(--game-gold);
   font-size: 2.4rem;
   font-weight: 900;
   line-height: 1;
@@ -793,6 +814,23 @@ canvas {
 
 .hunter-layout .game-actions {
   grid-area: actions;
+}
+
+.game-view:fullscreen {
+  width: 100vw;
+  min-height: 100vh;
+  padding: 12px;
+  border: 0;
+  border-radius: 0;
+  overflow: auto;
+}
+
+.game-view:fullscreen .hunter-layout {
+  min-height: calc(100vh - 24px);
+}
+
+.game-view:fullscreen .canvas-wrap {
+  width: min(100%, 880px);
 }
 
 .modal {
