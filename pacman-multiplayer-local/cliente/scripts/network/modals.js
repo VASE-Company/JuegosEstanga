@@ -42,23 +42,28 @@ const GameModals = {
   buildCharacterPicker() {
     return `
       <div class="character-picker">
-        <p class="eyebrow">selector visual</p>
+        <p class="eyebrow">selector de personajes</p>
         <h2>Elegí tu personaje</h2>
-        <p class="muted">Usá las flechas para cambiar y tocá “Jugar ahora” para empezar.</p>
+        <p class="muted">Deslizá para elegir. Los personajes ya seleccionados por otros jugadores no estarán disponibles.</p>
         <div class="character-stage">
           <div class="selector-card">
-            <img id="selectorImage" src="" alt="">
-            <strong id="selectorName"></strong>
-            <span id="selectorDescription"></span>
-            <button id="selectorPlayBtn" class="selector-play" type="button">Jugar ahora</button>
-            <div class="selector-nav">
-              <button id="characterPrev" class="selector-arrow" type="button" aria-label="Anterior">
+            <div class="selector-slide-container">
+              <button id="characterPrev" class="selector-arrow-btn" type="button" aria-label="Anterior">
                 <i data-lucide="chevron-left"></i>
               </button>
-              <button id="characterNext" class="selector-arrow" type="button" aria-label="Siguiente">
+              <div class="selector-image-frame">
+                <img id="selectorImage" src="" alt="">
+              </div>
+              <button id="characterNext" class="selector-arrow-btn" type="button" aria-label="Siguiente">
                 <i data-lucide="chevron-right"></i>
               </button>
             </div>
+            <div class="selector-details">
+              <strong id="selectorName"></strong>
+              <span id="selectorDescription"></span>
+              <p id="selectorStatus" class="selector-status-text"></p>
+            </div>
+            <button id="selectorPlayBtn" class="selector-play" type="button">Jugar ahora</button>
           </div>
         </div>
       </div>
@@ -123,17 +128,25 @@ const GameModals = {
   buildJoinRoom() {
     return `
       <div class="join-room-modal">
+        <p class="eyebrow">multijugador</p>
         <h2>Unirse a sala</h2>
-        <label>Codigo</label>
-        <input id="joinCode" maxlength="5" placeholder="K7A2P">
-        <label>Rol</label>
-        <select id="joinRole">
-          <option value="ghost">Fantasma</option>
-          <option value="pacman">Pac-Man</option>
-        </select>
-        <button id="confirmJoinRoom" type="button">Unirme</button>
+        <p class="muted">Ingresá el código de 5 letras para encontrar la partida y elegir tu personaje.</p>
+        <div class="room-field">
+          <label for="joinCode"><i data-lucide="key-round"></i><span>Código de sala</span></label>
+          <div class="join-code-shell">
+            <input id="joinCode" maxlength="5" placeholder="K7A2P" autocomplete="off" autocapitalize="characters" spellcheck="false">
+            <div class="join-code-badge">
+              <i data-lucide="search-code"></i>
+              <span>Listo para buscar</span>
+            </div>
+          </div>
+        </div>
+        <button id="confirmJoinRoom" class="confirm-join-btn" type="button">
+          <i data-lucide="search"></i>
+          <span>Buscar sala</span>
+        </button>
+        <p class="join-room-hint">Tip: no hace falta escribir espacios.</p>
       </div>
     `;
   }
 };
-

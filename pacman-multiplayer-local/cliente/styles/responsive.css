@@ -1,85 +1,549 @@
-  display: none;
-}
+﻿/* ============================================================
+   RESPONSIVE.CSS  â€“  pacman-multiplayer-local
+   Breakpoints:
+     â‰¤ 960px  â†’  tablet / medium  (burger navbar, col layout)
+     â‰¤ 560px  â†’  mobile small
+   ============================================================ */
 
-@media (max-width: 900px) {
-  .auth-grid, .dashboard { grid-template-columns: 1fr; }
+/* ----------------------------------------------------------
+   960px â€“ Tablet / medium: burger navbar + column layout
+   ---------------------------------------------------------- */
+@media (max-width: 960px) {
+
+  /* â”€â”€ App shell: mÃ¡rgenes laterales cÃ³modos â”€â”€ */
+  .app-shell {
+    width: min(100% - 28px, 1280px);
+    padding-top: 18px;
+    padding-bottom: 36px;
+  }
+
+  /* â”€â”€ Auth grid â†’ columna â”€â”€ */
+  .auth-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* â”€â”€ Menu shell â”€â”€ */
+  .menu-shell {
+    gap: 14px;
+  }
+
+  /* â”€â”€ Navbar: modo burger (2 filas) â”€â”€ */
   .menu-navbar {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "back toggle"
+      "brand brand";
+    align-items: center;
+    padding: 12px 16px;
+    gap: 8px 12px;
   }
-  .menu-brand {
-    width: 100%;
-    order: 3;
-  }
-  .menu-nav-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-  .menu-profile-card {
-    align-items: flex-start;
-  }
-}
 
-@media (max-width: 560px) {
-  .app-shell { width: min(100% - 16px, 1180px); padding-top: 12px; }
-  .topbar { align-items: flex-start; }
-  .row { flex-direction: column; }
-  .row button { width: 100%; }
-  .panel { padding: 16px; }
-  .menu-profile-card {
+  .menu-back   { grid-area: back; }
+  .menu-brand  { grid-area: brand; justify-items: start; text-align: left; min-width: 0; }
+
+  /* Mostrar botÃ³n burger */
+  .menu-nav-toggle {
+    grid-area: toggle;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    justify-self: end;
+  }
+
+  /* Acciones colapsadas por defecto */
+  .menu-nav-actions {
+    display: none;
+    grid-area: actions;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
   }
+
+  /* Cuando el navbar tiene .is-open, mostrar acciones en fila extra */
+  .menu-navbar.is-open {
+    grid-template-areas:
+      "back toggle"
+      "brand brand"
+      "actions actions";
+  }
+  .menu-navbar.is-open .menu-nav-actions {
+    display: flex;
+  }
+
+  /* Botones de acciÃ³n al 100% de ancho */
+  .menu-back,
+  .menu-action-link,
+  .menu-nav-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* â”€â”€ Profile card: horizontal compacta â”€â”€ */
+  .menu-profile-card {
+    flex-direction: row;
+    align-items: center;
+    padding: 14px 18px;
+    gap: 14px;
+    overflow: hidden;
+  }
+
   .profile-avatar {
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    flex: 0 0 auto;
   }
-  .game-scene { min-height: 100dvh; }
-  .canvas-wrap { height: 100dvh; }
+
+  .profile-copy {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* Ocultar el texto descriptivo ("ElegÃ­ un modo...") en tablet */
+  .profile-copy .muted {
+    display: none;
+  }
+
+  .profile-copy h2 {
+    font-size: clamp(0.95rem, 2.8vw, 1.25rem);
+    margin-bottom: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* â”€â”€ Dashboard: columna Ãºnica con mÃ¡rgenes â”€â”€ */
+  .dashboard {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    /* MÃ¡rgenes laterales para que las cajas no toquen el borde */
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .dashboard > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Orden visual en columna: Modos (1) â†’ Top 3 Personal (2) â†’ Top 10 General (3) */
+  .dashboard > :nth-child(1) { order: 1; } /* menu-panel (modos) */
+  .dashboard > :nth-child(2) { order: 2; } /* ranking-panel top 3 personal */
+  .dashboard > :nth-child(3) { order: 3; } /* ranking-panel top 10 general */
+
+  /* â”€â”€ Ancho mÃ¡ximo de las cajas de modos y rankings â”€â”€ */
+  .menu-panel,
+  .ranking-panel {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* â”€â”€ Game scene: canvas full-screen centrado â”€â”€ */
+  .game-scene {
+    padding: 0;
+    gap: 0;
+    min-height: 100dvh;
+  }
+
   .hud-overlay {
+    position: absolute;
+    top: 10px;
     left: 10px;
     right: 10px;
-    top: 10px;
+    width: auto;
+    padding: 0;
+    z-index: 8;
   }
-  .hud-card { width: min(100%, 320px); padding: 14px 14px 12px; }
+
+  .canvas-wrap {
+    height: 100dvh;
+    min-height: 0;
+  }
+
+  .hud-card {
+    width: 100%;
+    max-width: none;
+    padding: 8px 10px;
+    border-radius: 14px;
+    background: rgba(4, 10, 22, 0.82);
+    border: 1px solid rgba(255, 105, 121, 0.14);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .hud-strip {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .hud-side-left,
+  .hud-side-right {
+    width: 100%;
+  }
+
+  .hud-side-right {
+    align-items: flex-end;
+  }
+
+  .hud-card:not(.is-result) #gameModeLabel,
+  .hud-card:not(.is-result) #gameTitle,
+  .hud-card:not(.is-result) #gameMessage {
+    display: none;
+  }
+
+  .hud-card:not(.is-result) .hud-stat-points {
+    display: none;
+  }
+
+  .hud-card:not(.is-result) .hud-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .hud-card:not(.is-result) .hud-actions {
+    display: flex;
+  }
+
+  .hud-card:not(.is-result) .hud-stat {
+    padding: 0;
+  }
+
+  .hud-card:not(.is-result) .hud-stat span {
+    font-size: 0.82rem;
+  }
+
+  .hud-card:not(.is-result) .hud-stat strong {
+    font-size: 0.94rem;
+  }
+
+  .hud-card:not(.is-result) .hud-actions button {
+    min-height: 40px;
+    font-size: 0.84rem;
+  }
+}
+
+/* ----------------------------------------------------------
+   560px â€“ Mobile small
+   ---------------------------------------------------------- */
+@media (max-width: 560px) {
+
+  /* â”€â”€ App shell: mÃ¡rgenes muy ajustados â”€â”€ */
+  .app-shell {
+    width: min(100% - 20px, 1280px);
+    padding-top: 12px;
+    padding-bottom: 28px;
+  }
+
+  /* â”€â”€ Topbar â”€â”€ */
+  .topbar { align-items: flex-start; }
+
+  /* â”€â”€ Row de botones â†’ columna â”€â”€ */
+  .row { flex-direction: column; }
+  .row button { width: 100%; }
+
+  /* â”€â”€ Panel base â”€â”€ */
+  .panel { padding: 16px; }
+
+  /* â”€â”€ Menu shell â”€â”€ */
+  .menu-shell {
+    gap: 12px;
+  }
+
+  /* â”€â”€ Navbar mobile: ultra-compacta â”€â”€ */
+  .menu-navbar {
+    padding: 10px 12px;
+    gap: 7px 10px;
+    border-radius: 18px;
+  }
+
+  .menu-brand strong {
+    font-size: 1rem;
+  }
+
+  .menu-brand .eyebrow {
+    font-size: 0.68rem;
+  }
+
+  .menu-nav-toggle {
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+  }
+
+  .menu-back,
+  .menu-action-link,
+  .menu-nav-actions button {
+    min-height: 40px;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.84rem;
+  }
+
+  /* â”€â”€ Profile card mobile: compacta, row â”€â”€ */
+  .menu-profile-card {
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 14px;
+    gap: 12px;
+    border-radius: 18px;
+  }
+
+  .profile-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    flex: 0 0 auto;
+  }
+
+  /* Texto descriptivo oculto tambiÃ©n en mobile */
+  .profile-copy .muted {
+    display: none;
+  }
+
+  .profile-copy h2 {
+    font-size: clamp(0.85rem, 4vw, 1.1rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: 0;
+  }
+
+  .profile-copy .eyebrow {
+    font-size: 0.65rem;
+    margin-bottom: 0.15rem;
+  }
+
+  /* â”€â”€ Dashboard: columna con buenas mÃ¡rgenes â”€â”€ */
+  .dashboard {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    /* Las cajas tienen margen lateral integrado desde app-shell */
+  }
+
+  /* â”€â”€ Menu panel (modos): mÃ¡s compacto â”€â”€ */
+  .menu-panel {
+    padding: 16px 14px;
+    border-radius: 18px;
+  }
+
+  .menu-panel h2 {
+    font-size: clamp(1.1rem, 5vw, 1.45rem);
+    margin-bottom: 0.9rem;
+  }
+
+  /* â”€â”€ Button grid â”€â”€ */
+  .button-grid {
+    gap: 9px;
+  }
+
+  .button-grid button {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.75rem 0.9rem;
+    font-size: 0.88rem;
+    justify-content: center;
+  }
+
+  /* â”€â”€ Ranking panels â”€â”€ */
+  .ranking-panel {
+    padding: 14px 12px;
+    border-radius: 18px;
+  }
+
+  .ranking-panel h3 {
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+    gap: 8px;
+  }
+
+  .ranking-panel li {
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 6px 10px;
+    padding: 9px 10px;
+  }
+
+  .ranking-panel li::before {
+    width: 22px;
+    height: 22px;
+    font-size: 0.76rem;
+    margin-right: 0;
+  }
+
+  .ranking-panel li .rank-score {
+    min-width: 60px;
+    font-size: 0.88rem;
+    padding: 0.1rem 0.45rem;
+  }
+
+  .ranking-panel li .rank-details {
+    font-size: 0.88rem;
+  }
+
+  /* â”€â”€ Game scene mobile â”€â”€ */
+  .game-scene {
+    padding: 0;
+    gap: 0;
+  }
+
+  .canvas-wrap {
+    height: 100dvh;
+  }
+
+  .hud-card {
+    width: 100%;
+    max-width: none;
+    padding: 7px 9px;
+    border-radius: 12px;
+  }
+
+  .hud-strip {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .hud-side-left,
+  .hud-side-right {
+    width: 100%;
+  }
+
+  .hud-side-right {
+    align-items: flex-end;
+  }
+
+  .hud-card:not(.is-result) .hud-stats {
+    gap: 6px;
+  }
+
+  .hud-card:not(.is-result) .hud-stat {
+    padding: 0;
+    gap: 6px;
+  }
+
+  .hud-card:not(.is-result) .hud-stat span {
+    font-size: 0.78rem;
+  }
+
+  .hud-card:not(.is-result) .hud-stat strong {
+    font-size: 0.92rem;
+  }
+
+  .hud-card:not(.is-result) .hud-actions {
+    display: flex;
+  }
+
+  .hud-card:not(.is-result) .hud-actions button {
+    min-height: 42px;
+    padding: 0.65rem 0.8rem;
+    font-size: 0.82rem;
+  }
+
   .hud-card.is-result {
-    width: min(calc(100vw - 20px), 420px);
     padding: 18px 18px 16px;
   }
-  .result-visual img {
-    width: min(180px, 52vw);
+
+  .hud-card.is-result .hud-actions {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 0.65rem;
   }
-  .hud-overlay.is-result {
-    padding: 10px;
+
+  .hud-card:not(.is-result) #gameModeLabel,
+  .hud-card:not(.is-result) #gameTitle,
+  .hud-card:not(.is-result) #gameMessage {
+    display: none;
   }
+
+  .hud-card:not(.is-result) .hud-stat-points {
+    display: none;
+  }
+
+  /* â”€â”€ Modals â”€â”€ */
+  .modal {
+    padding: 12px;
+    display: grid;
+    place-items: center;
+  }
+
   .modal-box {
-    width: min(calc(100vw - 18px), 520px);
+    width: min(calc(100vw - 24px), 560px);
+    max-height: calc(100dvh - 24px);
+    overflow: hidden;
     padding: 18px;
   }
+
+  /* â”€â”€ Modal room â”€â”€ */
   .room-modal-header {
     flex-direction: column;
   }
+
   .room-grid {
     grid-template-columns: 1fr;
   }
+
   .room-footer button {
     width: 100%;
     min-width: 0;
   }
-  .character-stage {
-    padding: 6px 0 0;
+
+  /* â”€â”€ Character selector â”€â”€ */
+  .character-picker {
+    padding: 4px 4px 8px;
   }
+  .character-picker h2 {
+    font-size: clamp(1.05rem, 5vw, 1.45rem);
+    margin-bottom: 4px;
+  }
+  .character-stage {
+    padding: 4px 0 0;
+    margin-top: 8px;
+  }
+
   .selector-card {
     width: min(100%, 350px);
-    padding: 16px 14px 14px;
+    padding: 12px 12px 12px;
+    gap: 12px;
+    border-radius: 18px;
   }
-  .selector-nav { gap: 10px; }
-  .selector-arrow { height: 44px; }
-  .touch-controls { right: 10px; bottom: 10px; width: min(300px, calc(100vw - 20px)); }
+
+  .selector-slide-container { gap: 8px; }
+  .selector-image-frame { min-height: 132px; }
+  .selector-image-frame img { max-width: 128px; max-height: 128px; }
+  .selector-arrow-btn {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+  }
+  .selector-arrow-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+  .selector-details strong { font-size: 1.06rem; }
+  .selector-details span { font-size: 0.8rem; }
+  .selector-status-text { font-size: 0.78rem; }
+  .selector-play {
+    padding: 0.8rem 0.9rem;
+    font-size: 0.9rem;
+    border-radius: 12px;
+  }
+
+  /* â”€â”€ Touch controls â”€â”€ */
+  .touch-controls {
+    left: 50%;
+    right: auto;
+    bottom: 14px;
+    width: min(320px, calc(100vw - 20px));
+    transform: translateX(-50%);
+  }
+
   .hud-actions { margin-top: 0.65rem; }
 }
 
-
+/* ----------------------------------------------------------
+   Utilidades globales (no breakpoint-dependientes)
+   ---------------------------------------------------------- */
 .brand-title {
   margin: 0;
   width: 1px;
@@ -89,5 +553,5 @@
 
 @keyframes spin {
   from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  to   { transform: rotate(360deg); }
 }

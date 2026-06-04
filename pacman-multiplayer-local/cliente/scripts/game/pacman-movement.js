@@ -1,18 +1,28 @@
 var PacmanMovement = {
   getSceneLayout(state, canvasWidth, canvasHeight) {
+    const isCompact = window.innerWidth <= 1024;
     const isMobile = window.innerWidth <= 760;
-    const levelScale = state.level === 1 ? 0.82 : 1;
-    const outerPadding = isMobile ? 8 : 20;
-    const titleHeight = isMobile ? 44 : 62;
-    const plaqueWidth = isMobile ? canvasWidth - outerPadding * 2 : Math.max(200, Math.floor(canvasWidth * 0.22 * levelScale));
-    const plaqueHeight = isMobile ? 108 : 236;
+    const outerPadding = isMobile ? 8 : isCompact ? 12 : 20;
+    const titleHeight = isMobile ? 38 : isCompact ? 50 : 62;
+    const plaqueWidth = isMobile
+      ? canvasWidth - outerPadding * 2
+      : Math.max(180, Math.floor(canvasWidth * (isCompact ? 0.18 : 0.22) * levelScale));
+    const plaqueHeight = isMobile ? 82 : isCompact ? 148 : 236;
     const mapX = isMobile ? outerPadding : plaqueWidth + outerPadding;
-    const mapY = isMobile ? plaqueHeight + outerPadding : titleHeight + 16;
+    const mapY = isMobile
+      ? Math.max(220, Math.floor(canvasHeight * 0.32))
+      : isCompact
+        ? (state.level === 1 ? 92 : 72)
+        : (state.level === 1 ? 78 : 64);
     const mapPaddingRight = outerPadding;
     const mapPaddingBottom = outerPadding;
     const availableWidth = Math.max(120, canvasWidth - mapX - mapPaddingRight);
     const availableHeight = Math.max(120, canvasHeight - mapY - mapPaddingBottom);
-    const tile = Math.max(isMobile ? 10 : 14, Math.floor(Math.min(availableWidth / state.width, availableHeight / state.height) * (state.level === 1 ? 0.76 : 0.72)));
+    const density = isMobile ? 1.08 : isCompact ? 0.84 : 0.72;
+    const levelScale = isMobile
+      ? (state.level === 1 ? 0.98 : density)
+      : (state.level === 1 ? 0.82 : density);
+    const tile = Math.max(isMobile ? 12 : isCompact ? 11 : 14, Math.floor(Math.min(availableWidth / state.width, availableHeight / state.height) * levelScale));
     const mapHeight = tile * state.height;
     return {
       isMobile,
@@ -37,7 +47,8 @@ var PacmanMovement = {
   },
 
   getGhostStarts(parsed) {
-    const starts = parsed.ghostStarts.slice(0, 4);
+    const isOpen = (point) => point.x >= 0 && point.y >= 0 && point.x < parsed.width && point.y < parsed.height && !parsed.walls.has(`${point.x},${point.y}`);
+    const starts = parsed.ghostStarts.filter(isOpen).slice(0, 4);
     if (starts.length >= 4) return starts;
     const used = new Set(starts.map((start) => `${start.x},${start.y}`));
     const candidates = [
@@ -48,7 +59,6 @@ var PacmanMovement = {
       { x: Math.max(2, Math.floor(parsed.width / 2) - 3), y: Math.max(2, Math.floor(parsed.height / 2) + 1) },
       { x: Math.max(2, Math.floor(parsed.width / 2) + 3), y: Math.max(2, Math.floor(parsed.height / 2) - 1) }
     ];
-    const isOpen = (point) => point.x >= 0 && point.y >= 0 && point.x < parsed.width && point.y < parsed.height && !parsed.walls.has(`${point.x},${point.y}`);
     candidates.forEach((candidate) => {
       if (starts.length >= 4) return;
       if (!used.has(`${candidate.x},${candidate.y}`) && isOpen(candidate)) {

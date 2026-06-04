@@ -37,6 +37,8 @@ body.dark {
 body {
   margin: 0;
   min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
   font-family: "Inter", "Montserrat", "Segoe UI", sans-serif;
   background:
     radial-gradient(circle at 12% 8%, rgba(255, 72, 95, 0.15), transparent 22rem),
@@ -47,8 +49,8 @@ body {
 
 body.menu-bg {
   background:
-    linear-gradient(rgba(2, 8, 18, 0.5), rgba(2, 8, 18, 0.75)),
-    url("../assets/images/backgrounds/hero-pacman.jpg") center/cover fixed no-repeat;
+    linear-gradient(rgba(2, 8, 18, 0.45), rgba(2, 8, 18, 0.7)),
+    url("../assets/images/backgrounds/fondoprincial.png") center/cover fixed no-repeat;
 }
 
 body.game-mode {
@@ -93,13 +95,92 @@ body::before {
   opacity: 0.3;
 }
 
+.entry-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow: hidden;
+  pointer-events: none;
+  background: #020712;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.entry-transition.is-visible {
+  opacity: 1;
+}
+
+.entry-transition-reveal,
+.entry-transition-hero {
+  position: absolute;
+  inset: 0;
+}
+
+.entry-transition-reveal {
+  background:
+    linear-gradient(rgba(2, 8, 18, 0.2), rgba(2, 8, 18, 0.4)),
+    url("../assets/images/backgrounds/fondoprincial.png") center/cover no-repeat;
+  filter: saturate(0.95) brightness(0.94);
+}
+
+.entry-transition-hero {
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(rgba(2, 8, 18, 0.04), rgba(2, 8, 18, 0.18)),
+    url("../assets/images/backgrounds/hero-pacman.jpg") center/cover no-repeat;
+  transform: translateY(0);
+  opacity: 1;
+  will-change: transform, opacity;
+  transition:
+    transform 1300ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 700ms ease;
+}
+
+.entry-transition.is-animating .entry-transition-hero {
+  transform: translateY(-102%) scale(1.01);
+  opacity: 1;
+}
+
+body.entry-transition-active .app-shell {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+}
+
+.entry-transition-copy {
+  text-align: center;
+  padding: 18px 24px;
+  border-radius: 20px;
+  background: rgba(3, 10, 22, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.25);
+}
+
+.entry-transition-copy p {
+  margin: 0 0 0.25rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #ff8a8a;
+  font-weight: 900;
+}
+
+.entry-transition-copy strong {
+  display: block;
+  font-family: "Montserrat", "Inter", "Segoe UI", sans-serif;
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  letter-spacing: 0.06em;
+}
+
 button, input, select { font: inherit; }
 
 button {
   border: 1px solid transparent;
   border-radius: 14px;
   padding: 0.95rem 1.08rem;
-  background: linear-gradient(130deg, var(--primary), var(--primary-strong));
+  background: linear-gradient(130deg, #ff6b6b 0%, #ff3f54 52%, #b40f2d 100%);
   color: #101727;
   font-weight: 900;
   letter-spacing: 0.03em;
@@ -112,7 +193,7 @@ button:hover { transform: translateY(-1px); box-shadow: 0 15px 28px rgba(180, 15
 button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
 
 button.secondary {
-  background: linear-gradient(130deg, rgba(25, 49, 93, 0.95), rgba(31, 74, 135, 0.95));
+  background: linear-gradient(130deg, rgba(92, 12, 26, 0.95), rgba(168, 22, 44, 0.95));
   color: var(--text);
   border-color: var(--border);
   box-shadow: none;

@@ -31,6 +31,10 @@ function setSession(user, token) {
   localStorage.setItem(SESSION_KEY, JSON.stringify({ user, token }));
 }
 
+bind("pacmanLaunchBtn", "click", () => {
+  sessionStorage.setItem("pacman_entry_intro", "1");
+});
+
 function transitionToSelector() {
   authPanel.classList.remove("is-active");
   authPanel.classList.add("is-hidden");

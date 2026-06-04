@@ -14,7 +14,15 @@ const Rankings = {
   items(scores, empty) {
     if (!scores || !scores.length) return `<li>${empty}</li>`;
     return scores
-      .map((score) => `<li><strong>${score.score}</strong> - ${score.email} (${score.mode}, ${score.role}, nivel ${score.level})</li>`)
+      .map((score) => {
+        const meta = `${score.email} (${score.mode}, ${score.role}, nivel ${score.level})`;
+        return `
+          <li>
+            <span class="rank-score">${score.score}</span>
+            <span class="rank-details">${meta}</span>
+          </li>
+        `;
+      })
       .join("");
   }
 };

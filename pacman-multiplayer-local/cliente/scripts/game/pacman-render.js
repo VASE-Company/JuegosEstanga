@@ -47,28 +47,52 @@ var PacmanRender = {
       ctx.fill();
     });
 
+    const isMobile = layout.isMobile;
     (state.pellets || []).forEach((dot) => {
       const px = layout.mapX + dot.x * tile;
       const py = layout.mapY + dot.y * tile;
-      this.drawItemSprite(ctx, "pellet", px, py, tile, 0.34, 0.04);
+      this.drawItemSprite(ctx, "pellet", px, py, tile, isMobile ? 0.42 : 0.34, 0.04);
     });
 
     (state.powerPellets || []).forEach((dot) => {
       const px = layout.mapX + dot.x * tile;
       const py = layout.mapY + dot.y * tile;
-      this.drawItemSprite(ctx, "powerPellet", px, py, tile, 0.44, 0.06);
+      this.drawItemSprite(ctx, "powerPellet", px, py, tile, isMobile ? 0.56 : 0.44, 0.06);
     });
 
     this.drawPacman(ctx, state.pacman, tile, layout, Date.now());
     (state.ghosts || []).forEach((ghost, index) => this.drawGhost(ctx, ghost, tile, index, layout, Date.now()));
 
     const countdownOverlay = document.getElementById("countdownOverlay");
+    const gameScene = document.querySelector(".game-scene");
     if (countdownOverlay) {
       const countdownText = this.getCountdownText();
+      const countdownActive = this.isCountdownActive();
       const paused = this.paused && state.status === "playing";
-      countdownOverlay.classList.toggle("hidden", !countdownText && !paused);
+      countdownOverlay.classList.toggle("hidden", !countdownActive && !paused);
       countdownOverlay.classList.toggle("is-paused", paused);
-      countdownOverlay.innerHTML = countdownText ? `<span>${countdownText}</span>` : paused ? `<span>Pausa</span>` : "";
+      this.canvas.classList.toggle("is-countdown-active", countdownActive || paused);
+      if (gameScene) gameScene.classList.toggle("is-countdown-active", countdownActive);
+      if (countdownActive) {
+        const stageLabel = state.level === 1 ? "Preparando partida" : `Preparando nivel ${state.level}`;
+        countdownOverlay.innerHTML = `
+          <div class="countdown-card" role="status" aria-live="polite">
+            <span class="countdown-badge">${stageLabel}</span>
+            <strong class="countdown-number">${countdownText}</strong>
+            <span class="countdown-hint">Respirá, se arranca en segundos</span>
+          </div>
+        `;
+      } else if (paused) {
+        countdownOverlay.innerHTML = `
+          <div class="countdown-card countdown-card-paused" role="status" aria-live="polite">
+            <span class="countdown-badge">Pausa</span>
+            <strong class="countdown-number">II</strong>
+            <span class="countdown-hint">El juego quedó en espera</span>
+          </div>
+        `;
+      } else {
+        countdownOverlay.innerHTML = "";
+      }
     }
 
     if (state.comboFeedback && state.comboFeedback.until > Date.now()) {
@@ -151,7 +175,12 @@ var PacmanRender = {
       this.state.message = "";
     }
     const pauseButton = document.getElementById("pauseBtn");
-    if (pauseButton) pauseButton.textContent = this.paused ? "Reanudar" : "Pausar";
+    if (pauseButton) {
+      pauseButton.innerHTML = this.paused
+        ? '<i data-lucide="play"></i><span>Reanudar</span>'
+        : '<i data-lucide="pause"></i><span>Pausar</span>';
+      UI.renderIcons();
+    }
     this.render();
   },
 
@@ -162,19 +191,21 @@ var PacmanRender = {
     const titleText = `NIVEL ${state.level}`;
     ctx.save();
     ctx.fillStyle = "#ff485f";
-    ctx.font = `900 ${isMobile ? 28 : 56}px "Montserrat", sans-serif`;
+    ctx.font = `900 ${isMobile ? 18 : 56}px "Montserrat", sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    const titleY = isMobile ? panelY + 30 : state.level === 1 ? 52 : 32;
+    const titleY = isMobile ? 18 : state.level === 1 ? 52 : 32;
     ctx.fillText(titleText, this.canvas.width / 2, titleY);
     ctx.restore();
 
+    if (isMobile) return;
+
     ctx.save();
     ctx.fillStyle = "rgba(255,255,255,0.88)";
-    ctx.font = `700 ${isMobile ? 13 : 17}px "Inter", sans-serif`;
+    ctx.font = `700 17px "Inter", sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    const subtitleY = titleY + (isMobile ? 22 : 30);
+    const subtitleY = titleY + 30;
     ctx.fillText(state.mapName || state.levelName || "", this.canvas.width / 2, subtitleY);
     ctx.restore();
   },
@@ -264,7 +295,7 @@ var PacmanRender = {
           : "pacman-right";
     const image = this.spriteAssets[directionKey] || this.assets[directionKey];
     if (image && this.assetReady[directionKey]) {
-      const size = tile * 0.76;
+    const size = tile * (layout.isMobile ? 0.86 : 0.76);
       this.drawContainedImage(ctx, image, cx - size / 2, cy - size / 2, size, size, 0.92);
       return;
     }
@@ -285,7 +316,7 @@ var PacmanRender = {
     const key = ghost.vulnerable ? `${ghost.club}-vulnerable` : ghost.club;
     const image = this.spriteAssets[key] || this.assets[key];
     if (image && this.assetReady[key]) {
-      const size = tile * 0.72;
+      const size = tile * (layout.isMobile ? 0.82 : 0.72);
       ctx.save();
       ctx.globalAlpha = ghost.released ? 1 : 0.94;
       this.drawContainedImage(ctx, image, x + tile / 2 - size / 2, y + tile / 2 - size / 2, size, size, 0.92);

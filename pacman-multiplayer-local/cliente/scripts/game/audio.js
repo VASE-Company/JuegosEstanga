@@ -2,13 +2,15 @@ var PacmanAudio = {
   tracks: {},
   ambientKey: null,
   primed: false,
+  primePromise: null,
 
   init() {
     this.tracks = {
       lives3: this.createTrack("assets/audio/cancion3corazones.mp3", true),
       lives2: this.createTrack("assets/audio/cancion2corazones.mp3", true),
       lives1: this.createTrack("assets/audio/cancion1corazones.mp3", true),
-      victory: this.createTrack("assets/audio/cancionvictoria.mp3", false)
+      victory: this.createTrack("assets/audio/cancionvictoria.mp3", false),
+      defeat: this.createTrack("assets/audio/canciondederrota.mp3", true)
     };
   },
 
@@ -22,18 +24,20 @@ var PacmanAudio = {
 
   prime() {
     // aca dejamos los sonidos listos para que el navegador no los bloquee.
-    if (this.primed) return;
-    this.primed = true;
-    Object.values(this.tracks).forEach((audio) => {
+    if (this.primed) return Promise.resolve();
+    if (this.primePromise) return this.primePromise;
+    this.primePromise = Promise.all(Object.values(this.tracks).map((audio) => {
       audio.muted = true;
-      audio.play().then(() => {
+      return audio.play().then(() => {
         audio.pause();
         audio.currentTime = 0;
-        audio.muted = false;
-      }).catch(() => {
+      }).catch(() => {}).finally(() => {
         audio.muted = false;
       });
+    })).then(() => {
+      this.primed = true;
     });
+    return this.primePromise;
   },
 
   getAmbientKey(lives) {
@@ -50,9 +54,29 @@ var PacmanAudio = {
     this.ambientKey = null;
   },
 
+  stopVictory() {
+    const track = this.tracks.victory;
+    if (!track) return;
+    track.pause();
+    track.currentTime = 0;
+  },
+
+  stopDefeat() {
+    const track = this.tracks.defeat;
+    if (!track) return;
+    track.pause();
+    track.currentTime = 0;
+  },
+
   playAmbient(lives) {
     const key = this.getAmbientKey(Number(lives) || 3);
+    if (!this.primed && this.primePromise) {
+      this.primePromise.then(() => this.playAmbient(lives)).catch(() => {});
+      return;
+    }
     if (this.ambientKey === key && !this.tracks[key].paused) return;
+    this.stopVictory();
+    this.stopDefeat();
     this.stopAmbient();
     const track = this.tracks[key];
     if (!track) return;
@@ -63,10 +87,23 @@ var PacmanAudio = {
 
   playVictory() {
     this.stopAmbient();
+    this.stopVictory();
+    this.stopDefeat();
     const track = this.tracks.victory;
     if (!track) return;
     track.currentTime = 0;
     track.loop = false;
+    track.play().catch(() => {});
+  },
+
+  playDefeat() {
+    this.stopAmbient();
+    this.stopVictory();
+    this.stopDefeat();
+    const track = this.tracks.defeat;
+    if (!track) return;
+    track.currentTime = 0;
+    track.loop = true;
     track.play().catch(() => {});
   },
 
