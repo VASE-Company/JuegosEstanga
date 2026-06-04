@@ -1,6 +1,30 @@
 const toast = document.getElementById("toast");
 let toastTimer = null;
 
+const icons = {
+  sun: `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+    </svg>`,
+  moon: `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M20.2 14.8A8 8 0 0 1 9.2 3.8 7 7 0 1 0 20.2 14.8Z"></path>
+    </svg>`,
+  musicOn: `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 18V5l11-2v13"></path>
+      <circle cx="6" cy="18" r="3"></circle>
+      <circle cx="17" cy="16" r="3"></circle>
+    </svg>`,
+  musicOff: `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 18V5l8-1.45M20 12.5V3l-2.2.4"></path>
+      <circle cx="6" cy="18" r="3"></circle>
+      <path d="m3 3 18 18"></path>
+    </svg>`
+};
+
 export function showToast(message, tone = "info") {
   toast.textContent = message;
   toast.dataset.tone = tone;
@@ -48,10 +72,19 @@ export function setControlsEnabled(enabled) {
 }
 
 export function applyTheme(theme) {
-  const nextTheme = ["light", "dark", "night"].includes(theme) ? theme : "dark";
+  const nextTheme = theme === "light" ? "light" : "dark";
   document.body.classList.toggle("dark", nextTheme === "dark");
-  document.body.classList.toggle("night", nextTheme === "night");
-  document.getElementById("themeIcon").textContent =
-    nextTheme === "light" ? "Claro" : nextTheme === "dark" ? "Oscuro" : "Noche";
+  document.getElementById("themeIcon").innerHTML = nextTheme === "light" ? icons.sun : icons.moon;
+  document.getElementById("themeLabel").textContent = nextTheme === "light" ? "Claro" : "Oscuro";
   localStorage.setItem("snakeTheme", nextTheme);
+}
+
+export function setMusicState(isPlaying) {
+  document.getElementById("musicIcon").innerHTML = isPlaying ? icons.musicOn : icons.musicOff;
+  document.getElementById("musicLabel").textContent = isPlaying ? "Mutear" : "Escuchar";
+  document.getElementById("musicToggle").setAttribute(
+    "aria-label",
+    isPlaying ? "Mutear musica" : "Escuchar musica"
+  );
+  document.getElementById("musicToggle").title = isPlaying ? "Mutear musica" : "Escuchar musica";
 }

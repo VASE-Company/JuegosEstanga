@@ -9,6 +9,7 @@ import {
   setControlsEnabled,
   setGameMode,
   setGameStatus,
+  setMusicState,
   setScore,
   showToast,
   showView
@@ -29,6 +30,8 @@ const canvas = document.getElementById("snakeCanvas");
 const restartBtn = document.getElementById("restartBtn");
 const backMenuBtn = document.getElementById("backMenuBtn");
 const pauseBtn = document.getElementById("pauseBtn");
+const musicToggle = document.getElementById("musicToggle");
+const gameMusic = document.getElementById("gameMusic");
 const joinForm = document.getElementById("joinForm");
 const joinCodeInput = document.getElementById("joinCodeInput");
 
@@ -42,6 +45,7 @@ let multiplayerActiveTurn = false;
 let turnFinished = false;
 let paused = false;
 let controlsActive = false;
+let musicPlaying = false;
 
 function requireUser() {
   user = getCurrentUser();
@@ -94,6 +98,28 @@ function togglePause() {
   } else {
     setGameStatus(currentMode === "singleplayer" ? "Caza trofeos con Julian" : "Tu turno: caza trofeos hasta caer");
     game.start();
+  }
+}
+
+async function toggleMusic() {
+  if (!gameMusic) return;
+
+  if (musicPlaying) {
+    gameMusic.pause();
+    musicPlaying = false;
+    setMusicState(false);
+    return;
+  }
+
+  gameMusic.volume = 0.42;
+  try {
+    await gameMusic.play();
+    musicPlaying = true;
+    setMusicState(true);
+  } catch (error) {
+    musicPlaying = false;
+    setMusicState(false);
+    showToast("El navegador bloqueo la musica. Toca el boton de musica otra vez.", "error");
   }
 }
 
@@ -260,14 +286,15 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
 });
 
 document.getElementById("themeToggle").addEventListener("click", () => {
-  const currentTheme = document.body.classList.contains("night")
-    ? "night"
-    : document.body.classList.contains("dark")
-      ? "dark"
-      : "light";
-  const nextTheme = currentTheme === "light" ? "dark" : currentTheme === "dark" ? "night" : "light";
-  applyTheme(nextTheme);
+  applyTheme(document.body.classList.contains("dark") ? "light" : "dark");
   game?.draw();
+});
+
+musicToggle.addEventListener("click", toggleMusic);
+gameMusic.addEventListener("pause", () => {
+  if (!musicPlaying) return;
+  musicPlaying = false;
+  setMusicState(false);
 });
 
 document.getElementById("closeModalBtn").addEventListener("click", closeRoomModal);
@@ -391,6 +418,7 @@ socket.on("rankings-actualizados", () => {
 });
 
 applyTheme(localStorage.getItem("snakeTheme") || "dark");
+setMusicState(false);
 if (user?.id && user?.email) {
   showDashboard();
 } else {

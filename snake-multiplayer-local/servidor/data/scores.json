@@ -405,5 +405,82 @@
     "score": 60,
     "result": "perdió",
     "createdAt": "2026-06-04T19:05:40.622Z"
+  },
+  {
+    "id": "score_1e4d9f447a8b5dc7",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_b79115c1f49480e0",
+    "email": "alexisvallejos805@gmail.com",
+    "score": 40,
+    "result": "finalizado",
+    "createdAt": "2026-06-04T19:21:02.535Z"
+  },
+  {
+    "id": "score_9390ba812a2ac42a",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_b79115c1f49480e0",
+    "email": "alexisvallejos805@gmail.com",
+    "score": 40,
+    "result": "finalizado",
+    "createdAt": "2026-06-04T19:22:17.783Z"
+  },
+  {
+    "id": "score_670f7af4f5e1c247",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_b79115c1f49480e0",
+    "email": "alexisvallejos805@gmail.com",
+    "score": 30,
+    "result": "finalizado",
+    "createdAt": "2026-06-04T19:26:26.045Z"
+  },
+  {
+    "id": "score_3ae9e86ac8e0dcc7",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_b79115c1f49480e0",
+    "email": "alexisvallejos805@gmail.com",
+    "score": 60,
+    "result": "finalizado",
+    "createdAt": "2026-06-04T19:26:58.950Z"
+  },
+  {
+    "id": "score_0469be9e44c2e9c6",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_b79115c1f49480e0",
+    "email": "alexisvallejos805@gmail.com",
+    "score": 0,
+    "result": "finalizado",
+    "createdAt": "2026-06-04T19:36:29.816Z"
+  },
+  {
+    "id": "score_73e7e2abb4a41f46",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_b79115c1f49480e0",
+    "email": "alexisvallejos805@gmail.com",
+    "score": 150,
+    "result": "finalizado",
+    "createdAt": "2026-06-04T19:41:01.721Z"
+  },
+  {
+    "id": "score_56612c71c02d89e8",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_b79115c1f49480e0",
+    "email": "alexisvallejos805@gmail.com",
+    "score": 10,
+    "result": "finalizado",
+    "createdAt": "2026-06-04T19:41:46.614Z"
   }
 ]

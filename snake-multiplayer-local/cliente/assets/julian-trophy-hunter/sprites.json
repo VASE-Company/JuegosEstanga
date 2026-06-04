@@ -36,6 +36,9 @@
   "branding": {
     "atletiShield": "/assets/julian-trophy-hunter/branding/atleti_shield.png"
   },
+  "audio": {
+    "gameTheme": "/assets/julian-trophy-hunter/audio/game-theme.mp3"
+  },
   "ui": {
     "heartFull": "/assets/julian-trophy-hunter/ui/heart_full.png",
     "heartEmpty": "/assets/julian-trophy-hunter/ui/heart_empty.png",

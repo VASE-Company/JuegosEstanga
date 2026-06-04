@@ -32,23 +32,6 @@ body.dark {
   --shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
 }
 
-body.night {
-  color-scheme: dark;
-  --bg: #010615;
-  --surface: #071126;
-  --surface-2: #0b1733;
-  --text: #f8fafc;
-  --muted: #91a3c2;
-  --line: #17284f;
-  --primary: #ff243f;
-  --primary-strong: #ff5067;
-  --secondary: #96b7ff;
-  --secondary-strong: #d3e1ff;
-  --gold: #ffc42e;
-  --danger: #ff7568;
-  --shadow: 0 22px 54px rgba(0, 0, 0, 0.58);
-}
-
 * { box-sizing: border-box; }
 
 body {
@@ -103,9 +86,9 @@ img {
 }
 
 .app-shell {
-  width: min(1180px, calc(100% - 32px));
+  width: 100%;
   margin: 0 auto;
-  padding: 18px 0 40px;
+  padding: 10px;
 }
 
 .topbar,
@@ -137,13 +120,22 @@ body.dark .topbar h1 {
   color: #f8fafc;
 }
 
-.theme-switcher {
+.utility-controls {
   position: fixed;
   top: 14px;
   right: 14px;
   z-index: 30;
-  min-width: 92px;
-  min-height: 42px;
+  display: flex;
+  gap: 8px;
+}
+
+.utility-button {
+  min-width: 112px;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   padding: 0 14px;
   border: 1px solid color-mix(in srgb, var(--secondary) 38%, var(--line));
   border-radius: 8px;
@@ -153,9 +145,35 @@ body.dark .topbar h1 {
   text-transform: uppercase;
 }
 
-.theme-switcher span {
+.utility-button:hover {
+  border-color: color-mix(in srgb, var(--gold) 52%, var(--line));
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+}
+
+.utility-icon {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+}
+
+.utility-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.utility-label {
   font-size: 0.72rem;
   font-weight: 900;
+}
+
+.music-switcher {
+  color: var(--gold);
 }
 
 .eyebrow {
@@ -339,8 +357,7 @@ label {
 }
 
 .score-pill,
-.room-code,
-.health-bar {
+.room-code {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
@@ -351,13 +368,6 @@ label {
 .room-code {
   padding: 12px 16px;
   font-variant-numeric: tabular-nums;
-}
-
-.health-bar {
-  width: 144px;
-  height: 48px;
-  object-fit: contain;
-  padding: 4px 8px;
 }
 
 .canvas-wrap {
@@ -412,8 +422,9 @@ canvas {
 }
 
 .game-view {
-  margin-top: -8px;
-  padding: clamp(12px, 2vw, 20px);
+  min-height: calc(100dvh - 20px);
+  margin-top: 0;
+  padding: clamp(10px, 1.5vw, 18px);
   border: 1px solid rgba(73, 94, 139, 0.42);
   border-radius: 8px;
   background:
@@ -423,30 +434,10 @@ canvas {
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
 }
 
-body.night .game-view {
-  background:
-    linear-gradient(180deg, rgba(2, 8, 22, 0.97), rgba(0, 4, 14, 0.99)),
-    #010615;
-  border-color: rgba(38, 57, 103, 0.62);
-  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.62);
-}
-
-body.night .mode-card,
-body.night .score-card,
-body.night .lives-card,
-body.night .hud-panel,
-body.night .arena-status {
-  background: linear-gradient(180deg, rgba(6, 18, 43, 0.95), rgba(2, 9, 24, 0.98));
-  border-color: rgba(55, 79, 130, 0.5);
-}
-
-body.night .game-view .canvas-wrap {
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(255, 196, 46, 0.08);
-}
-
 .hunter-layout {
   display: grid;
-  grid-template-columns: minmax(136px, 0.56fr) minmax(520px, 3.5fr) minmax(136px, 0.56fr);
+  min-height: calc(100dvh - 58px);
+  grid-template-columns: minmax(150px, 0.7fr) minmax(0, 4fr) minmax(150px, 0.7fr);
   grid-template-areas:
     "top top top"
     "left arena right"
@@ -459,14 +450,13 @@ body.night .game-view .canvas-wrap {
 .hunter-top {
   grid-area: top;
   display: grid;
-  grid-template-columns: minmax(176px, 0.9fr) minmax(340px, 2fr) minmax(128px, 0.55fr) minmax(160px, 0.7fr);
+  grid-template-columns: minmax(176px, 0.9fr) minmax(340px, 2fr) minmax(128px, 0.55fr);
   gap: 14px;
   align-items: stretch;
 }
 
 .mode-card,
 .score-card,
-.lives-card,
 .hud-panel,
 .arena-status {
   border: 1px solid rgba(96, 122, 173, 0.42);
@@ -476,8 +466,7 @@ body.night .game-view .canvas-wrap {
 }
 
 .mode-card,
-.score-card,
-.lives-card {
+.score-card {
   min-height: 86px;
   padding: 12px 14px;
 }
@@ -542,8 +531,7 @@ body.night .game-view .canvas-wrap {
   text-transform: uppercase;
 }
 
-.score-card,
-.lives-card {
+.score-card {
   display: grid;
   place-items: center;
   text-align: center;
@@ -554,15 +542,6 @@ body.night .game-view .canvas-wrap {
   font-size: clamp(2rem, 5vw, 3.1rem);
   line-height: 1;
   font-variant-numeric: tabular-nums;
-}
-
-.lives-card .health-bar {
-  width: 138px;
-  height: 42px;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  padding: 0;
 }
 
 .hunter-side {
@@ -661,7 +640,9 @@ body.night .game-view .canvas-wrap {
   grid-area: arena;
   position: relative;
   display: grid;
+  width: 100%;
   justify-items: center;
+  align-content: start;
 }
 
 .arena-status {
@@ -680,7 +661,7 @@ body.night .game-view .canvas-wrap {
 }
 
 .game-view .canvas-wrap {
-  width: min(100%, 900px);
+  width: 100%;
   margin: 0;
   border: 0;
   border-radius: 8px;
@@ -689,8 +670,8 @@ body.night .game-view .canvas-wrap {
 }
 
 .trophies-panel img {
-  width: 64px;
-  height: 64px;
+  width: 74px;
+  height: 74px;
   object-fit: contain;
   filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.36));
 }
@@ -769,26 +750,26 @@ body.night .game-view .canvas-wrap {
 
 .game-view .game-controls {
   grid-area: dpad;
-  width: min(330px, 100%);
+  width: min(360px, 100%);
   align-self: center;
   display: grid;
-  grid-template-columns: repeat(3, 92px);
-  grid-template-rows: repeat(3, 78px);
+  grid-template-columns: repeat(3, 98px);
+  grid-template-rows: repeat(3, 82px);
   justify-content: center;
   gap: 8px;
 }
 
 .game-view .control {
-  min-height: 78px;
+  min-height: 82px;
   border: 0;
   background: transparent;
 }
 
 .game-view .control img {
-  width: 88px;
-  height: 88px;
+  width: 96px;
+  height: 96px;
   object-fit: contain;
-  filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.34));
+  filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.42));
 }
 
 .game-view .control.up { grid-column: 2; grid-row: 1; }
@@ -922,20 +903,37 @@ body.night .game-view .canvas-wrap {
   }
 
   .hero-band .ghost,
-  .score-pill,
-  .health-bar {
+  .score-pill {
     width: 100%;
-  }
-
-  .lives-card .health-bar {
-    width: 138px;
   }
 }
 
 @media (max-width: 520px) {
+  .utility-controls {
+    top: 8px;
+    right: 8px;
+    gap: 6px;
+  }
+
+  .utility-button {
+    min-width: 46px;
+    width: 46px;
+    min-height: 44px;
+    padding: 0;
+  }
+
+  .utility-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
   .app-shell {
-    width: min(100% - 20px, 1180px);
-    padding-top: 14px;
+    width: 100%;
+    padding: 8px;
   }
 
   .auth-view {
