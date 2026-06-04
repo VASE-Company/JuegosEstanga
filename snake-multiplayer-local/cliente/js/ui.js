@@ -48,7 +48,10 @@ export function setControlsEnabled(enabled) {
 }
 
 export function applyTheme(theme) {
-  document.body.classList.toggle("dark", theme === "dark");
-  document.getElementById("themeIcon").textContent = theme === "dark" ? "☀" : "☾";
-  localStorage.setItem("snakeTheme", theme);
+  const nextTheme = ["light", "dark", "night"].includes(theme) ? theme : "dark";
+  document.body.classList.toggle("dark", nextTheme === "dark");
+  document.body.classList.toggle("night", nextTheme === "night");
+  document.getElementById("themeIcon").textContent =
+    nextTheme === "light" ? "Claro" : nextTheme === "dark" ? "Oscuro" : "Noche";
+  localStorage.setItem("snakeTheme", nextTheme);
 }

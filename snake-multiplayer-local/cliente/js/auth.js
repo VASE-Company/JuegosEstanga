@@ -9,18 +9,14 @@ export function getCurrentUser() {
   }
 }
 
-export function setCurrentUser(user) {
+export function setCurrentUser(user, token = null) {
   const current = JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ ...current, user: { id: user.id, email: user.email } }));
+  const nextSession = { ...current, user: { id: user.id, email: user.email } };
+  if (token) nextSession.token = token;
+  localStorage.setItem(SESSION_KEY, JSON.stringify(nextSession));
 }
 
 export async function logout() {
-  try {
-    const session = JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");
-    if (session?.token) {
-      await fetch("/api/auth/logout", { method: "POST", headers: { Authorization: `Bearer ${session.token}` } });
-    }
-  } catch {}
   localStorage.removeItem(SESSION_KEY);
 }
 
@@ -31,7 +27,7 @@ export async function requestCode(email, type) {
     body: JSON.stringify({ email, type })
   });
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "No se pudo pedir el código.");
+  if (!response.ok) throw new Error(data.error || "No se pudo pedir el codigo.");
   return data;
 }
 
@@ -42,8 +38,7 @@ export async function verifyCode(email, code, type) {
     body: JSON.stringify({ email, code, type })
   });
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "No se pudo verificar el código.");
-  if (data?.token) {`r`n    const current = JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");`r`n    localStorage.setItem(SESSION_KEY, JSON.stringify({ ...current, token: data.token, user: data.user }));`r`n  } else {`r`n    setCurrentUser(data.user);`r`n  }
+  if (!response.ok) throw new Error(data.error || "No se pudo verificar el codigo.");
+  setCurrentUser(data.user, data.token || null);
   return data.user;
 }
-

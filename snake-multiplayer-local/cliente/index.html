@@ -3,39 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Snake Multiplayer Local</title>
+  <title>Julian Alvarez Trophy Hunter</title>
   <link rel="stylesheet" href="./css/styles.css">
 </head>
 <body>
   <div class="app-shell">
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">multiplayer local</p>
-        <h1>Snake</h1>
-      </div>
-      <button class="icon-button" id="themeToggle" aria-label="Cambiar modo claro u oscuro" title="Cambiar tema">
-        <span id="themeIcon">☾</span>
-      </button>
-    </header>
+    <button class="theme-switcher" id="themeToggle" aria-label="Cambiar modo visual" title="Cambiar modo visual">
+      <span id="themeIcon">Oscuro</span>
+    </button>
 
     <main>
       <section class="auth-view panel" id="authView">
         <div class="section-heading">
           <p class="eyebrow">acceso con email</p>
-          <h2>Entrá para jugar</h2>
-          <p>Recibí un código de 6 dígitos. Si no configuraste SMTP, aparece en la consola del servidor.</p>
+          <h2>Entra para cazar trofeos</h2>
+          <p>Recibi un codigo de 6 digitos. Si no configuraste SMTP, aparece en la consola del servidor.</p>
         </div>
         <form id="authForm" class="auth-form">
           <label for="emailInput">Email</label>
           <input id="emailInput" type="email" autocomplete="email" placeholder="jugador@gmail.com" required>
           <div class="segmented" role="group" aria-label="Tipo de acceso">
             <button type="button" class="segment active" data-auth-type="register">Registrarme</button>
-            <button type="button" class="segment" data-auth-type="login">Iniciar sesión</button>
+            <button type="button" class="segment" data-auth-type="login">Iniciar sesion</button>
           </div>
-          <button class="primary" id="requestCodeBtn" type="submit">Pedir código</button>
+          <button class="primary" id="requestCodeBtn" type="submit">Pedir codigo</button>
         </form>
         <form id="codeForm" class="auth-form hidden">
-          <label for="codeInput">Código</label>
+          <label for="codeInput">Codigo</label>
           <input id="codeInput" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" placeholder="123456" required>
           <button class="primary" id="verifyCodeBtn" type="submit">Verificar</button>
           <button class="ghost" id="backToEmailBtn" type="button">Cambiar email</button>
@@ -48,18 +42,22 @@
             <p class="eyebrow">jugador conectado</p>
             <h2 id="userEmail">jugador</h2>
           </div>
-          <button class="ghost" id="logoutBtn">Cerrar sesión</button>
+          <div class="hero-sprites" aria-hidden="true">
+            <img src="./assets/julian-trophy-hunter/branding/atleti_shield.png" alt="">
+            <img src="./assets/julian-trophy-hunter/trophies/trophy_champions.png" alt="">
+          </div>
+          <button class="ghost" id="logoutBtn">Cerrar sesion</button>
         </div>
 
         <div class="dashboard-grid">
           <section class="panel actions-panel">
             <div class="section-heading">
               <p class="eyebrow">modos</p>
-              <h2>Elegí partida</h2>
+              <h2>Elegi partida</h2>
             </div>
-            <button class="primary action-button" id="singleBtn">Jugar 1 jugador</button>
-            <button class="secondary action-button" id="createRoomBtn">Crear partida 2 jugadores</button>
-            <button class="secondary action-button" id="joinRoomBtn">Unirse con código</button>
+            <button class="primary action-button" id="singleBtn">Jugar caza individual</button>
+            <button class="secondary action-button" id="createRoomBtn">Crear duelo 2 jugadores</button>
+            <button class="secondary action-button" id="joinRoomBtn">Unirse con codigo</button>
           </section>
 
           <section class="panel">
@@ -81,25 +79,103 @@
       </section>
 
       <section class="game-view hidden" id="gameView">
-        <div class="game-header">
-          <div>
-            <p class="eyebrow" id="gameModeLabel">snake</p>
-            <h2 id="gameStatus">Listo</h2>
+        <div class="hunter-layout">
+          <header class="hunter-top">
+            <div class="mode-card">
+              <img src="./assets/julian-trophy-hunter/trophies/trophy_champions.png" alt="">
+              <div>
+                <p class="eyebrow">Modo</p>
+                <strong id="gameModeLabel">Caza individual</strong>
+              </div>
+            </div>
+            <div class="brand-lockup">
+              <img class="brand-shield" src="./assets/julian-trophy-hunter/branding/atleti_shield.png" alt="Escudo Atletico">
+              <div>
+                <h2>Julian Alvarez</h2>
+                <p>Trophy Hunter</p>
+              </div>
+              <img class="brand-shield" src="./assets/julian-trophy-hunter/branding/atleti_shield.png" alt="Escudo Atletico">
+            </div>
+            <div class="score-card">
+              <p class="eyebrow">Score</p>
+              <strong id="scoreValue">0</strong>
+            </div>
+            <div class="lives-card">
+              <p class="eyebrow">Vidas</p>
+              <img class="health-bar" src="./assets/julian-trophy-hunter/ui/health_bar.png" alt="Tres vidas">
+            </div>
+          </header>
+
+          <aside class="hunter-side hunter-left">
+            <section class="hud-panel ranking-panel">
+              <p class="eyebrow">Top cazadores</p>
+              <ol class="ranking-list compact" id="gameRankingList"></ol>
+            </section>
+            <section class="hud-panel player-panel">
+              <p class="eyebrow">Jugador</p>
+              <img src="./assets/julian-trophy-hunter/heads/head_up.png" alt="Julian Alvarez">
+              <strong id="playerEmailShort">Julian Alvarez</strong>
+              <span>19</span>
+            </section>
+          </aside>
+
+          <main class="arena-panel">
+            <div class="arena-status" id="gameStatus">Listo</div>
+            <div class="canvas-wrap">
+              <canvas id="snakeCanvas" width="800" height="640" aria-label="Tablero de Julian Alvarez Trophy Hunter"></canvas>
+            </div>
+          </main>
+
+          <aside class="hunter-side hunter-right">
+            <section class="hud-panel trophies-panel">
+              <p class="eyebrow">Trofeos</p>
+              <img src="./assets/julian-trophy-hunter/trophies/trophy_champions.png" alt="Champions">
+              <img src="./assets/julian-trophy-hunter/trophies/trophy_world_cup.png" alt="World Cup">
+              <img src="./assets/julian-trophy-hunter/trophies/trophy_la_liga.png" alt="La Liga">
+            </section>
+            <section class="hud-panel record-panel">
+              <p class="eyebrow">Record</p>
+              <strong><img src="./assets/julian-trophy-hunter/trophies/trophy_champions.png" alt=""> <span id="bestScoreValue">0</span></strong>
+              <p class="eyebrow">Mejor partida</p>
+              <strong><span class="ball-icon" aria-hidden="true"></span> <span id="bestMatchValue">0</span></strong>
+            </section>
+            <button class="pause-button" id="pauseBtn" type="button">Pausa</button>
+          </aside>
+
+          <section class="hud-panel controls-info">
+            <p class="eyebrow">Controles</p>
+            <div><span class="keycap">← ↑ ↓ →</span><strong>Flechas para moverte</strong></div>
+            <div><span class="keycap">P</span><strong>Pausa</strong></div>
+          </section>
+
+          <div class="game-controls" id="touchControls" aria-label="Controles tactiles">
+            <button class="control up" data-direction="up" aria-label="Arriba">
+              <img src="./assets/julian-trophy-hunter/ui/dpad_up.png" alt="">
+            </button>
+            <button class="control left" data-direction="left" aria-label="Izquierda">
+              <img src="./assets/julian-trophy-hunter/ui/dpad_left.png" alt="">
+            </button>
+            <button class="control center" type="button" aria-label="Centro">
+              <img src="./assets/julian-trophy-hunter/ui/dpad_center.png" alt="">
+            </button>
+            <button class="control right" data-direction="right" aria-label="Derecha">
+              <img src="./assets/julian-trophy-hunter/ui/dpad_right.png" alt="">
+            </button>
+            <button class="control down" data-direction="down" aria-label="Abajo">
+              <img src="./assets/julian-trophy-hunter/ui/dpad_down.png" alt="">
+            </button>
           </div>
-          <div class="score-pill">Score <strong id="scoreValue">0</strong></div>
-        </div>
-        <div class="canvas-wrap">
-          <canvas id="snakeCanvas" width="640" height="640" aria-label="Tablero del juego Snake"></canvas>
-        </div>
-        <div class="game-controls" id="touchControls" aria-label="Controles táctiles">
-          <button class="control up" data-direction="up" aria-label="Arriba">↑</button>
-          <button class="control left" data-direction="left" aria-label="Izquierda">←</button>
-          <button class="control down" data-direction="down" aria-label="Abajo">↓</button>
-          <button class="control right" data-direction="right" aria-label="Derecha">→</button>
-        </div>
-        <div class="game-actions">
-          <button class="secondary" id="restartBtn">Reiniciar</button>
-          <button class="ghost" id="backMenuBtn">Volver al menú</button>
+
+          <section class="hud-panel objective-panel">
+            <p class="eyebrow">Objetivo</p>
+            <strong>Colecciona todos los trofeos y obten el mejor score</strong>
+            <span>*</span>
+          </section>
+
+          <div class="game-actions">
+            <button class="secondary" id="restartBtn">Reiniciar</button>
+            <button class="ghost" id="backMenuBtn">Volver al menu</button>
+          </div>
         </div>
       </section>
     </main>
@@ -107,13 +183,13 @@
 
   <div class="modal hidden" id="roomModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-card">
-      <button class="modal-close" id="closeModalBtn" aria-label="Cerrar">×</button>
-      <p class="eyebrow">partida 2 jugadores</p>
-      <h2 id="modalTitle">Código de sala</h2>
-      <p id="modalMessage">Compartí este código con el segundo jugador.</p>
+      <button class="modal-close" id="closeModalBtn" aria-label="Cerrar">x</button>
+      <p class="eyebrow">duelo 2 jugadores</p>
+      <h2 id="modalTitle">Codigo de sala</h2>
+      <p id="modalMessage">Comparti este codigo con el segundo jugador.</p>
       <div class="room-code" id="roomCodeText">-----</div>
       <form id="joinForm" class="join-form hidden">
-        <label for="joinCodeInput">Código</label>
+        <label for="joinCodeInput">Codigo</label>
         <input id="joinCodeInput" maxlength="5" placeholder="K7A2P" autocomplete="off">
         <button class="primary" type="submit">Unirme</button>
       </form>

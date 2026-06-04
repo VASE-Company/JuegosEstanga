@@ -1,0 +1,74 @@
+{
+  "heads": {
+    "up": "/assets/julian-trophy-hunter/heads/head_up.png",
+    "down": "/assets/julian-trophy-hunter/heads/head_down.png",
+    "left": "/assets/julian-trophy-hunter/heads/head_left.png",
+    "right": "/assets/julian-trophy-hunter/heads/head_right.png"
+  },
+  "body": {
+    "horizontal": "/assets/julian-trophy-hunter/body/body_horizontal.png",
+    "vertical": "/assets/julian-trophy-hunter/body/body_vertical.png",
+    "horizontalAlvarez": "/assets/julian-trophy-hunter/body/body_horizontal_alvarez.png",
+    "horizontal19": "/assets/julian-trophy-hunter/body/body_horizontal_19.png",
+    "verticalAlvarez": "/assets/julian-trophy-hunter/body/body_vertical_alvarez.png",
+    "vertical19": "/assets/julian-trophy-hunter/body/body_vertical_19.png",
+    "curves": {
+      "topLeft": "/assets/julian-trophy-hunter/body/curve_top_left.png",
+      "topRight": "/assets/julian-trophy-hunter/body/curve_top_right.png",
+      "bottomLeft": "/assets/julian-trophy-hunter/body/curve_bottom_left.png",
+      "bottomRight": "/assets/julian-trophy-hunter/body/curve_bottom_right.png"
+    },
+    "tails": {
+      "up": "/assets/julian-trophy-hunter/body/tail_up.png",
+      "down": "/assets/julian-trophy-hunter/body/tail_down.png",
+      "left": "/assets/julian-trophy-hunter/body/tail_left.png",
+      "right": "/assets/julian-trophy-hunter/body/tail_right.png"
+    }
+  },
+  "trophies": {
+    "champions": "/assets/julian-trophy-hunter/trophies/trophy_champions.png",
+    "worldCup": "/assets/julian-trophy-hunter/trophies/trophy_world_cup.png",
+    "laLiga": "/assets/julian-trophy-hunter/trophies/trophy_la_liga.png"
+  },
+  "map": {
+    "field": "/assets/julian-trophy-hunter/map/field.png"
+  },
+  "branding": {
+    "atletiShield": "/assets/julian-trophy-hunter/branding/atleti_shield.png"
+  },
+  "ui": {
+    "heartFull": "/assets/julian-trophy-hunter/ui/heart_full.png",
+    "heartEmpty": "/assets/julian-trophy-hunter/ui/heart_empty.png",
+    "healthBar": "/assets/julian-trophy-hunter/ui/health_bar.png",
+    "dpadUp": "/assets/julian-trophy-hunter/ui/dpad_up.png",
+    "dpadDown": "/assets/julian-trophy-hunter/ui/dpad_down.png",
+    "dpadLeft": "/assets/julian-trophy-hunter/ui/dpad_left.png",
+    "dpadRight": "/assets/julian-trophy-hunter/ui/dpad_right.png",
+    "dpadCenter": "/assets/julian-trophy-hunter/ui/dpad_center.png"
+  },
+  "effects": {
+    "pickup": [
+      "/assets/julian-trophy-hunter/effects/pickup/pickup_01.png",
+      "/assets/julian-trophy-hunter/effects/pickup/pickup_02.png",
+      "/assets/julian-trophy-hunter/effects/pickup/pickup_03.png",
+      "/assets/julian-trophy-hunter/effects/pickup/pickup_04.png"
+    ],
+    "collision": [
+      "/assets/julian-trophy-hunter/effects/collision/collision_01.png",
+      "/assets/julian-trophy-hunter/effects/collision/collision_02.png",
+      "/assets/julian-trophy-hunter/effects/collision/collision_03.png",
+      "/assets/julian-trophy-hunter/effects/collision/collision_04.png"
+    ]
+  },
+  "metadata": {
+    "format": "png",
+    "transparentBackground": true,
+    "tileSize": 128,
+    "healthBarSize": {
+      "width": 192,
+      "height": 64
+    },
+    "palette": ["red", "white", "darkBlue", "gold"],
+    "source": "sprites normalized from the Julian Alvarez pixel sheet and stadium map supplied by the user"
+  }
+}

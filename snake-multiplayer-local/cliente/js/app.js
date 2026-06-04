@@ -21,9 +21,14 @@ const codeInput = document.getElementById("codeInput");
 const userEmail = document.getElementById("userEmail");
 const personalRanking = document.getElementById("personalRanking");
 const generalRanking = document.getElementById("generalRanking");
+const gameRankingList = document.getElementById("gameRankingList");
+const bestScoreValue = document.getElementById("bestScoreValue");
+const bestMatchValue = document.getElementById("bestMatchValue");
+const playerEmailShort = document.getElementById("playerEmailShort");
 const canvas = document.getElementById("snakeCanvas");
 const restartBtn = document.getElementById("restartBtn");
 const backMenuBtn = document.getElementById("backMenuBtn");
+const pauseBtn = document.getElementById("pauseBtn");
 const joinForm = document.getElementById("joinForm");
 const joinCodeInput = document.getElementById("joinCodeInput");
 
@@ -35,15 +40,13 @@ let currentMode = null;
 let activeRoomCode = null;
 let multiplayerActiveTurn = false;
 let turnFinished = false;
-
-if (!user?.id || !user?.email) {
-  window.location.href = "/";
-}
+let paused = false;
+let controlsActive = false;
 
 function requireUser() {
   user = getCurrentUser();
   if (!user?.id || !user?.email) {
-    window.location.href = "/";
+    showView("authView");
     return false;
   }
   return true;
@@ -52,30 +55,58 @@ function requireUser() {
 async function loadRankings() {
   if (!user) return;
   const data = await fetchRankings(user.email);
-  renderRanking(personalRanking, data.personalTop3, "Todavía no tenés scores.");
-  renderRanking(generalRanking, data.generalTop10, "Todavía no hay scores en este servidor.");
+  renderRanking(personalRanking, data.personalTop3, "Todavia no tenes trofeos.");
+  renderRanking(generalRanking, data.generalTop10, "Todavia no hay cazadores en este servidor.");
+  renderRanking(gameRankingList, data.generalTop10.slice(0, 5), "Todavia no hay cazadores.");
+
+  const personalBest = data.personalTop3[0]?.score || 0;
+  const serverBest = data.generalTop10[0]?.score || 0;
+  bestScoreValue.textContent = Math.max(personalBest, serverBest);
+  bestMatchValue.textContent = personalBest;
 }
 
 function showDashboard() {
   user = getCurrentUser();
   if (!user) {
-    window.location.href = "/";
+    showView("authView");
     return;
   }
   userEmail.textContent = user.email;
+  playerEmailShort.textContent = user.email.split("@")[0] || "Julian Alvarez";
   showView("dashboardView");
   loadRankings().catch((error) => showToast(error.message, "error"));
   askRankings(user.email);
 }
 
+function setPauseButton(isPaused, enabled = controlsActive) {
+  paused = isPaused;
+  pauseBtn.disabled = !enabled;
+  pauseBtn.textContent = isPaused ? "Seguir" : "Pausa";
+  pauseBtn.classList.toggle("paused", isPaused);
+}
+
+function togglePause() {
+  if (!game || !controlsActive || game.gameOver) return;
+  setPauseButton(!paused);
+  game.setActive(!paused);
+  if (paused) {
+    setGameStatus("Pausa");
+  } else {
+    setGameStatus(currentMode === "singleplayer" ? "Caza trofeos con Julian" : "Tu turno: caza trofeos hasta caer");
+    game.start();
+  }
+}
+
 function setupGame({ mode, status, controls = true }) {
   game?.stop();
   turnFinished = false;
+  controlsActive = controls;
   currentMode = mode;
-  setGameMode(mode === "singleplayer" ? "1 jugador" : "2 jugadores por turnos");
+  setGameMode(mode === "singleplayer" ? "Caza individual" : "Duelo por turnos");
   setGameStatus(status);
   setScore(0);
   setControlsEnabled(controls);
+  setPauseButton(false, controls);
   restartBtn.classList.toggle("hidden", mode !== "singleplayer");
   showView("gameView");
 }
@@ -84,16 +115,17 @@ function startSingleplayer() {
   if (!requireUser()) return;
   activeRoomCode = null;
   multiplayerActiveTurn = false;
-  setupGame({ mode: "singleplayer", status: "Jugando", controls: true });
+  setupGame({ mode: "singleplayer", status: "Caza trofeos con Julian", controls: true });
   game = new SnakeGame(canvas, {
     onScore: setScore,
     onGameOver: async (score) => {
-      setGameStatus(`Perdiste. Score final: ${score}`);
+      setGameStatus(`Fin de la caza. Score final: ${score}`);
       setControlsEnabled(false);
+      setPauseButton(false, false);
       try {
         await saveSingleplayerScore(user.email, score);
         await loadRankings();
-        showToast("Score guardado.");
+        showToast("Score guardado para Julian Trophy Hunter.");
       } catch (error) {
         showToast(error.message, "error");
       }
@@ -105,7 +137,7 @@ function startSingleplayer() {
 function startActiveMultiplayerTurn(room) {
   multiplayerActiveTurn = true;
   activeRoomCode = room.codigo;
-  setupGame({ mode: "multiplayer", status: "Tu turno: jugá hasta perder", controls: true });
+  setupGame({ mode: "multiplayer", status: "Tu turno: caza trofeos hasta caer", controls: true });
   game = new SnakeGame(canvas, {
     onScore: setScore,
     onState: (state) => sendSnakeState(activeRoomCode, state),
@@ -113,6 +145,7 @@ function startActiveMultiplayerTurn(room) {
       if (turnFinished) return;
       turnFinished = true;
       setControlsEnabled(false);
+      setPauseButton(false, false);
       setGameStatus(`Turno terminado. Score: ${score}`);
       const result = await finishTurn(activeRoomCode, score);
       if (!result?.ok) showToast(result?.error || "No se pudo finalizar el turno.", "error");
@@ -136,6 +169,8 @@ function returnToMenu() {
   activeRoomCode = null;
   currentMode = null;
   multiplayerActiveTurn = false;
+  controlsActive = false;
+  setPauseButton(false, false);
   showDashboard();
 }
 
@@ -147,7 +182,7 @@ authForm.addEventListener("submit", async (event) => {
     authForm.classList.add("hidden");
     codeForm.classList.remove("hidden");
     codeInput.focus();
-    showToast("Código enviado. Revisá email o consola del servidor.");
+    showToast("Codigo enviado. Revisa email o consola del servidor.");
   } catch (error) {
     showToast(error.message, "error");
   }
@@ -158,7 +193,7 @@ codeForm.addEventListener("submit", async (event) => {
   try {
     user = await verifyCode(pendingEmail, codeInput.value.trim(), authType);
     codeInput.value = "";
-    showToast("Sesión iniciada.");
+    showToast("Sesion iniciada.");
     showDashboard();
   } catch (error) {
     showToast(error.message, "error");
@@ -188,7 +223,7 @@ document.getElementById("createRoomBtn").addEventListener("click", async () => {
   }
   activeRoomCode = result.room.codigo;
   openRoomModal({
-    title: "Código de sala",
+    title: "Codigo de sala",
     message: "Compartilo con el segundo jugador. La partida empieza cuando se una.",
     code: activeRoomCode
   });
@@ -198,7 +233,7 @@ document.getElementById("joinRoomBtn").addEventListener("click", () => {
   if (!requireUser()) return;
   openRoomModal({
     title: "Unirse a sala",
-    message: "Ingresá el código de 5 caracteres que creó el otro jugador.",
+    message: "Ingresa el codigo de 5 caracteres que creo el otro jugador.",
     code: "-----",
     join: true
   });
@@ -220,12 +255,18 @@ joinForm.addEventListener("submit", async (event) => {
 document.getElementById("logoutBtn").addEventListener("click", () => {
   logout().finally(() => {
     user = null;
-    window.location.href = "/";
+    showView("authView");
   });
 });
 
 document.getElementById("themeToggle").addEventListener("click", () => {
-  applyTheme(document.body.classList.contains("dark") ? "light" : "dark");
+  const currentTheme = document.body.classList.contains("night")
+    ? "night"
+    : document.body.classList.contains("dark")
+      ? "dark"
+      : "light";
+  const nextTheme = currentTheme === "light" ? "dark" : currentTheme === "dark" ? "night" : "light";
+  applyTheme(nextTheme);
   game?.draw();
 });
 
@@ -236,6 +277,7 @@ document.getElementById("roomModal").addEventListener("click", (event) => {
 
 restartBtn.addEventListener("click", startSingleplayer);
 backMenuBtn.addEventListener("click", returnToMenu);
+pauseBtn.addEventListener("click", togglePause);
 
 document.querySelectorAll("[data-direction]").forEach((button) => {
   button.addEventListener("click", () => game?.setDirection(button.dataset.direction));
@@ -270,6 +312,11 @@ window.addEventListener("keydown", (event) => {
     d: "right",
     D: "right"
   };
+  if (event.key === "p" || event.key === "P") {
+    event.preventDefault();
+    togglePause();
+    return;
+  }
   if (map[event.key]) {
     event.preventDefault();
     game?.setDirection(map[event.key]);
@@ -283,7 +330,7 @@ socket.on("partida-creada-snake", (room) => {
 });
 
 socket.on("jugador-unido-snake", () => {
-  showToast("El segundo jugador se unió.");
+  showToast("El segundo jugador se unio.");
 });
 
 socket.on("partida-iniciada-snake", () => {
@@ -310,15 +357,16 @@ socket.on("estado-snake-espectador", ({ state, jugadorActivo }) => {
 });
 
 socket.on("turno-finalizado-snake", ({ jugador, score }) => {
-  showToast(`${jugador} terminó con ${score} puntos.`);
+  showToast(`${jugador} termino con ${score} puntos.`);
 });
 
 socket.on("partida-finalizada-snake", async ({ room, winner, empate }) => {
   game?.stop();
   setControlsEnabled(false);
+  setPauseButton(false, false);
   const j1 = room.jugador1;
   const j2 = room.jugador2;
-  const result = empate ? "Empate" : `Ganó ${winner}`;
+  const result = empate ? "Empate" : `Gano ${winner}`;
   setGameStatus(`${result}. ${j1.email}: ${j1.score} / ${j2.email}: ${j2.score}`);
   showToast("Partida finalizada. Rankings actualizados.");
   activeRoomCode = null;
@@ -328,7 +376,8 @@ socket.on("partida-finalizada-snake", async ({ room, winner, empate }) => {
 socket.on("rival-desconectado", ({ message }) => {
   game?.stop();
   setControlsEnabled(false);
-  setGameStatus(message || "El rival se desconectó.");
+  setPauseButton(false, false);
+  setGameStatus(message || "El rival se desconecto.");
   showToast(message || "La partida fue cancelada.", "error");
   activeRoomCode = null;
 });
@@ -341,7 +390,9 @@ socket.on("rankings-actualizados", () => {
   if (user) loadRankings().catch(() => {});
 });
 
-applyTheme(localStorage.getItem("snakeTheme") || "light");
-showDashboard();
-
-
+applyTheme(localStorage.getItem("snakeTheme") || "dark");
+if (user?.id && user?.email) {
+  showDashboard();
+} else {
+  showView("authView");
+}
