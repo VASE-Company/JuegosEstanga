@@ -80,13 +80,24 @@ El usuario debe estar registrado e iniciado sesion para jugar, crear salas o uni
 
 Flujo:
 
-1. Ingresar email.
-2. Pedir codigo de registro o login.
-3. Revisar email o consola del servidor.
-4. Ingresar codigo de 6 digitos.
-5. El navegador guarda `id` y `email` en `localStorage`.
+1. Ingresar nombre visible.
+2. Ingresar email.
+3. Pedir codigo de registro o login.
+4. Revisar email o consola del servidor.
+5. Ingresar codigo de 6 digitos.
+6. El navegador guarda `id`, `email` y `displayName` en `localStorage`.
 
 No se usan contrasenas.
+
+## Como jugar
+
+- Mover con flechas o WASD.
+- Pausar con `P` o `Espacio`.
+- En celular, usar los botones tactiles `Arriba`, `Izquierda`, `Abajo` y `Derecha`.
+- El objetivo es comer todos los puntos y completar niveles.
+- El puntaje y los estados se sincronizan en el servidor durante la partida.
+- Desde el menu y la pausa se puede abrir la ayuda y la configuracion.
+- El tema claro u oscuro se cambia desde `Configuración`.
 
 ## Modos de juego
 
@@ -157,7 +168,7 @@ Caracteres de mapa:
 
 ## Rankings
 
-Los scores se guardan en `servidor/data/scores.json`.
+Los scores se guardan en `servidor/scripts/data/scores.json`.
 
 La pantalla principal muestra:
 
@@ -170,10 +181,11 @@ En desarrollo local, el Top 10 general corresponde solamente a los datos de esa 
 
 El servidor crea automaticamente estos archivos si no existen:
 
-- `servidor/data/users.json`
-- `servidor/data/scores.json`
-- `servidor/data/verificationCodes.json`
-- `servidor/data/matches.txt`
+- `servidor/scripts/data/users.json`
+- `servidor/scripts/data/scores.json`
+- `servidor/scripts/data/liveScores.json`
+- `servidor/scripts/data/verificationCodes.json`
+- `servidor/scripts/data/matches.txt`
 
 Si un JSON esta vacio o corrupto, el servidor lo reinicia como `[]` para no romper el arranque.
 

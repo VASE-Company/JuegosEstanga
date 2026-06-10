@@ -11,37 +11,100 @@
       const element = document.getElementById(id);
       if (element) element.addEventListener(eventName, handler);
     };
-    document.body.classList.add("dark");
+    Preferences.apply();
     this.ensureToastRoot();
-    bind("modalClose", "click", () => this.closeModal());
     bind("menuNavToggle", "click", () => {
       const navbar = document.querySelector(".menu-navbar");
       if (!navbar) return;
       const nextState = !navbar.classList.contains("is-open");
       navbar.classList.toggle("is-open", nextState);
       const toggle = document.getElementById("menuNavToggle");
-      if (toggle) toggle.setAttribute("aria-expanded", String(nextState));
+      if (toggle) {
+        toggle.setAttribute("aria-expanded", String(nextState));
+        toggle.setAttribute("aria-label", nextState ? "Cerrar menú" : "Abrir menú");
+      }
     });
-    document.querySelectorAll(".menu-nav-actions a, .menu-nav-actions button").forEach((element) => {
+    document.querySelectorAll("#menuNavActions button, #menuNavActions a").forEach((element) => {
       element.addEventListener("click", () => {
         const navbar = document.querySelector(".menu-navbar");
         const toggle = document.getElementById("menuNavToggle");
         if (navbar) navbar.classList.remove("is-open");
-        if (toggle) toggle.setAttribute("aria-expanded", "false");
+        if (toggle) {
+          toggle.setAttribute("aria-expanded", "false");
+          toggle.setAttribute("aria-label", "Abrir menú");
+        }
       });
     });
+    document.addEventListener("click", (event) => {
+      const navbar = document.querySelector(".menu-navbar");
+      const toggle = document.getElementById("menuNavToggle");
+      const actions = document.getElementById("menuNavActions");
+      if (!navbar || !toggle || !actions) return;
+      if (!navbar.classList.contains("is-open")) return;
+      if (navbar.contains(event.target)) return;
+      navbar.classList.remove("is-open");
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-label", "Abrir menú");
+    });
+    bind("modalClose", "click", () => this.closeModal());
+    bind("gameMenuToggle", "click", () => {
+      const menu = document.getElementById("gameActionsMenu");
+      if (!menu || menu.classList.contains("hidden")) return;
+      const nextState = !menu.classList.contains("is-open");
+      menu.classList.toggle("is-open", nextState);
+      const toggle = document.getElementById("gameMenuToggle");
+      if (toggle) toggle.setAttribute("aria-expanded", String(nextState));
+      if (nextState && window.PacmanGame?.mode === "singleplayer" && !window.PacmanGame.paused) {
+        window.PacmanGame.togglePause();
+      }
+    });
+    document.querySelectorAll("#gameActionsMenu button").forEach((element) => {
+      element.addEventListener("click", () => this.setGameMenuOpen(false));
+    });
+    bind("scrollTopBtn", "click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    const updateScrollButton = () => {
+      const scrollButton = document.getElementById("scrollTopBtn");
+      if (!scrollButton) return;
+      scrollButton.classList.toggle("hidden", window.scrollY < 280);
+    };
+    window.addEventListener("scroll", updateScrollButton, { passive: true });
+    window.addEventListener("resize", updateScrollButton);
+    updateScrollButton();
+    document.addEventListener("click", (event) => {
+      const shell = document.querySelector(".hud-actions-shell");
+      const toggle = document.getElementById("gameMenuToggle");
+      const menu = document.getElementById("gameActionsMenu");
+      if (!shell || !toggle || !menu) return;
+      if (menu.classList.contains("hidden") || !menu.classList.contains("is-open")) return;
+      if (shell.contains(event.target)) return;
+      this.setGameMenuOpen(false);
+    });
     this.renderIcons();
+  },
+  setGameMenuOpen(nextState) {
+    const menu = document.getElementById("gameActionsMenu");
+    const toggle = document.getElementById("gameMenuToggle");
+    if (!menu || menu.classList.contains("hidden")) return;
+    menu.classList.toggle("is-open", Boolean(nextState));
+    if (toggle) toggle.setAttribute("aria-expanded", String(Boolean(nextState)));
   },
   show(viewName) {
     Object.values(this.views).forEach((view) => view.classList.add("hidden"));
     this.views[viewName].classList.remove("hidden");
     document.body.classList.toggle("menu-bg", viewName === "menu");
     document.body.classList.toggle("game-mode", viewName === "game");
-    if (viewName !== "menu") {
-      const navbar = document.querySelector(".menu-navbar");
-      const toggle = document.getElementById("menuNavToggle");
-      if (navbar) navbar.classList.remove("is-open");
-      if (toggle) toggle.setAttribute("aria-expanded", "false");
+    const gameMenu = document.getElementById("gameActionsMenu");
+    const gameMenuToggle = document.getElementById("gameMenuToggle");
+    const menuNavbar = document.querySelector(".menu-navbar");
+    const menuNavToggle = document.getElementById("menuNavToggle");
+    if (gameMenu) gameMenu.classList.remove("is-open");
+    if (gameMenuToggle) gameMenuToggle.setAttribute("aria-expanded", "false");
+    if (menuNavbar) menuNavbar.classList.remove("is-open");
+    if (menuNavToggle) {
+      menuNavToggle.setAttribute("aria-expanded", "false");
+      menuNavToggle.setAttribute("aria-label", "Abrir menú");
     }
     this.renderIcons();
   },
@@ -143,10 +206,14 @@
     this.renderIcons();
   },
   setMenuUser(user) {
-    document.getElementById("userEmailLabel").textContent = user.email;
-    const initials = String(user.email || "")
+    const displayName = user.displayName || user.name || Preferences.fallbackDisplayName(user.email);
+    const nameLabel = document.getElementById("userNameLabel");
+    const emailLabel = document.getElementById("userEmailLabel");
+    if (nameLabel) nameLabel.textContent = displayName;
+    if (emailLabel) emailLabel.textContent = user.email;
+    const initials = String(displayName || user.email || "")
       .split("@")[0]
-      .split(/[._-]/)
+      .split(/[._-\s]/)
       .filter(Boolean)
       .slice(0, 2)
       .map((part) => part.charAt(0))
@@ -157,31 +224,97 @@
     if (initialsLabel) initialsLabel.textContent = initials;
   },
   renderLobby(lobby, currentUser) {
+    // pinta la sala con el estado real del servidor, así no queda nada a ojo del cliente
     document.getElementById("lobbyCode").textContent = lobby.codigo;
-    const pacman = lobby.jugadores.pacman ? lobby.jugadores.pacman.email : "Sin asignar";
-    const ghosts = lobby.jugadores.fantasmas.length
-      ? lobby.jugadores.fantasmas.map((ghost) => ghost.email).join(", ")
-      : "Sin fantasmas";
+    const playerLabel = (player, fallback) => player ? (player.displayName || player.name || player.email || fallback) : fallback;
+    const isHost = Boolean(currentUser && lobby.hostUserId === currentUser.id);
+    const pacman = lobby.jugadores.pacman;
+    const ghosts = lobby.jugadores.fantasmas || [];
     const isWaiting = !lobby.ready;
-    const connectedGhosts = lobby.jugadores.fantasmas.length;
+    const connectedGhosts = ghosts.length;
     const maxGhosts = Number(lobby.maxFantasmasHumanos || 0);
+    const emptySlots = Math.max(0, maxGhosts - connectedGhosts);
+    const ghostCards = ghosts.length
+      ? ghosts.map((ghost, index) => `
+        <article class="lobby-member-card lobby-member-ghost">
+          <div class="lobby-member-avatar">${String(playerLabel(ghost, "GF")).slice(0, 2).toUpperCase()}</div>
+          <div class="lobby-member-copy">
+            <p class="eyebrow">Fantasma ${index + 1}</p>
+            <strong>${playerLabel(ghost, "Fantasma")}</strong>
+            <span>${ghost.character || "boca"}</span>
+          </div>
+        </article>
+      `).join("")
+      : `<div class="lobby-empty-state">Todavía no se unieron fantasmas.</div>`;
+    const emptyGhostSlots = Array.from({ length: emptySlots }, (_, index) => `
+      <article class="lobby-member-card lobby-member-empty">
+        <div class="lobby-member-avatar is-empty">${index + 1}</div>
+        <div class="lobby-member-copy">
+          <p class="eyebrow">Espacio libre</p>
+          <strong>Fantasma disponible</strong>
+          <span>Esperando jugador</span>
+        </div>
+      </article>
+    `).join("");
     document.getElementById("lobbyInfo").innerHTML = `
-      <div class="lobby-status ${isWaiting ? "is-waiting" : "is-ready"}">
-        <strong>${isWaiting ? "Sala de espera" : "Sala lista para empezar"}</strong>
-        <span>${isWaiting ? "Quedate acá hasta que se unan los demás." : "Ya pueden iniciar la partida."}</span>
-      </div>
-      <div><strong>Pac-Man:</strong> ${pacman}</div>
-      <div><strong>Fantasmas:</strong> ${ghosts}</div>
-      <div><strong>Fantasmas conectados:</strong> ${connectedGhosts}${maxGhosts ? ` / ${maxGhosts}` : ""}</div>
-      <div><strong>Nivel inicial:</strong> ${lobby.nivelInicial}</div>
-      <div><strong>Maximo fantasmas humanos:</strong> ${lobby.maxFantasmasHumanos}</div>
-      <div><strong>Bots:</strong> ${lobby.allowBots ? "permitidos" : "desactivados"}</div>
-      <div><strong>Estado:</strong> ${lobby.ready ? "listo para iniciar" : "esperando jugadores"}</div>
+      <section class="lobby-status-banner ${isWaiting ? "is-waiting" : "is-ready"}">
+        <div>
+          <p class="lobby-kicker">${isWaiting ? "Sala de espera" : "Sala lista"}</p>
+          <strong>${isWaiting ? "Esperando al resto del equipo" : "Ya puede empezar la partida"}</strong>
+        </div>
+        <span class="lobby-status-pill">${isWaiting ? "En pausa" : "Lista para jugar"}</span>
+      </section>
+      <section class="lobby-roster">
+        <article class="lobby-member-card lobby-member-main">
+          <div class="lobby-member-avatar lobby-avatar-main">${String(playerLabel(pacman, "PM")).slice(0, 2).toUpperCase()}</div>
+          <div class="lobby-member-copy">
+            <p class="eyebrow">Pac-Man</p>
+            <strong>${playerLabel(pacman, "Sin asignar")}</strong>
+            <span>${pacman ? (pacman.character || "pacman") : "Esperando jugador"}</span>
+          </div>
+        </article>
+        <div class="lobby-ghosts">
+          <div class="lobby-section-head">
+            <p class="eyebrow">Fantasmas</p>
+            <span class="lobby-count">${connectedGhosts}${maxGhosts ? ` / ${maxGhosts}` : ""}</span>
+          </div>
+          <div class="lobby-ghost-grid">
+            ${ghostCards}
+            ${emptyGhostSlots}
+          </div>
+        </div>
+      </section>
+      <section class="lobby-meta-grid">
+        <div class="lobby-meta-card"><span>Nivel inicial</span><strong>${lobby.nivelInicial}</strong></div>
+        <div class="lobby-meta-card"><span>Bots</span><strong>${lobby.allowBots ? "Permitidos" : "Desactivados"}</strong></div>
+        <div class="lobby-meta-card"><span>Estado</span><strong>${lobby.ready ? "Listo" : "Esperando"}</strong></div>
+        <div class="lobby-meta-card"><span>Rol activo</span><strong>${currentUser && pacman && pacman.userId === currentUser.id ? "Pac-Man" : "Fantasma"}</strong></div>
+      </section>
+      <section class="lobby-actions-row">
+        <button id="switchRoleLobbyBtn" type="button" class="secondary lobby-action-btn lobby-action-switch" ${currentUser ? "" : "disabled"}>
+          <i data-lucide="refresh-cw"></i>
+          <span>Cambiar mi rol</span>
+        </button>
+        ${isHost ? `
+          <button id="restartLobbyBtn" type="button" class="secondary lobby-action-btn lobby-action-restart">
+            <i data-lucide="rotate-ccw"></i>
+            <span>Reiniciar sala</span>
+          </button>
+        ` : ""}
+      </section>
     `;
-    document.getElementById("startRoomBtn").disabled = !(lobby.ready && currentUser && lobby.hostUserId === currentUser.id);
-    document.getElementById("lobbyMessage").textContent = lobby.message || (isWaiting ? "Sala de espera activa." : "");
+    const startButton = document.getElementById("startRoomBtn");
+    if (startButton) {
+      startButton.disabled = !(lobby.ready && currentUser && lobby.hostUserId === currentUser.id);
+      startButton.textContent = "Iniciar partida";
+    }
+    document.getElementById("lobbyMessage").textContent = lobby.message || (isWaiting ? "Falta al menos un fantasma." : "");
+  },
+  updateTheme() {
+    Preferences.apply();
   },
   updateHud(state, label) {
+    // este hud acompaña la partida y también arma la pantalla final cuando se termina el nivel
     const gameScene = document.querySelector(".game-scene");
     const isResult = state.status !== "playing";
     const hudCard = document.querySelector(".hud-card");
@@ -215,6 +348,13 @@
       ? (state.scoreGhost ?? state.scorePacman ?? 0)
       : (state.scorePacman || 0);
     document.getElementById("scoreLabel").textContent = scoreValue;
+    const levelLabel = document.getElementById("levelLabel");
+    if (levelLabel) levelLabel.textContent = state.level ?? 1;
+    const resultLevelLabel = document.getElementById("resultLevelLabel");
+    if (resultLevelLabel) resultLevelLabel.textContent = state.level ?? 1;
+    const resultLevelStat = document.getElementById("resultLevelStat");
+    if (resultLevelStat) resultLevelStat.classList.toggle("hidden", !isResult);
+    // las vidas se muestran con corazones para que se entienda rápido incluso en celu
     const lives = Math.max(0, state.livesPacman ?? 0);
     const heartPath = "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.03L12 21.35Z";
     const hearts = Array.from({ length: 3 }, (_, index) => {
@@ -238,10 +378,20 @@
     const nextLevelButton = document.getElementById("nextLevelBtn");
     const restartButton = document.getElementById("restartLevelBtn");
     const exitButton = document.getElementById("backToMenuBtn");
+    const gameMenuToggle = document.getElementById("gameMenuToggle");
+    const gameActionsMenu = document.getElementById("gameActionsMenu");
     if (pauseButton) pauseButton.classList.toggle("hidden", isResult);
     if (nextLevelButton) nextLevelButton.classList.toggle("hidden", !(isResult && state.resultType === "victory" && state.pendingNextLevel));
     if (restartButton) restartButton.classList.toggle("hidden", !(isResult && state.resultType === "defeat" && state.playerRole === "pacman"));
     if (exitButton) exitButton.classList.toggle("hidden", false);
+    if (gameMenuToggle) gameMenuToggle.classList.toggle("hidden", isResult);
+    if (gameActionsMenu) {
+      gameActionsMenu.classList.toggle("hidden", false);
+      if (isResult) {
+        gameActionsMenu.classList.remove("is-open");
+      }
+    }
+    if (gameMenuToggle && isResult) gameMenuToggle.setAttribute("aria-expanded", "false");
     const gameMessage = document.getElementById("gameMessage");
     if (gameMessage) {
       const message = isResult

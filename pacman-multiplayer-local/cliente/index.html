@@ -1,221 +1,371 @@
-<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LA BANDA INFINITA</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=Montserrat:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/base.css?v=20260604.10">
-  <link rel="stylesheet" href="styles/layout.css?v=20260604.10">
-  <link rel="stylesheet" href="styles/game.css?v=20260604.10">
-  <link rel="stylesheet" href="styles/modals.css?v=20260604.10">
-  <link rel="stylesheet" href="styles/responsive.css?v=20260604.10">
-</head>
-<body>
-  <div id="entryTransition" class="entry-transition hidden" aria-hidden="true">
-    <div class="entry-transition-reveal"></div>
-    <div class="entry-transition-hero">
-      <div class="entry-transition-copy">
-        <p>LA BANDA INFINITA</p>
-        <strong>Juegos Estanga</strong>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LA BANDA INFINITA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=Montserrat:wght@500;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles/base.css?v=20260604.10" />
+    <link rel="stylesheet" href="styles/layout.css?v=20260604.10" />
+    <link rel="stylesheet" href="styles/game.css?v=20260604.10" />
+    <link rel="stylesheet" href="styles/modals.css?v=20260604.10" />
+    <link rel="stylesheet" href="styles/responsive.css?v=20260604.10" />
+  </head>
+  <body>
+    <div
+      id="entryTransition"
+      class="entry-transition hidden"
+      aria-hidden="true"
+    >
+      <div class="entry-transition-reveal"></div>
+      <div class="entry-transition-hero">
+        <div class="entry-transition-copy">
+          <p>LA BANDA INFINITA</p>
+          <strong>Juegos Estanga</strong>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="app-shell">
-    <header class="topbar">
-      <h1 class="brand-title" aria-hidden="true"></h1>
-    </header>
+    <div class="app-shell">
+      <header class="topbar">
+        <h1 class="brand-title" aria-hidden="true"></h1>
+      </header>
 
-    <main>
-      <section id="authView" class="view auth-grid">
-        <div class="panel auth-panel">
-          <h2>Entrar para jugar</h2>
-          <p class="muted">Acceso en 2 pasos: valida tu mail real y luego verifica el codigo.</p>
-          <div class="steps" aria-label="pasos de acceso">
-            <div id="stepMail" class="step-badge active">1. Mail</div>
-            <div id="stepCode" class="step-badge">2. Codigo</div>
-          </div>
-          <label>Email</label>
-          <input id="authEmail" type="email" placeholder="jugador@gmail.com" autocomplete="off" autocapitalize="none" spellcheck="false">
-          <ul id="emailChecklist" class="mail-checklist">
-            <li id="mailRuleAt">Debe contener @</li>
-            <li id="mailRuleFormat">Debe tener formato valido</li>
-            <li id="mailRuleDomain">Dominio permitido: gmail.com, hotmail.com, outlook.com</li>
-          </ul>
-          <div class="row">
-            <button id="requestRegisterBtn" type="button">Registrarme</button>
-            <button id="requestLoginBtn" type="button" class="secondary">Iniciar sesion</button>
-          </div>
-          <label>Codigo de 6 digitos</label>
-          <input id="authCode" type="text" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="off" autocapitalize="none" spellcheck="false">
-          <button id="verifyCodeBtn" type="button">Verificar codigo</button>
-          <p id="authMessage" class="message"></p>
-        </div>
-        <div class="panel feature-panel hero-panel">
-          <img src="assets/images/backgrounds/hero-pacman.jpg" alt="Portada de LA BANDA INFINITA">
-          <div class="hero-caption">
-            <h2>LA BANDA INFINITA</h2>
-            <p>River, Boca, Racing, Independiente y San Lorenzo en una apertura epica para comenzar la partida.</p>
-          </div>
-        </div>
-      </section>
-
-      <section id="menuView" class="view hidden">
-        <div class="menu-shell">
-          <nav class="menu-navbar">
-            <a class="menu-back" href="/" aria-label="Volver al selector de juegos">
-              <i data-lucide="arrow-left"></i>
-              <span>Volver al selector</span>
-            </a>
-            <div class="menu-brand">
-              <p class="eyebrow">Juegos Estanga</p>
-              <strong>La Banda Infinita</strong>
+      <main>
+        <section id="authView" class="view auth-grid">
+          <div class="panel auth-panel">
+            <h2>Entrar para jugar</h2>
+            <p class="muted">
+              Acceso en 2 pasos: valida tu mail real y luego verifica el codigo.
+            </p>
+            <div class="steps" aria-label="pasos de acceso">
+              <div id="stepMail" class="step-badge active">1. Mail</div>
+              <div id="stepCode" class="step-badge">2. Codigo</div>
             </div>
-            <button id="menuNavToggle" class="menu-nav-toggle" type="button" aria-label="Abrir menu" aria-expanded="false">
-              <i data-lucide="menu"></i>
-            </button>
-            <div class="menu-nav-actions">
-              <a id="changeGameBtn" class="menu-action-link" href="/">
-                <i data-lucide="gamepad-2"></i>
-                <span>Cambiar juego</span>
-              </a>
-              <button id="logoutBtn" type="button" class="secondary">
-                <i data-lucide="log-out"></i>
-                <span>Salir</span>
+            <label>Nombre visible</label>
+            <input
+              id="authName"
+              type="text"
+              maxlength="24"
+              placeholder="Tu nombre de juego"
+              autocomplete="off"
+              autocapitalize="words"
+              spellcheck="false"
+            />
+            <label>Email</label>
+            <input
+              id="authEmail"
+              type="email"
+              placeholder="jugador@gmail.com"
+              autocomplete="off"
+              autocapitalize="none"
+              spellcheck="false"
+            />
+            <ul id="emailChecklist" class="mail-checklist">
+              <li id="mailRuleAt">Debe contener @</li>
+              <li id="mailRuleFormat">Debe tener formato valido</li>
+              <li id="mailRuleDomain">
+                Dominio permitido: gmail.com, hotmail.com, outlook.com
+              </li>
+            </ul>
+            <div class="row">
+              <button id="requestRegisterBtn" type="button">Registrarme</button>
+              <button id="requestLoginBtn" type="button" class="secondary">
+                Iniciar sesión
               </button>
             </div>
-          </nav>
-          <section class="menu-profile-card">
-            <div class="profile-avatar" id="userInitialsLabel">UE</div>
-            <div class="profile-copy">
-              <p class="eyebrow">perfil activo</p>
-              <h2 id="userEmailLabel"></h2>
-              <p class="muted">Elegí un modo de juego o cambiate a otro título de Juegos Estanga.</p>
-            </div>
-          </section>
-          <div class="dashboard">
-            <div class="menu-panel">
-              <p class="eyebrow">modos</p>
-              <h2>Elegí cómo querés jugar</h2>
-              <div class="button-grid">
-                <button id="singlePlayerBtn" type="button"><i data-lucide="gamepad-2"></i><span>Jugar 1 jugador</span></button>
-                <button id="createRoomBtn" type="button"><i data-lucide="users-round"></i><span>Crear partida multijugador</span></button>
-                <button id="joinRoomBtn" type="button" class="secondary"><i data-lucide="log-in"></i><span>Unirse con codigo</span></button>
-              </div>
-            </div>
-            <div class="ranking-panel">
-              <h3><i data-lucide="medal"></i><span>Top 3 personal</span></h3>
-              <ol id="personalRanking"></ol>
-            </div>
-            <div class="ranking-panel">
-              <h3><i data-lucide="trophy"></i><span>Top 10 general local</span></h3>
-              <ol id="generalRanking"></ol>
+            <label>Codigo de 6 digitos</label>
+            <input
+              id="authCode"
+              type="text"
+              inputmode="numeric"
+              maxlength="6"
+              placeholder="123456"
+              autocomplete="off"
+              autocapitalize="none"
+              spellcheck="false"
+            />
+            <button id="verifyCodeBtn" type="button">Verificar codigo</button>
+            <p id="authMessage" class="message"></p>
+          </div>
+          <div class="panel feature-panel hero-panel">
+            <img
+              src="assets/images/backgrounds/hero-pacman.jpg"
+              alt="Portada de LA BANDA INFINITA"
+            />
+            <div class="hero-caption">
+              <h2>LA BANDA INFINITA</h2>
+              <p>
+                River, Boca, Racing, Independiente y San Lorenzo en una apertura
+                épica para comenzar la partida.
+              </p>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section id="lobbyView" class="view hidden">
-        <div class="panel lobby-panel">
-          <div class="lobby-head">
-            <div>
-              <p class="eyebrow">sala</p>
-              <h2 id="lobbyCode">-----</h2>
-            </div>
-            <button id="leaveLobbyBtn" type="button" class="secondary">Salir</button>
-          </div>
-          <div id="lobbyInfo" class="lobby-info"></div>
-          <button id="startRoomBtn" type="button">Iniciar partida</button>
-          <p id="lobbyMessage" class="message"></p>
-        </div>
-      </section>
-
-      <section id="gameView" class="view hidden">
-        <div class="game-scene">
-          <div class="hud-overlay">
-            <div class="hud-card">
-              <div id="resultVisual" class="result-visual hidden">
-                <img id="resultVisualImage" alt="" src="assets/images/backgrounds/hero-pacman.jpg">
+        <section id="menuView" class="view hidden">
+          <div class="menu-shell">
+            <nav class="menu-navbar">
+              <a
+                class="menu-switch menu-switch-desktop"
+                href="/"
+                aria-label="Cambiar de juego"
+              >
+                <i data-lucide="gamepad-2"></i>
+                <span>Cambiar</span>
+              </a>
+              <div class="menu-brand">
+                <p class="eyebrow">Juegos Estanga</p>
+                <strong>La Banda Infinita</strong>
               </div>
-              <div class="hud-strip">
-                <div class="hud-side hud-side-left">
-                  <div class="hud-stat hud-stat-score"><span>Score</span><strong id="scoreLabel">0</strong></div>
-                  <div class="hud-stat hud-stat-points"><span>Faltan</span><strong id="pelletsLabel">0</strong></div>
-                </div>
-                <div class="hud-side hud-side-right">
-                  <div class="hud-stat hud-stat-lives"><span>Vidas</span><strong id="livesLabel">3</strong></div>
-                  <div class="hud-actions">
-                    <button id="pauseBtn" type="button" class="secondary">
-                      <i data-lucide="pause"></i>
-                      <span>Pausar</span>
-                    </button>
-                    <button id="nextLevelBtn" type="button" class="secondary hidden">
-                      <i data-lucide="arrow-right-circle"></i>
-                      <span>Siguiente nivel</span>
-                    </button>
-                    <button id="restartLevelBtn" type="button" class="secondary hidden">
-                      <i data-lucide="rotate-ccw"></i>
-                      <span>Reiniciar</span>
-                    </button>
-                    <button id="backToMenuBtn" type="button" class="secondary">
-                      <i data-lucide="log-out"></i>
-                      <span>Salir</span>
-                    </button>
+              <button id="menuNavToggle" type="button" class="menu-nav-toggle secondary" aria-expanded="false" aria-controls="menuNavActions" aria-label="Abrir menú">
+                <i data-lucide="menu"></i>
+              </button>
+              <div id="menuNavActions" class="menu-nav-actions">
+                <a
+                  class="menu-switch menu-switch-mobile"
+                  href="/"
+                  aria-label="Cambiar de juego"
+                >
+                  <i data-lucide="gamepad-2"></i>
+                  <span>Cambiar</span>
+                </a>
+                <button id="howToPlayBtn" type="button" class="secondary">
+                  <i data-lucide="book-open"></i>
+                  <span>Cómo jugar</span>
+                </button>
+                <button id="preferencesBtn" type="button" class="secondary">
+                  <i data-lucide="settings-2"></i>
+                  <span>Configuración</span>
+                </button>
+              </div>
+            </nav>
+            <div class="dashboard menu-grid">
+              <article class="menu-profile-card profile-summary-card">
+                <div class="profile-summary-main">
+                  <div class="profile-avatar" id="userInitialsLabel">UE</div>
+                  <div class="profile-copy profile-summary-copy">
+                    <p class="eyebrow">perfil activo</p>
+                    <h2 id="userNameLabel"></h2>
+                    <p id="userEmailLabel" class="muted"></p>
                   </div>
                 </div>
+                <div class="profile-summary-actions">
+                  <button id="profileEditBtn" type="button" class="secondary">
+                    <i data-lucide="square-pen"></i><span>Cambiar nombre</span>
+                  </button>
+                  <button id="profileLogoutBtn" type="button" class="danger">
+                    <i data-lucide="log-out"></i><span>Cerrar sesión</span>
+                  </button>
+                </div>
+              </article>
+              <div class="menu-panel menu-modes-card">
+                <p class="eyebrow">modos</p>
+                <h2>Elegí cómo querés jugar</h2>
+                <div class="button-grid">
+                  <button id="singlePlayerBtn" type="button">
+                    <i data-lucide="gamepad-2"></i><span>Jugar 1 jugador</span>
+                  </button>
+                  <button id="createRoomBtn" type="button">
+                    <i data-lucide="users-round"></i><span>Crear partida multijugador</span>
+                  </button>
+                  <button id="joinRoomBtn" type="button" class="secondary">
+                    <i data-lucide="log-in"></i><span>Unirse con código</span>
+                  </button>
+                </div>
               </div>
-              <p id="gameMessage" class="message"></p>
+              <a id="openRankingsBtn" href="/pacman/rankings/" class="panel ranking-callout rankings-launch-card">
+                <p class="eyebrow">rankings</p>
+                <h2>Ver rankings</h2>
+                <p class="muted">Mostramos tu Top 3 personal y el Top 10 general local en un solo lugar.</p>
+                <span class="callout-cta">Abrir rankings</span>
+              </a>
             </div>
           </div>
-          <div class="canvas-wrap">
-            <canvas id="gameCanvas" width="840" height="560"></canvas>
+        </section>
+
+        <section id="lobbyView" class="view hidden">
+          <div class="panel lobby-panel">
+            <div class="lobby-head">
+              <div>
+                <p class="eyebrow">sala</p>
+                <h2 id="lobbyCode">-----</h2>
+              </div>
+              <button id="leaveLobbyBtn" type="button" class="secondary">
+                Salir
+              </button>
+            </div>
+            <div id="lobbyInfo" class="lobby-info"></div>
+            <button id="startRoomBtn" type="button">Iniciar partida</button>
+            <p id="lobbyMessage" class="message"></p>
           </div>
-          <div id="countdownOverlay" class="countdown-overlay hidden" aria-live="polite"></div>
-          <div class="touch-controls" aria-label="Controles tactiles">
-            <button data-dir="up" type="button" aria-label="Arriba"><i data-lucide="chevron-up"></i></button>
-            <button data-dir="left" type="button" aria-label="Izquierda"><i data-lucide="chevron-left"></i></button>
-            <button data-dir="down" type="button" aria-label="Abajo"><i data-lucide="chevron-down"></i></button>
-            <button data-dir="right" type="button" aria-label="Derecha"><i data-lucide="chevron-right"></i></button>
+        </section>
+
+        <section id="gameView" class="view hidden">
+          <div class="game-scene">
+            <div class="hud-overlay">
+              <div class="hud-card">
+                <div id="resultVisual" class="result-visual hidden">
+                  <img
+                    id="resultVisualImage"
+                    alt=""
+                    src="assets/images/backgrounds/hero-pacman.jpg"
+                  />
+                </div>
+                <div class="hud-strip">
+                  <div class="hud-side hud-side-left">
+                    <div class="hud-stat hud-stat-score">
+                      <span>Score</span><strong id="scoreLabel">0</strong>
+                    </div>
+                    <div class="hud-stat hud-stat-points">
+                      <span>Faltan</span><strong id="pelletsLabel">0</strong>
+                    </div>
+                    <div id="resultLevelStat" class="hud-stat hud-stat-level hud-result-level hidden">
+                      <span>Nivel</span><strong id="resultLevelLabel">1</strong>
+                    </div>
+                  </div>
+                  <div class="hud-side hud-side-right">
+                    <div class="hud-stat hud-stat-lives">
+                      <span>Vidas</span><strong id="livesLabel">3</strong>
+                    </div>
+                    <div class="hud-actions-shell">
+                      <button
+                        id="gameMenuToggle"
+                        type="button"
+                        class="secondary hud-menu-toggle"
+                        aria-expanded="false"
+                        aria-controls="gameActionsMenu"
+                      >
+                        <i data-lucide="menu"></i>
+                        <span>Menú</span>
+                      </button>
+                      <div
+                        id="gameActionsMenu"
+                        class="hud-actions"
+                        aria-label="Opciones de juego"
+                      >
+                        <button id="helpBtn" type="button" class="secondary">
+                          <i data-lucide="book-open"></i>
+                          <span>Ayuda</span>
+                        </button>
+                        <button
+                          id="settingsBtn"
+                          type="button"
+                          class="secondary"
+                        >
+                          <i data-lucide="settings-2"></i>
+                          <span>Config</span>
+                        </button>
+                        <button id="pauseBtn" type="button" class="secondary">
+                          <i data-lucide="pause"></i>
+                          <span>Pausar</span>
+                        </button>
+                        <button
+                          id="nextLevelBtn"
+                          type="button"
+                          class="secondary hidden"
+                        >
+                          <i data-lucide="arrow-right-circle"></i>
+                          <span>Siguiente nivel</span>
+                        </button>
+                        <button
+                          id="restartLevelBtn"
+                          type="button"
+                          class="secondary hidden"
+                        >
+                          <i data-lucide="rotate-ccw"></i>
+                          <span>Reiniciar</span>
+                        </button>
+                        <button
+                          id="backToMenuBtn"
+                          type="button"
+                          class="secondary"
+                        >
+                          <i data-lucide="log-out"></i>
+                          <span>Salir</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="hud-status-row">
+                  <div class="hud-stat hud-stat-level">
+                    <span>Nivel</span><strong id="levelLabel">1</strong>
+                  </div>
+                </div>
+                <p id="gameMessage" class="message"></p>
+              </div>
+            </div>
+            <div class="canvas-wrap">
+              <canvas id="gameCanvas" width="840" height="560"></canvas>
+            </div>
+            <div
+              id="countdownOverlay"
+              class="countdown-overlay hidden"
+              aria-live="polite"
+            ></div>
+            <div class="touch-controls" aria-label="Controles tactiles">
+              <button data-dir="up" type="button" aria-label="Arriba">
+                <i data-lucide="chevron-up"></i>
+              </button>
+              <button data-dir="left" type="button" aria-label="Izquierda">
+                <i data-lucide="chevron-left"></i>
+              </button>
+              <button data-dir="down" type="button" aria-label="Abajo">
+                <i data-lucide="chevron-down"></i>
+              </button>
+              <button data-dir="right" type="button" aria-label="Derecha">
+                <i data-lucide="chevron-right"></i>
+              </button>
+            </div>
           </div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <div id="gameLoadingOverlay" class="game-loading hidden" aria-live="polite">
-    <div class="game-loading-card">
-      <i data-lucide="loader-circle"></i>
-      <strong>Cargando partido</strong>
-      <span>Preparando el estadio y los personajes...</span>
+        </section>
+      </main>
     </div>
-  </div>
 
-  <div id="modal" class="modal hidden">
-    <div class="modal-box">
-      <button id="modalClose" class="modal-close" type="button">×</button>
-      <div id="modalContent"></div>
+    <button
+      id="scrollTopBtn"
+      class="scroll-top-btn hidden"
+      type="button"
+      aria-label="Volver arriba"
+    >
+      <i data-lucide="arrow-up"></i>
+    </button>
+    <div id="gameLoadingOverlay" class="game-loading hidden" aria-live="polite">
+      <div class="game-loading-card">
+        <i data-lucide="loader-circle"></i>
+        <strong>Cargando partido</strong>
+        <span>Preparando el estadio y los personajes...</span>
+      </div>
     </div>
-  </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="scripts/core/levels.js?v=20260604.10"></script>
-  <script src="scripts/core/bots.js?v=20260604.10"></script>
-  <script src="scripts/core/ui.js?v=20260604.10"></script>
-  <script src="scripts/core/rankings.js?v=20260604.10"></script>
-  <script src="scripts/core/auth.js?v=20260604.10"></script>
-  <script src="scripts/game/audio.js?v=20260604.10"></script>
-  <script src="scripts/game/pacman-core.js?v=20260604.10"></script>
-  <script src="scripts/game/pacman-flow.js?v=20260604.10"></script>
-  <script src="scripts/game/pacman-movement.js?v=20260604.10"></script>
-  <script src="scripts/game/pacman-render.js?v=20260604.10"></script>
-  <script src="scripts/game/pacman.js?v=20260604.10"></script>
-  <script src="scripts/network/socket.js?v=20260604.10"></script>
-  <script src="scripts/network/modals.js?v=20260604.10"></script>
-  <script src="scripts/network/app.js?v=20260604.10"></script>
-</body>
+    <div id="modal" class="modal hidden">
+      <div class="modal-box">
+        <button id="modalClose" class="modal-close" type="button">×</button>
+        <div id="modalContent"></div>
+      </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="scripts/core/levels.js?v=20260604.10"></script>
+    <script src="scripts/core/bots.js?v=20260604.10"></script>
+    <script src="scripts/core/preferences.js?v=20260609.1"></script>
+    <script src="scripts/core/ui.js?v=20260604.10"></script>
+    <script src="scripts/core/rankings.js?v=20260604.10"></script>
+    <script src="scripts/core/auth.js?v=20260604.10"></script>
+    <script src="scripts/game/audio.js?v=20260604.10"></script>
+    <script src="scripts/game/pacman-core.js?v=20260604.10"></script>
+    <script src="scripts/game/pacman-flow.js?v=20260604.10"></script>
+    <script src="scripts/game/pacman-movement.js?v=20260604.10"></script>
+    <script src="scripts/game/pacman-render.js?v=20260604.10"></script>
+    <script src="scripts/game/pacman.js?v=20260604.10"></script>
+    <script src="scripts/network/socket.js?v=20260604.10"></script>
+    <script src="scripts/network/modals.js?v=20260604.10"></script>
+    <script src="scripts/network/app.js?v=20260604.10"></script>
+  </body>
 </html>
-
-

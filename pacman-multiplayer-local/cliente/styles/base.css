@@ -32,6 +32,23 @@ body.dark {
   --border: rgba(255, 105, 121, 0.24);
 }
 
+body.light {
+  --bg: #f7f9ff;
+  --bg-soft: #e3ebff;
+  --panel: rgba(255, 255, 255, 0.9);
+  --panel-strong: rgba(255, 255, 255, 0.97);
+  --text: #12223d;
+  --muted: #536784;
+  --primary: #cf2349;
+  --primary-strong: #8f1538;
+  --accent: #f85e70;
+  --accent-2: #e5ecff;
+  --danger: #bb1f49;
+  --success: #0f8a62;
+  --shadow: 0 24px 60px rgba(64, 83, 126, 0.14);
+  --border: rgba(76, 103, 151, 0.18);
+}
+
 * { box-sizing: border-box; }
 
 body {
@@ -47,9 +64,22 @@ body {
   color: var(--text);
 }
 
+body.light {
+  background:
+    radial-gradient(circle at 14% 10%, rgba(248, 94, 112, 0.16), transparent 20rem),
+    radial-gradient(circle at 88% 16%, rgba(92, 112, 255, 0.12), transparent 24rem),
+    linear-gradient(170deg, var(--bg), var(--bg-soft));
+}
+
 body.menu-bg {
   background:
     linear-gradient(rgba(2, 8, 18, 0.45), rgba(2, 8, 18, 0.7)),
+    url("../assets/images/backgrounds/fondoprincial.png") center/cover fixed no-repeat;
+}
+
+body.light.menu-bg {
+  background:
+    linear-gradient(rgba(247, 249, 255, 0.46), rgba(226, 234, 255, 0.72)),
     url("../assets/images/backgrounds/fondoprincial.png") center/cover fixed no-repeat;
 }
 
@@ -93,6 +123,11 @@ body::before {
   background: linear-gradient(transparent 96%, rgba(255, 255, 255, 0.04));
   background-size: 100% 6px;
   opacity: 0.3;
+}
+
+body.light::before {
+  opacity: 0.12;
+  background: linear-gradient(transparent 96%, rgba(26, 38, 64, 0.03));
 }
 
 .entry-transition {
@@ -199,6 +234,22 @@ button.secondary {
   box-shadow: none;
 }
 
+body.light button.secondary,
+body.light .menu-back,
+body.light .menu-action-link {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(232, 239, 255, 0.98));
+  color: var(--text);
+  border-color: rgba(90, 113, 158, 0.18);
+  box-shadow: 0 10px 22px rgba(74, 92, 129, 0.08);
+}
+
+body.light button.secondary:hover:not(:disabled),
+body.light .menu-back:hover,
+body.light .menu-action-link:hover {
+  border-color: rgba(207, 35, 73, 0.26);
+  box-shadow: 0 16px 26px rgba(74, 92, 129, 0.12);
+}
+
 button.danger { background: linear-gradient(130deg, #ff5c7d, #ff3e67); color: white; }
 
 input, select {
@@ -208,6 +259,17 @@ input, select {
   padding: 0.95rem 1rem;
   background: rgba(6, 19, 41, 0.85);
   color: var(--text);
+}
+
+body.light input,
+body.light select {
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text);
+  box-shadow: 0 10px 24px rgba(79, 98, 136, 0.08);
+}
+
+body.light input::placeholder {
+  color: #7a89a4;
 }
 
 input:focus, select:focus {

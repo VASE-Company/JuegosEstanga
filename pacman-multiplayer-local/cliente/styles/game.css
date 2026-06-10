@@ -45,6 +45,7 @@
   backdrop-filter: none;
   pointer-events: auto;
 }
+/* cuando termina la partida, el hud cambia de tono para que el resultado se note al toque */
 .hud-card.is-result {
   position: relative;
   left: auto;
@@ -82,6 +83,46 @@
 }
 .hud-card.is-result #pauseBtn {
   display: none;
+}
+.hud-actions-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  width: 100%;
+}
+.hud-menu-toggle {
+  align-self: flex-end;
+  min-height: 42px;
+  padding: 0.65rem 0.95rem;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.hud-menu-toggle.hidden {
+  display: none !important;
+}
+.hud-actions-shell .hud-actions {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(260px, 100%);
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(7, 18, 35, 0.96);
+  border: 1px solid rgba(255, 105, 121, 0.16);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 16;
+}
+.hud-actions-shell .hud-actions.is-open {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 .hud-card.is-result .hud-stat-points {
   display: none;
@@ -127,10 +168,19 @@
 }
 .hud-card.is-result .hud-side-left {
   width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 .hud-card.is-result .hud-side-right {
   width: 100%;
   align-items: stretch;
+}
+.hud-card.is-result .hud-result-level {
+  display: flex !important;
+}
+.hud-card:not(.is-result) .hud-result-level {
+  display: none !important;
 }
 .hud-card.is-result .hud-actions {
   width: 100%;
@@ -138,10 +188,24 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   justify-content: stretch;
+  position: static;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .hud-card.is-result .hud-actions button {
   min-width: 0;
   width: 100%;
+}
+.hud-card.is-result .hud-menu-toggle {
+  display: none;
+}
+.hud-actions-shell .hud-actions button {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 14px;
+  align-items: center;
 }
 .hud-strip {
   display: flex;
@@ -149,6 +213,11 @@
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 8px;
+}
+.hud-status-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 6px;
 }
 .hud-side {
   display: flex;
@@ -182,6 +251,14 @@
 .hud-stat-lives {
   background: rgba(10, 16, 26, 0.88);
 }
+.hud-stat-level {
+  min-width: 124px;
+  justify-content: center;
+}
+/* este dato repite el nivel actual en la pantalla final para que no se pierda de vista */
+.hud-result-level {
+  min-width: 0;
+}
 .hud-stat-score {
   min-width: 122px;
 }
@@ -196,6 +273,9 @@
 }
 .hud-stat span { color: rgba(255, 232, 236, 0.8); font-weight: 800; }
 .hud-stat strong { font-size: 1.08rem; color: #fff; }
+.hud-stat-level strong {
+  font-size: 1rem;
+}
 .hud-actions {
   display: flex;
   gap: 10px;
@@ -360,7 +440,7 @@ canvas.is-countdown-active {
   right: 16px;
   bottom: 16px;
   width: min(320px, calc(100vw - 32px));
-  display: grid;
+  display: none;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   z-index: 3;

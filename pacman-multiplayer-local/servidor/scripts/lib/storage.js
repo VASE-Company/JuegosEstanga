@@ -5,6 +5,7 @@ const fsp = require('fs/promises');
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const SCORES_FILE = path.join(DATA_DIR, 'scores.json');
+const LIVE_SCORES_FILE = path.join(DATA_DIR, 'liveScores.json');
 const CODES_FILE = path.join(DATA_DIR, 'verificationCodes.json');
 const MATCHES_FILE = path.join(DATA_DIR, 'matches.txt');
 
@@ -13,6 +14,7 @@ async function ensureDataFiles() {
   const defaults = [
     [USERS_FILE, '[]'],
     [SCORES_FILE, '[]'],
+    [LIVE_SCORES_FILE, '[]'],
     [CODES_FILE, '[]'],
     [MATCHES_FILE, '']
   ];
@@ -45,6 +47,7 @@ module.exports = {
   DATA_DIR,
   USERS_FILE,
   SCORES_FILE,
+  LIVE_SCORES_FILE,
   CODES_FILE,
   MATCHES_FILE,
   ensureDataFiles,

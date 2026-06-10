@@ -9,6 +9,7 @@ const {
   DATA_DIR,
   USERS_FILE,
   SCORES_FILE,
+  LIVE_SCORES_FILE,
   CODES_FILE,
   MATCHES_FILE,
   ensureDataFiles,
@@ -27,7 +28,9 @@ const {
   normalizeEmail,
   isCode,
   createVerificationCode,
-  generateId
+  generateId,
+  sanitizeDisplayName,
+  defaultDisplayName
 } = require("./lib/validation");
 
 const app = express();
@@ -43,6 +46,9 @@ const PORTAL_DIR = path.join(__dirname, "..", "..", "..", "arcade-portal");
 const rooms = new Map();
 const socketUsers = new Map();
 const sessions = new Map();
+let liveSnapshotQueue = Promise.resolve();
+const GHOST_INITIAL_RELEASE_SCHEDULE = [0, 10000, 15000, 20000];
+const GHOST_RESPAWN_DELAY = 5000;
 
 app.use(express.json());
 app.use(express.static(PORTAL_DIR));
@@ -85,6 +91,103 @@ async function getUserByEmail(email) {
   return users.find((user) => user.email === normalizeEmail(email)) || null;
 }
 
+function normalizeStoredUser(user) {
+  if (!user) return null;
+  const displayName = sanitizeDisplayName(user.displayName || defaultDisplayName(user.email));
+  return {
+    ...user,
+    displayName
+  };
+}
+
+async function updateUserDisplayName(email, displayName) {
+  const normalizedEmail = normalizeEmail(email);
+  const cleanedName = sanitizeDisplayName(displayName);
+  if (!cleanedName) throw new Error("El nombre visible no es valido.");
+  const users = await readJson(USERS_FILE);
+  const index = users.findIndex((user) => user.email === normalizedEmail);
+  if (index === -1) throw new Error("Usuario no encontrado");
+  users[index] = {
+    ...users[index],
+    displayName: cleanedName,
+    updatedAt: new Date().toISOString()
+  };
+  await writeJson(USERS_FILE, users);
+  return normalizeStoredUser(users[index]);
+}
+
+async function getLiveSnapshots() {
+  return readJson(LIVE_SCORES_FILE);
+}
+
+async function upsertLiveSnapshot(snapshot) {
+  liveSnapshotQueue = liveSnapshotQueue.then(async () => {
+    const snapshots = await getLiveSnapshots();
+    const index = snapshots.findIndex((item) => item.codigo === snapshot.codigo);
+    if (index >= 0) snapshots[index] = snapshot;
+    else snapshots.push(snapshot);
+    await writeJson(LIVE_SCORES_FILE, snapshots);
+  }).catch((error) => {
+    console.error("Error en cola de snapshot:", error.message);
+  });
+  return liveSnapshotQueue;
+}
+
+async function removeLiveSnapshot(codigo) {
+  liveSnapshotQueue = liveSnapshotQueue.then(async () => {
+    const snapshots = await getLiveSnapshots();
+    const filtered = snapshots.filter((item) => item.codigo !== codigo);
+    if (filtered.length !== snapshots.length) {
+      await writeJson(LIVE_SCORES_FILE, filtered);
+    }
+  }).catch((error) => {
+    console.error("Error eliminando snapshot:", error.message);
+  });
+  return liveSnapshotQueue;
+}
+
+function queueLiveSnapshot(room) {
+  if (!room || room.estado !== "jugando" || !room.gameState) return;
+  const minInterval = 1500;
+  const now = Date.now();
+  const elapsed = now - (room.lastSnapshotSavedAt || 0);
+  const persist = async () => {
+    room.snapshotInFlight = true;
+    try {
+      const state = room.gameState;
+      await upsertLiveSnapshot({
+        codigo: room.codigo,
+        game: room.game || "pacman",
+        estado: room.estado,
+        level: state.level,
+        scorePacman: state.scorePacman,
+        livesPacman: state.livesPacman,
+        scoreGhosts: state.ghosts.map((ghost) => ({
+          email: ghost.email,
+          displayName: ghost.displayName || defaultDisplayName(ghost.email),
+          score: ghost.score || 0
+        })),
+        updatedAt: new Date().toISOString()
+      });
+      room.lastSnapshotSavedAt = Date.now();
+    } catch (error) {
+      console.error("Error guardando snapshot live:", error.message);
+    } finally {
+      room.snapshotInFlight = false;
+    }
+  };
+  if (elapsed >= minInterval && !room.snapshotInFlight) {
+    persist();
+    return;
+  }
+  if (room.snapshotTimer) return;
+  room.snapshotTimer = setTimeout(() => {
+    room.snapshotTimer = null;
+    if (room.snapshotInFlight) return;
+    persist();
+  }, Math.max(120, minInterval - elapsed));
+}
+
 async function getTop3UserScoresByGame(email, game) {
   const scores = await readJson(SCORES_FILE);
   return scores
@@ -110,6 +213,7 @@ async function saveScore(scoreData) {
   if (!user) throw new Error("Usuario no registrado");
   const scores = await readJson(SCORES_FILE);
   const game = scoreData.game || "pacman";
+  const displayName = sanitizeDisplayName(scoreData.displayName || user.displayName || defaultDisplayName(user.email));
   const score = {
     id: generateId("score"),
     game,
@@ -119,6 +223,7 @@ async function saveScore(scoreData) {
     matchCode: scoreData.matchCode || null,
     userId: scoreData.userId || user.id,
     email: user.email,
+    displayName,
     score: Math.round(numericScore),
     result: scoreData.result || "finalizado",
     createdAt: new Date().toISOString()
@@ -199,10 +304,12 @@ function nearestPellet(state, from) {
 
 function createGameState(room) {
   const level = LEVELS.find((item) => item.id === Number(room.nivelActual)) || LEVELS[0];
-  const parsed = parseLevel(level);
+  const seed = room.levelSeed || `${room.codigo}-${room.nivelActual}-${Date.now()}`;
+  const parsed = parseLevel(level, seed);
   const pacmanPlayer = room.jugadores.pacman;
   const humanGhosts = room.jugadores.fantasmas.slice(0, room.maxFantasmasHumanos);
   const totalGhosts = room.allowBots ? Math.min(5, Math.max(parsed.ghostStarts.length, humanGhosts.length)) : humanGhosts.length;
+  const ghostSpawn = parsed.ghostStarts[0] || parsed.pacmanStart;
   
   const ghostClubs = ["boca", "independiente", "racing", "sanlorenzo"];
   const humanChosenClubs = humanGhosts.map(h => h.character).filter(Boolean);
@@ -210,7 +317,6 @@ function createGameState(room) {
 
   const ghosts = [];
   for (let i = 0; i < totalGhosts; i += 1) {
-    const start = parsed.ghostStarts[i % parsed.ghostStarts.length];
     const human = humanGhosts[i] || null;
     let club = "";
     if (human) {
@@ -220,16 +326,19 @@ function createGameState(room) {
     }
     ghosts.push({
       id: `ghost_${i + 1}`,
-      x: start.x,
-      y: start.y,
-      startX: start.x,
-      startY: start.y,
+      x: ghostSpawn.x,
+      y: ghostSpawn.y,
+      startX: ghostSpawn.x,
+      startY: ghostSpawn.y,
       club: club,
       direction: ["left", "right", "up", "down"][i % 4],
       vulnerable: false,
+      released: i === 0,
+      releaseAt: GHOST_INITIAL_RELEASE_SCHEDULE[i] ?? 20000 + ((i - 3) * 5000),
       isBot: !human,
       userId: human ? human.userId : null,
       email: human ? human.email : `Bot ${i + 1}`,
+      displayName: human ? normalizeStoredUser(human).displayName : `Bot ${i + 1}`,
       socketId: human ? human.socketId : null,
       score: 0
     });
@@ -253,6 +362,7 @@ function createGameState(room) {
       direction: "left",
       userId: pacmanPlayer ? pacmanPlayer.userId : null,
       email: pacmanPlayer ? pacmanPlayer.email : "Pac-Man Bot",
+      displayName: pacmanPlayer ? normalizeStoredUser(pacmanPlayer).displayName : "Pac-Man Bot",
       socketId: pacmanPlayer ? pacmanPlayer.socketId : null,
       isBot: !pacmanPlayer
     },
@@ -281,6 +391,8 @@ async function finishRoom(room, winner, message) {
   if (!room || room.estado === "finalizada" || room.estado === "cancelada") return;
   room.estado = winner === "Cancelada" ? "cancelada" : "finalizada";
   if (room.interval) clearInterval(room.interval);
+  if (room.snapshotTimer) clearTimeout(room.snapshotTimer);
+  room.snapshotTimer = null;
   const state = room.gameState;
   if (state) {
     state.status = room.estado;
@@ -327,6 +439,7 @@ async function finishRoom(room, winner, message) {
   } catch (error) {
     console.error("Error guardando cierre multiplayer:", error.message);
   }
+  await removeLiveSnapshot(room.codigo);
   io.to(room.codigo).emit("partida-finalizada-pacman", state || { winner, message });
   io.to(room.codigo).emit("game-state-pacman", state);
   setTimeout(() => rooms.delete(room.codigo), 30000);
@@ -350,6 +463,7 @@ async function advanceLevel(room) {
   room.gameState.scorePacman = state.scorePacman + 500;
   room.gameState.livesPacman = state.livesPacman;
   io.to(room.codigo).emit("nivel-completado-pacman", { level: state.level, nextLevel: room.nivelActual });
+  queueLiveSnapshot(room);
 }
 
 async function tickRoom(room) {
@@ -358,6 +472,7 @@ async function tickRoom(room) {
   const now = Date.now();
   state.ghosts.forEach((ghost) => {
     ghost.vulnerable = now < state.vulnerableUntil;
+    if (!ghost.released && now >= ghost.releaseAt) ghost.released = true;
   });
 
   const pacInput = state.pacman.socketId ? room.inputs[state.pacman.socketId] : null;
@@ -370,6 +485,7 @@ async function tickRoom(room) {
   }
 
   for (const ghost of state.ghosts) {
+    if (!ghost.released) continue;
     const input = ghost.socketId ? room.inputs[ghost.socketId] : null;
     if (input && !ghost.isBot) {
       moveActor(state, ghost, input);
@@ -390,13 +506,15 @@ async function tickRoom(room) {
 
   for (const ghost of state.ghosts) {
     if (ghost.x === state.pacman.x && ghost.y === state.pacman.y) {
-      if (ghost.vulnerable) {
-        state.scorePacman += 200;
-        ghost.score += 0;
-        ghost.x = ghost.startX;
-        ghost.y = ghost.startY;
-        ghost.vulnerable = false;
-      } else {
+        if (ghost.vulnerable) {
+          state.scorePacman += 200;
+          ghost.score += 0;
+          ghost.x = ghost.startX;
+          ghost.y = ghost.startY;
+          ghost.vulnerable = false;
+          ghost.released = false;
+          ghost.releaseAt = now + GHOST_RESPAWN_DELAY;
+        } else {
         state.livesPacman -= 1;
         ghost.score += 100;
         if (state.livesPacman <= 0) {
@@ -414,6 +532,7 @@ async function tickRoom(room) {
     return;
   }
 
+  queueLiveSnapshot(room);
   io.to(room.codigo).emit("game-state-pacman", publicState(room.gameState));
 }
 
@@ -436,6 +555,7 @@ function publicState(state) {
       direction: state.pacman.direction,
       userId: state.pacman.userId,
       email: state.pacman.email,
+      displayName: state.pacman.displayName,
       isBot: state.pacman.isBot
     },
     ghosts: state.ghosts.map((ghost) => ({
@@ -444,9 +564,12 @@ function publicState(state) {
       y: ghost.y,
       direction: ghost.direction,
       vulnerable: ghost.vulnerable,
+      released: ghost.released,
+      releaseAt: ghost.releaseAt,
       isBot: ghost.isBot,
       userId: ghost.userId,
       email: ghost.email,
+      displayName: ghost.displayName,
       score: ghost.score
     })),
     pellets: state.pellets,
@@ -456,7 +579,60 @@ function publicState(state) {
   };
 }
 
+function syncLobbySockets(room) {
+  // cada socket guarda su rol actualizado para que la sala no quede desfasada
+  if (!room?.sockets) return;
+  const rolesByUserId = new Map();
+  if (room.jugadores?.pacman) {
+    rolesByUserId.set(room.jugadores.pacman.userId, { role: "pacman", character: room.jugadores.pacman.character });
+  }
+  for (const ghost of room.jugadores?.fantasmas || []) {
+    rolesByUserId.set(ghost.userId, { role: "ghost", character: ghost.character });
+  }
+  Object.entries(room.sockets).forEach(([socketId, meta]) => {
+    const updated = rolesByUserId.get(meta.userId);
+    if (!updated) return;
+    room.sockets[socketId] = { ...meta, ...updated };
+  });
+}
+
+function pickGhostCharacter(room, excludeUserId = null) {
+  // rotamos los fantasmas por nombre para que no se repitan de una manera rara
+  const preferred = ["boca", "independiente", "racing", "sanlorenzo"];
+  const occupied = new Set();
+  if (room.jugadores?.pacman && room.jugadores.pacman.userId !== excludeUserId) occupied.add("pacman");
+  for (const ghost of room.jugadores?.fantasmas || []) {
+    if (ghost.userId !== excludeUserId) occupied.add(ghost.character);
+  }
+  return preferred.find((character) => !occupied.has(character)) || "boca";
+}
+
+function toggleLobbyRole(room, userId) {
+  // esta lógica mueve al jugador entre pacman y fantasma sin romper la sala
+  if (!room?.jugadores) throw new Error("La sala no existe.");
+  const pacman = room.jugadores.pacman;
+  const ghostIndex = room.jugadores.fantasmas.findIndex((ghost) => ghost.userId === userId);
+  if (pacman?.userId === userId) {
+    if (!room.jugadores.fantasmas.length) throw new Error("Necesitas al menos un fantasma para cambiar el rol.");
+    const nextPacman = room.jugadores.fantasmas[0];
+    const nextGhost = { ...pacman, role: "ghost", character: pickGhostCharacter(room, pacman.userId) };
+    room.jugadores.pacman = { ...nextPacman, role: "pacman", character: "pacman" };
+    room.jugadores.fantasmas[0] = nextGhost;
+    syncLobbySockets(room);
+    return;
+  }
+  if (ghostIndex >= 0) {
+    const currentGhost = room.jugadores.fantasmas[ghostIndex];
+    const nextGhost = pacman ? { ...pacman, role: "ghost", character: pickGhostCharacter(room, pacman.userId) } : null;
+    room.jugadores.pacman = { ...currentGhost, role: "pacman", character: "pacman" };
+    if (nextGhost) room.jugadores.fantasmas[ghostIndex] = nextGhost;
+    else room.jugadores.fantasmas.splice(ghostIndex, 1);
+    syncLobbySockets(room);
+  }
+}
+
 function lobbyPayload(room) {
+  // armamos una sola foto de la sala para que cliente y server miren lo mismo
   return {
     codigo: room.codigo,
     estado: room.estado,
@@ -465,8 +641,11 @@ function lobbyPayload(room) {
     maxFantasmasHumanos: room.maxFantasmasHumanos,
     allowBots: room.allowBots,
     hostUserId: room.hostUserId,
-    jugadores: room.jugadores,
     ready: Boolean(room.jugadores.pacman && room.jugadores.fantasmas.length >= 1),
+    jugadores: {
+      pacman: room.jugadores.pacman ? { ...room.jugadores.pacman, displayName: normalizeStoredUser(room.jugadores.pacman).displayName } : null,
+      fantasmas: room.jugadores.fantasmas.map((ghost) => ({ ...ghost, displayName: normalizeStoredUser(ghost).displayName }))
+    },
     message: !room.jugadores.pacman
       ? "Falta un Pac-Man."
       : room.jugadores.fantasmas.length < 1
@@ -509,6 +688,7 @@ app.post("/api/auth/verify-code", async (req, res) => {
   const email = normalizeEmail(req.body.email);
   const code = String(req.body.code || "");
   const type = req.body.type;
+  const displayName = sanitizeDisplayName(req.body.displayName || defaultDisplayName(email));
   if (!isEmail(email)) return res.status(400).json({ ok: false, message: "Email invalido.", error: "Email invalido." });
   if (!isCode(code)) return res.status(400).json({ ok: false, message: "El codigo debe tener 6 digitos.", error: "El codigo debe tener 6 digitos." });
   const codes = await readJson(CODES_FILE);
@@ -519,21 +699,27 @@ app.post("/api/auth/verify-code", async (req, res) => {
   let user = users.find((item) => item.email === email);
   if (type === "register") {
     if (user) return res.status(409).json({ ok: false, message: "El usuario ya existe. Inicia sesion.", error: "El usuario ya existe. Inicia sesion." });
-    user = { id: generateId("user"), email, createdAt: new Date().toISOString(), verified: true };
+    user = { id: generateId("user"), email, displayName, createdAt: new Date().toISOString(), verified: true };
     users.push(user);
     await writeJson(USERS_FILE, users);
   }
   if (type === "login" && !user) return res.status(404).json({ ok: false, message: "El usuario no existe. Registrate primero.", error: "El usuario no existe. Registrate primero." });
+  if (user && displayName) {
+    user.displayName = displayName;
+    user.updatedAt = new Date().toISOString();
+    users = users.map((item) => (item.id === user.id ? user : item));
+    await writeJson(USERS_FILE, users);
+  }
   await writeJson(CODES_FILE, codes.filter((item) => item !== found));
   const token = createSession(user);
-  res.json({ ok: true, message: "Sesion iniciada.", user, token });
+  res.json({ ok: true, message: "Sesion iniciada.", user: normalizeStoredUser(user), token });
 });
 
 app.get("/api/auth/me", async (req, res) => {
   const session = sessionFromRequest(req);
   if (!session) return res.status(401).json({ ok: false, message: "No autenticado.", error: "No autenticado." });
   const users = await readJson(USERS_FILE);
-  const user = users.find((item) => item.id === session.userId && item.email === session.email);
+  const user = normalizeStoredUser(users.find((item) => item.id === session.userId && item.email === session.email));
   if (!user) return res.status(401).json({ ok: false, message: "Sesion invalida.", error: "Sesion invalida." });
   res.json({ ok: true, user });
 });
@@ -542,6 +728,19 @@ app.post("/api/auth/logout", (req, res) => {
   const session = sessionFromRequest(req);
   if (session) sessions.delete(session.token);
   res.json({ ok: true, message: "Sesion cerrada." });
+});
+
+app.post("/api/auth/profile", async (req, res) => {
+  const session = sessionFromRequest(req);
+  if (!session) return res.status(401).json({ ok: false, message: "No autenticado.", error: "No autenticado." });
+  try {
+    const displayName = sanitizeDisplayName(req.body.displayName);
+    if (!displayName) return res.status(400).json({ ok: false, message: "El nombre visible no es valido.", error: "El nombre visible no es valido." });
+    const user = await updateUserDisplayName(session.email, displayName);
+    res.json({ ok: true, user });
+  } catch (error) {
+    res.status(400).json({ ok: false, message: error.message, error: error.message });
+  }
 });
 
 app.get("/api/rankings/pacman", async (req, res) => {
@@ -697,6 +896,7 @@ io.on("connection", (socket) => {
       const user = await assertRegistered(payload.userId, payload.email);
       const role = payload.role === "ghost" ? "ghost" : "pacman";
       const character = payload.character || (role === "pacman" ? "pacman" : "boca");
+      const displayName = sanitizeDisplayName(payload.displayName || user.displayName || defaultDisplayName(user.email));
       const codigo = generateRoomCode();
       const room = {
         codigo,
@@ -715,10 +915,10 @@ io.on("connection", (socket) => {
         interval: null,
         createdAt: new Date().toISOString()
       };
-      const player = { userId: user.id, email: user.email, socketId: socket.id, character };
+      const player = { userId: user.id, email: user.email, displayName, socketId: socket.id, character };
       if (role === "pacman") room.jugadores.pacman = player;
       else room.jugadores.fantasmas.push(player);
-      room.sockets[socket.id] = { userId: user.id, email: user.email, role, character };
+      room.sockets[socket.id] = { userId: user.id, email: user.email, displayName, role, character };
       rooms.set(codigo, room);
       socket.join(codigo);
       socket.emit("partida-creada-pacman", lobbyPayload(room));
@@ -739,12 +939,13 @@ io.on("connection", (socket) => {
       
       const role = payload.role === "ghost" ? "ghost" : "pacman";
       const character = payload.character || (role === "pacman" ? "pacman" : "boca");
+      const displayName = sanitizeDisplayName(payload.displayName || user.displayName || defaultDisplayName(user.email));
       
       const isTaken = (room.jugadores.pacman && room.jugadores.pacman.character === character) ||
         (room.jugadores.fantasmas || []).some(ghost => ghost.character === character);
       if (isTaken) throw new Error(`El personaje ${character} ya esta siendo usado por otro jugador.`);
 
-      const player = { userId: user.id, email: user.email, socketId: socket.id, character };
+      const player = { userId: user.id, email: user.email, displayName, socketId: socket.id, character };
       if (role === "pacman") {
         if (room.jugadores.pacman) throw new Error("Ya hay un Pac-Man humano.");
         room.jugadores.pacman = player;
@@ -754,7 +955,7 @@ io.on("connection", (socket) => {
         }
         room.jugadores.fantasmas.push(player);
       }
-      room.sockets[socket.id] = { userId: user.id, email: user.email, role, character };
+      room.sockets[socket.id] = { userId: user.id, email: user.email, displayName, role, character };
       socket.join(codigo);
       socket.emit("jugador-unido-pacman", lobbyPayload(room));
       io.to(codigo).emit("lobby-actualizado-pacman", lobbyPayload(room));
@@ -763,8 +964,46 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("cambiar-rol-pacman", ({ codigo, userId } = {}) => {
+    try {
+      // este cambio lo valida el server para que no se pueda tunear desde el navegador
+      const room = rooms.get(String(codigo || "").trim().toUpperCase());
+      if (!room) throw new Error("La sala no existe.");
+      if (room.estado !== "lobby") throw new Error("Solo podés cambiar roles en la sala de espera.");
+      const participant = room.sockets[socket.id];
+      if (!participant || participant.userId !== userId) throw new Error("No perteneces a la sala.");
+      toggleLobbyRole(room, userId);
+      io.to(room.codigo).emit("lobby-actualizado-pacman", lobbyPayload(room));
+    } catch (error) {
+      socket.emit("error-partida", { message: error.message });
+    }
+  });
+
+  socket.on("reiniciar-sala-pacman", ({ codigo, userId } = {}) => {
+    try {
+      // reiniciar desde acá evita que queden restos de una partida vieja en otros clientes
+      const room = rooms.get(String(codigo || "").trim().toUpperCase());
+      if (!room) throw new Error("La sala no existe.");
+      if (!room.sockets[socket.id] || room.sockets[socket.id].userId !== userId) throw new Error("No perteneces a la sala.");
+      if (room.hostUserId !== userId) throw new Error("Solo el creador puede reiniciar la sala.");
+      if (room.interval) {
+        clearInterval(room.interval);
+        room.interval = null;
+      }
+      room.gameState = null;
+      room.estado = "lobby";
+      room.inputs = {};
+      room.message = "La sala fue reiniciada.";
+      io.to(room.codigo).emit("sala-reiniciada-pacman", { message: room.message });
+      io.to(room.codigo).emit("lobby-actualizado-pacman", lobbyPayload(room));
+    } catch (error) {
+      socket.emit("error-partida", { message: error.message });
+    }
+  });
+
   socket.on("iniciar-partida-pacman", async ({ codigo, userId } = {}) => {
     try {
+      // arrancamos solo cuando la sala está completa y el host lo confirma
       const room = rooms.get(String(codigo || "").trim().toUpperCase());
       if (!room) throw new Error("La sala no existe.");
       if (room.estado !== "lobby") throw new Error("La sala no esta en lobby.");
@@ -775,6 +1014,7 @@ io.on("connection", (socket) => {
       room.estado = "jugando";
       room.gameState = createGameState(room);
       room.interval = setInterval(() => tickRoom(room), 1000 / 12);
+      queueLiveSnapshot(room);
       io.to(room.codigo).emit("partida-iniciada-pacman", publicState(room.gameState));
       io.to(room.codigo).emit("game-state-pacman", publicState(room.gameState));
     } catch (error) {
@@ -922,6 +1162,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
+    // si alguien se va sin avisar, limpiamos su lugar para que la sala no quede colgada
     const meta = socketUsers.get(socket.id);
     socketUsers.delete(socket.id);
     if (meta?.game === "snake") {
@@ -936,8 +1177,10 @@ io.on("connection", (socket) => {
 });
 
 function removeSocketFromRoom(socket, room, message) {
+  // esta limpieza deja el estado prolijo y avisa al resto sin romper la sala
   const player = room.sockets[socket.id];
   if (!player) return;
+  const playerName = player.displayName || player.email || "Un jugador";
   delete room.sockets[socket.id];
   delete room.inputs[socket.id];
   socket.leave(room.codigo);
@@ -952,19 +1195,56 @@ function removeSocketFromRoom(socket, room, message) {
   }
   if (room.estado === "lobby") {
     if (!room.jugadores.pacman && room.jugadores.fantasmas.length === 0) {
+      socket.emit("sala-cerrada-pacman", { message: "Se ha cerrado la sala." });
       rooms.delete(room.codigo);
     } else {
-      io.to(room.codigo).emit("rival-desconectado-pacman", { message });
+      io.to(room.codigo).emit("rival-desconectado-pacman", { message: `${playerName} salió de la sala.` });
       io.to(room.codigo).emit("lobby-actualizado-pacman", lobbyPayload(room));
     }
   } else {
-    io.to(room.codigo).emit("rival-desconectado-pacman", { message });
+    io.to(room.codigo).emit("rival-desconectado-pacman", { message: `${playerName} salió de la partida.` });
   }
 }
 
-ensureDataFiles().then(() => {
-  server.listen(PORT, HOST, () => {
-    console.log(`Servidor funcionando en http://localhost:${PORT}`);
-    console.log(`Red local: usa http://IP-DE-LA-PC:${PORT}`);
+function listenOnPort(port) {
+  return new Promise((resolve, reject) => {
+    const onError = (error) => {
+      server.off("listening", onListening);
+      reject(error);
+    };
+
+    const onListening = () => {
+      server.off("error", onError);
+      resolve(port);
+    };
+
+    server.once("error", onError);
+    server.once("listening", onListening);
+    server.listen(port, HOST);
   });
+}
+
+async function startServer() {
+  await ensureDataFiles();
+  const preferredPorts = [PORT, PORT + 1, PORT + 2, PORT + 3, PORT + 4, PORT + 5];
+  for (const port of preferredPorts) {
+    try {
+      await listenOnPort(port);
+      console.log(`Servidor funcionando en http://localhost:${port}`);
+      console.log(`Red local: usa http://IP-DE-LA-PC:${port}`);
+      return;
+    } catch (error) {
+      if (error && error.code === "EADDRINUSE") {
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  throw new Error(`No se pudo iniciar el servidor. Los puertos ${preferredPorts.join(", ")} estan ocupados.`);
+}
+
+startServer().catch((error) => {
+  console.error(error.message || error);
+  process.exit(1);
 });

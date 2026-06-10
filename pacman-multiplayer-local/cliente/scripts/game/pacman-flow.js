@@ -69,9 +69,11 @@
       this.levelTransitionTimer = null;
     }
     const level = LEVELS[levelId - 1] || LEVELS[0];
-    const parsed = parseLevel(level);
+    const levelSeed = `${level.id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const parsed = parseLevel(level, levelSeed);
     const ghostHouse = this.getGhostHouse(parsed);
     const ghostStarts = this.getGhostStarts(parsed);
+    const ghostSpawn = ghostHouse.slots?.[0] || ghostStarts[0] || parsed.ghostStarts?.[0] || parsed.pacmanStart;
     const orderedGhostProfiles = this.getOrderedGhostProfiles();
     const pacmanInterval = Math.max(90, Math.round(170 / Math.max(0.95, level.speed || 1)));
     const ghostIntervalBase = Math.max(95, Math.round((this.role === "ghost" ? 210 : 220) / Math.max(0.95, level.ghostSpeed || 1)));
@@ -82,6 +84,7 @@
     this.state = {
       status: "playing",
       level: level.id,
+      levelSeed,
       levelName: level.name,
       mapName: level.mapName || "Monumental",
       playerRole: this.role,
@@ -130,28 +133,28 @@
         email: this.role === "pacman" ? Auth.user.email : "Pac-Man Bot",
         isBot: this.role !== "pacman"
       },
-      ghosts: ghostStarts.slice(0, 4).map((start, index) => {
-        const profile = orderedGhostProfiles[index] || orderedGhostProfiles[index % orderedGhostProfiles.length];
+      ghosts: orderedGhostProfiles.slice(0, 4).map((profile, index) => {
+        const releaseSchedule = this.ghostInitialReleaseScheduleMs || [0, 10000, 15000, 20000];
         return {
           id: `ghost_${index + 1}`,
           club: profile.club,
           asset: profile.asset,
           speed: profile.speed,
           wobble: profile.wobble,
-          x: start.x,
-          y: start.y,
-          startX: start.x,
-          startY: start.y,
-          prevX: start.x,
-          prevY: start.y,
-          renderX: start.x,
-          renderY: start.y,
+          x: ghostSpawn.x,
+          y: ghostSpawn.y,
+          startX: ghostSpawn.x,
+          startY: ghostSpawn.y,
+          prevX: ghostSpawn.x,
+          prevY: ghostSpawn.y,
+          renderX: ghostSpawn.x,
+          renderY: ghostSpawn.y,
           moveStartedAt: Date.now(),
           moveDuration: ghostIntervalBase,
           direction: index % 2 ? "left" : "right",
           lastMoveAt: 0,
           released: index === 0,
-          releaseAt: index * this.releaseDelayMs,
+          releaseAt: releaseSchedule[index] ?? 20000 + ((index - 3) * 5000),
           vulnerable: false,
           eatenAtVulnerableUntil: 0,
           isBot: !(this.role === "ghost" && index === 0),
@@ -332,7 +335,7 @@
           ghost.released = false;
           ghost.vulnerable = false;
           ghost.eatenAtVulnerableUntil = state.vulnerableUntil;
-          ghost.releaseAt = now + this.releaseDelayMs;
+          ghost.releaseAt = now + (this.ghostRespawnDelayMs || 5000);
           ghost.lastMoveAt = now;
           state.ghostDeaths += 1;
           this.syncGhostScore(state);

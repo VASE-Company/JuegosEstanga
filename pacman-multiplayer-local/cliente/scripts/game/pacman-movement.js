@@ -17,7 +17,9 @@ var PacmanMovement = {
     const tile = Math.max(isMobile ? 12 : isCompact ? 11 : 14, Math.floor(Math.min(availableWidth / state.width, availableHeight / state.height) * levelScale));
     const mapWidth = tile * state.width;
     const mapHeight = tile * state.height;
-    const mapX = isMobile ? Math.max(outerPadding, Math.floor((canvasWidth - mapWidth) / 2)) : plaqueWidth + outerPadding;
+    const mapX = isMobile
+      ? Math.max(outerPadding, Math.floor((canvasWidth - mapWidth) / 2))
+      : Math.max(outerPadding, Math.floor((canvasWidth - mapWidth) / 2));
     const mapY = isMobile
       ? Math.max(84, Math.floor((canvasHeight - mapHeight) / 2) - 10)
       : isCompact

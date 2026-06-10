@@ -51,13 +51,13 @@ var PacmanRender = {
     (state.pellets || []).forEach((dot) => {
       const px = layout.mapX + dot.x * tile;
       const py = layout.mapY + dot.y * tile;
-      this.drawItemSprite(ctx, "pellet", px, py, tile, isMobile ? 0.42 : 0.34, 0.04);
+      this.drawItemSprite(ctx, "pellet", px, py, tile, isMobile ? 0.5 : 0.38, 0.045);
     });
 
     (state.powerPellets || []).forEach((dot) => {
       const px = layout.mapX + dot.x * tile;
       const py = layout.mapY + dot.y * tile;
-      this.drawItemSprite(ctx, "powerPellet", px, py, tile, isMobile ? 0.56 : 0.44, 0.06);
+      this.drawItemSprite(ctx, "powerPellet", px, py, tile, isMobile ? 0.7 : 0.52, 0.08);
     });
 
     this.drawPacman(ctx, state.pacman, tile, layout, Date.now());
@@ -350,14 +350,24 @@ var PacmanRender = {
 
   drawItemSprite(ctx, key, x, y, tile, sizeFactor, fallbackRadiusFactor) {
     const image = this.spriteAssets[key] || this.assets[key];
+    const centerX = x + tile / 2;
+    const centerY = y + tile / 2;
+    ctx.save();
+    ctx.shadowColor = key === "powerPellet" ? "rgba(255, 214, 102, 0.7)" : "rgba(255, 255, 255, 0.42)";
+    ctx.shadowBlur = tile * (key === "powerPellet" ? 0.24 : 0.14);
+    ctx.fillStyle = key === "powerPellet" ? "rgba(255, 214, 102, 0.14)" : "rgba(255, 255, 255, 0.08)";
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, Math.max(2.5, tile * (key === "powerPellet" ? 0.19 : 0.11)), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
     if (image && this.assetReady[key]) {
       const size = tile * sizeFactor;
-      this.drawContainedImage(ctx, image, x + tile / 2 - size / 2, y + tile / 2 - size / 2, size, size, 0.92);
+      this.drawContainedImage(ctx, image, centerX - size / 2, centerY - size / 2, size, size, key === "powerPellet" ? 0.98 : 0.94);
       return;
     }
     ctx.fillStyle = key === "powerPellet" ? "#7cf7d4" : "#ffe680";
     ctx.beginPath();
-    ctx.arc(x + tile / 2, y + tile / 2, Math.max(2, tile * fallbackRadiusFactor), 0, Math.PI * 2);
+    ctx.arc(centerX, centerY, Math.max(2, tile * fallbackRadiusFactor), 0, Math.PI * 2);
     ctx.fill();
   },
 

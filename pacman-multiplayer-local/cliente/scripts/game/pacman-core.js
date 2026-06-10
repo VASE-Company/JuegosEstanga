@@ -17,7 +17,8 @@ var PacmanCore = {
   assetReady: {},
   spriteAssets: {},
   loadingUntil: 0,
-  releaseDelayMs: 2200,
+  ghostRespawnDelayMs: 5000,
+  ghostInitialReleaseScheduleMs: [0, 10000, 15000, 20000],
   ghostProfiles: [
     { club: "boca", asset: "assets/images/characters/bocafantasma.png", vulnerableAsset: "assets/images/characters/bocafantasma-perseguido.png", speed: 1.35, wobble: 0.04 },
     { club: "independiente", asset: "assets/images/characters/independientefantasma.png", vulnerableAsset: "assets/images/characters/independientefantasma-perseguido.png", speed: 1.15, wobble: 0.07 },

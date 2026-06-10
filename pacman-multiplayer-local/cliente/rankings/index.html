@@ -1,0 +1,112 @@
+﻿<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LA BANDA INFINITA · Rankings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=Montserrat:wght@500;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/pacman/styles/base.css?v=20260604.10" />
+    <link rel="stylesheet" href="/pacman/styles/layout.css?v=20260604.10" />
+    <link rel="stylesheet" href="/pacman/styles/responsive.css?v=20260604.10" />
+    <link rel="stylesheet" href="/pacman/styles/rankings.css?v=20260609.3" />
+  </head>
+  <body class="rankings-page-shell">
+    <div class="app-shell rankings-app-shell">
+      <nav class="menu-navbar">
+        <a
+          class="menu-switch menu-switch-desktop"
+          href="/"
+          aria-label="Cambiar de juego"
+        >
+          <i data-lucide="gamepad-2"></i>
+          <span>Cambiar</span>
+        </a>
+        <div class="menu-brand">
+          <p class="eyebrow">Juegos Estanga</p>
+          <strong>La Banda Infinita</strong>
+        </div>
+        <button id="menuNavToggle" type="button" class="menu-nav-toggle secondary" aria-expanded="false" aria-controls="menuNavActions" aria-label="Abrir menú">
+          <i data-lucide="menu"></i>
+        </button>
+        <div id="menuNavActions" class="menu-nav-actions">
+          <a class="menu-switch menu-switch-mobile" href="/" aria-label="Cambiar de juego">
+            <i data-lucide="gamepad-2"></i>
+            <span>Cambiar</span>
+          </a>
+          <button id="howToPlayBtn" type="button" class="secondary">
+            <i data-lucide="book-open"></i>
+            <span>Cómo jugar</span>
+          </button>
+          <button id="preferencesBtn" type="button" class="secondary">
+            <i data-lucide="settings-2"></i>
+            <span>Configuración</span>
+          </button>
+          <a class="secondary rankings-return-cta" href="/pacman/">
+            <i data-lucide="gamepad-2"></i>
+            <span>Volver al juego</span>
+          </a>
+        </div>
+      </nav>
+
+      <main class="rankings-main">
+        <section class="rankings-hero panel">
+          <div class="rankings-hero-copy">
+            <p class="eyebrow">tu progreso</p>
+            <h1>Marcá tus mejores partidas</h1>
+            <p class="muted">
+              Acá ves tu Top 3 personal y el Top 10 general local con una presentación más limpia y fácil de leer.
+            </p>
+            <div class="rankings-hero-actions">
+              <a class="secondary rankings-return-cta" href="/pacman/">
+                <i data-lucide="gamepad-2"></i>
+                <span>Volver al juego</span>
+              </a>
+              <button id="refreshRankingsBtn" type="button" class="secondary">
+                <i data-lucide="refresh-cw"></i>
+                <span>Actualizar</span>
+              </button>
+            </div>
+          </div>
+          <aside class="rankings-user-card">
+            <div class="profile-avatar rankings-user-avatar" id="rankingsUserInitials">UE</div>
+            <div class="rankings-user-copy">
+              <p class="eyebrow">perfil activo</p>
+              <strong id="rankingsUserName">Jugador</strong>
+              <span id="rankingsUserEmail">Sin email</span>
+            </div>
+          </aside>
+        </section>
+
+        <section class="rankings-grid rankings-grid-page">
+          <article class="ranking-panel ranking-panel-page ranking-panel-personal">
+            <h3><i data-lucide="medal"></i><span>Top 3 personal</span></h3>
+            <ol id="personalRanking"></ol>
+          </article>
+          <article class="ranking-panel ranking-panel-page ranking-panel-highlight">
+            <h3><i data-lucide="trophy"></i><span>Top 10 general local</span></h3>
+            <ol id="generalRanking"></ol>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <div id="modal" class="modal hidden">
+      <div class="modal-box">
+        <button id="modalClose" class="modal-close" type="button">×</button>
+        <div id="modalContent"></div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/pacman/scripts/core/preferences.js?v=20260609.1"></script>
+    <script src="/pacman/scripts/core/ui.js?v=20260604.10"></script>
+    <script src="/pacman/scripts/network/modals.js?v=20260604.10"></script>
+    <script src="/pacman/scripts/core/rankings.js?v=20260604.10"></script>
+    <script src="/pacman/scripts/pages/rankings-page.js?v=20260609.3"></script>
+  </body>
+</html>

@@ -1,0 +1,328 @@
+﻿.rankings-page-shell {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at top left, rgba(255, 72, 95, 0.16), transparent 34%),
+    radial-gradient(circle at top right, rgba(99, 102, 241, 0.12), transparent 28%),
+    linear-gradient(180deg, #070b18 0%, #090f20 48%, #050812 100%);
+}
+
+.rankings-app-shell {
+  display: grid;
+  gap: 20px;
+}
+
+/* este navbar es el mismo de pacman para que la navegación no cambie de una pantalla a otra */
+.rankings-navbar {
+  top: 55px;
+}
+
+.rankings-return-link,
+.rankings-return-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 50px;
+  padding: 0.95rem 1.2rem;
+  border-radius: 18px;
+  text-decoration: none;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.22), rgba(45, 212, 191, 0.2));
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 10px 22px rgba(45, 212, 191, 0.12);
+  color: #eef4ff;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+}
+
+.rankings-return-link:hover,
+.rankings-return-cta:hover {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(45, 212, 191, 0.26));
+  border-color: rgba(99, 102, 241, 0.42);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px rgba(45, 212, 191, 0.18);
+}
+
+.rankings-return-link svg,
+.rankings-return-cta svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.rankings-logout-btn {
+  width: 100%;
+}
+
+.rankings-main {
+  display: grid;
+  gap: 18px;
+  padding-top: 44px;
+}
+
+/* dejamos más aire arriba para que la portada del ranking respire mejor */
+.rankings-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
+  gap: 18px;
+  align-items: stretch;
+  margin-top: 4rem;
+  background:
+    linear-gradient(135deg, rgba(255, 72, 95, 0.18), rgba(14, 20, 42, 0.9) 58%),
+    var(--panel);
+}
+
+.rankings-hero-copy {
+  display: grid;
+  gap: 14px;
+}
+
+.rankings-hero-copy h1 {
+  margin: 0;
+  font-size: clamp(1.9rem, 4vw, 3.1rem);
+  line-height: 1.02;
+  color: #fff;
+}
+
+.rankings-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.rankings-hero-actions a,
+.rankings-hero-actions button {
+  min-width: 180px;
+  justify-content: center;
+}
+
+.rankings-user-card {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 105, 121, 0.14);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 72, 95, 0.08));
+}
+
+.rankings-user-avatar {
+  width: 72px;
+  height: 72px;
+}
+
+.rankings-user-copy {
+  display: grid;
+  gap: 4px;
+  text-align: center;
+}
+
+.rankings-user-copy strong {
+  font-size: 1.2rem;
+}
+
+.rankings-user-copy span {
+  color: var(--muted);
+  word-break: break-word;
+}
+
+.rankings-grid-page {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.ranking-panel-page {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 72, 95, 0.12), rgba(13, 18, 34, 0.96)),
+    var(--panel);
+  border-color: rgba(255, 105, 121, 0.16);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.04);
+}
+
+.ranking-panel-page::after {
+  content: "";
+  position: absolute;
+  inset: auto 18px 18px auto;
+  width: 84px;
+  height: 84px;
+  border-radius: 24px;
+  background: radial-gradient(circle, rgba(255, 72, 95, 0.2), transparent 70%);
+  pointer-events: none;
+}
+
+.ranking-panel-highlight {
+  background:
+    linear-gradient(180deg, rgba(99, 102, 241, 0.12), rgba(13, 18, 34, 0.96)),
+    var(--panel);
+}
+
+.ranking-panel-page h3 {
+  margin-bottom: 1rem;
+}
+
+.ranking-panel-page ol {
+  counter-reset: rank-counter;
+  list-style: none;
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+}
+
+.ranking-panel-page li {
+  counter-increment: rank-counter;
+  position: relative;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 14px 14px 14px 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 105, 121, 0.12);
+  background: rgba(8, 14, 28, 0.68);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.ranking-panel-page li::before {
+  content: counter(rank-counter);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  color: #fff;
+  font-weight: 900;
+  background: linear-gradient(135deg, rgba(255, 72, 95, 0.95), rgba(123, 44, 255, 0.9));
+  box-shadow: 0 10px 20px rgba(255, 72, 95, 0.16);
+}
+
+.ranking-panel-page .rank-score {
+  display: inline-flex;
+  align-items: center;
+  min-width: 72px;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(255, 72, 95, 0.12);
+  border: 1px solid rgba(255, 105, 121, 0.18);
+  color: #fff;
+  font-weight: 800;
+  justify-self: start;
+}
+
+.ranking-panel-page .rank-details {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.ranking-panel-personal li:nth-child(1) { margin-left: 0; }
+.ranking-panel-personal li:nth-child(2) { margin-left: 14px; }
+.ranking-panel-personal li:nth-child(3) { margin-left: 28px; }
+
+.ranking-panel-highlight li:nth-child(1) { margin-left: 0; }
+.ranking-panel-highlight li:nth-child(2) { margin-left: 10px; }
+.ranking-panel-highlight li:nth-child(3) { margin-left: 20px; }
+.ranking-panel-highlight li:nth-child(4) { margin-left: 30px; }
+.ranking-panel-highlight li:nth-child(5) { margin-left: 40px; }
+.ranking-panel-highlight li:nth-child(6) { margin-left: 48px; }
+.ranking-panel-highlight li:nth-child(7) { margin-left: 56px; }
+.ranking-panel-highlight li:nth-child(8) { margin-left: 64px; }
+.ranking-panel-highlight li:nth-child(9) { margin-left: 72px; }
+.ranking-panel-highlight li:nth-child(10) { margin-left: 80px; }
+
+body.light .rankings-page-shell {
+  background:
+    radial-gradient(circle at top left, rgba(255, 72, 95, 0.14), transparent 34%),
+    radial-gradient(circle at top right, rgba(79, 70, 229, 0.12), transparent 30%),
+    linear-gradient(180deg, #f6f8ff 0%, #edf2ff 54%, #e9eefc 100%);
+}
+
+body.light .rankings-topbar,
+body.light .rankings-hero,
+body.light .rankings-user-card,
+body.light .ranking-panel-page {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(76, 103, 151, 0.16);
+  box-shadow: 0 18px 38px rgba(88, 107, 146, 0.1);
+}
+
+body.light .rankings-hero-copy h1,
+body.light .rankings-topbar-copy strong,
+body.light .rankings-user-copy strong,
+body.light .ranking-panel-page h3 {
+  color: var(--text);
+}
+
+body.light .rankings-return-link,
+body.light .rankings-return-cta {
+  color: var(--text);
+}
+
+body.light .ranking-panel-page li {
+  background: rgba(245, 247, 255, 0.96);
+  border-color: rgba(76, 103, 151, 0.12);
+}
+
+body.light .ranking-panel-page .rank-score {
+  background: rgba(255, 72, 95, 0.08);
+  color: var(--text);
+}
+
+@media (max-width: 960px) {
+  .rankings-topbar {
+    grid-template-columns: 1fr auto 1fr;
+    justify-items: stretch;
+  }
+
+  .rankings-topbar-copy {
+    text-align: center;
+  }
+
+  .rankings-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .rankings-grid-page {
+    grid-template-columns: 1fr;
+  }
+
+  .rankings-nav-actions {
+    right: 0;
+    left: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .rankings-topbar,
+  .rankings-hero,
+  .ranking-panel-page {
+    padding: 16px;
+  }
+
+  .rankings-hero-copy h1 {
+    font-size: clamp(1.5rem, 8vw, 2.3rem);
+  }
+
+  .rankings-hero-actions a,
+  .rankings-hero-actions button {
+    width: 100%;
+  }
+
+  .rankings-user-card {
+    padding: 16px;
+  }
+
+  .ranking-panel-page li {
+    grid-template-columns: 44px minmax(0, 1fr);
+    padding: 12px 12px 12px 10px;
+  }
+
+  .ranking-panel-highlight li:nth-child(n),
+  .ranking-panel-personal li:nth-child(n) {
+    margin-left: 0;
+  }
+}

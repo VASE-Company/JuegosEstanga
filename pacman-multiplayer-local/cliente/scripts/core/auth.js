@@ -15,13 +15,19 @@ const Auth = {
     bind("verifyCodeBtn", "click", () => this.verifyCode());
     bind("logoutBtn", "click", () => this.logout());
     bind("authEmail", "input", () => this.validateEmailLive());
+    bind("authName", "input", () => this.validateEmailLive());
     this.resetAuthForm();
     this.validateEmailLive();
   },
   resetAuthForm() {
     const emailInput = document.getElementById("authEmail");
+    const nameInput = document.getElementById("authName");
     const codeInput = document.getElementById("authCode");
     if (emailInput && !this.user) emailInput.value = "";
+    if (nameInput) {
+      const preferredName = this.user?.displayName || Preferences.get().displayName || Preferences.fallbackDisplayName(this.user?.email || "");
+      nameInput.value = preferredName;
+    }
     if (codeInput) codeInput.value = "";
     this.pendingType = null;
     this.pendingEmail = null;
@@ -30,19 +36,28 @@ const Auth = {
   getUser() {
     try {
       const session = JSON.parse(localStorage.getItem(this.sessionKey));
-      return session?.user || null;
+      const user = session?.user || null;
+      if (!user) return null;
+      return {
+        ...user,
+        displayName: user.displayName || Preferences.fallbackDisplayName(user.email)
+      };
     } catch {
       return null;
     }
   },
   setUser(user) {
-    this.user = user;
+    this.user = {
+      ...user,
+      displayName: user.displayName || Preferences.fallbackDisplayName(user.email)
+    };
     const session = JSON.parse(localStorage.getItem(this.sessionKey) || "{}");
-    localStorage.setItem(this.sessionKey, JSON.stringify({ ...session, user }));
-    UI.setMenuUser(user);
+    localStorage.setItem(this.sessionKey, JSON.stringify({ ...session, user: this.user }));
+    Preferences.save({ displayName: this.user.displayName });
+    UI.setMenuUser(this.user);
     UI.playEntryTransition(() => {
       UI.show("menu");
-      Rankings.load(user.email);
+      Rankings.load(this.user.email);
     });
   },
   logout() {
@@ -62,6 +77,9 @@ const Auth = {
   email() {
     return document.getElementById("authEmail").value.trim().toLowerCase();
   },
+  displayName() {
+    return Preferences.cleanDisplayName(document.getElementById("authName").value);
+  },
   setStep(step) {
     document.getElementById("stepMail").classList.toggle("active", step === "mail");
     document.getElementById("stepCode").classList.toggle("active", step === "code");
@@ -73,19 +91,29 @@ const Auth = {
   },
   validateEmailLive() {
     const email = this.email();
+    const displayName = this.displayName();
     const hasAt = email.includes("@");
     const basicFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     const domain = email.split("@")[1] || "";
     const validDomain = this.allowedDomains.includes(domain);
+    const validName = displayName.length >= 2;
 
     this.markRule("mailRuleAt", hasAt, email.length > 0);
     this.markRule("mailRuleFormat", basicFormat, email.length > 0);
     this.markRule("mailRuleDomain", validDomain, domain.length > 0);
 
-    const requestEnabled = hasAt && basicFormat && validDomain;
+    const requestEnabled = hasAt && basicFormat && validDomain && validName;
     document.getElementById("requestRegisterBtn").disabled = !requestEnabled;
     document.getElementById("requestLoginBtn").disabled = !requestEnabled;
 
+    if (!displayName) {
+      UI.message("authMessage", "Escribe tu nombre visible para empezar.", true);
+      return false;
+    }
+    if (!validName) {
+      UI.message("authMessage", "El nombre debe tener al menos 2 caracteres.", true);
+      return false;
+    }
     if (!email) {
       this.pendingType = null;
       this.pendingEmail = null;
@@ -132,7 +160,7 @@ const Auth = {
       const response = await fetch("/api/auth/request-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: this.email(), type })
+        body: JSON.stringify({ email: this.email(), type, displayName: this.displayName() })
       });
       const data = await response.json();
       UI.message("authMessage", data.message, !response.ok);
@@ -156,7 +184,7 @@ const Auth = {
       const response = await fetch("/api/auth/verify-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: this.email(), code, type: this.pendingType })
+        body: JSON.stringify({ email: this.email(), code, type: this.pendingType, displayName: this.displayName() })
       });
       const data = await response.json();
       if (!response.ok) {
@@ -175,5 +203,51 @@ const Auth = {
     } catch {
       UI.message("authMessage", "No se pudo verificar el codigo.", true);
     }
+  },
+  async updateProfile(displayName) {
+    const cleanName = Preferences.cleanDisplayName(displayName);
+    if (cleanName.length < 2) throw new Error("El nombre visible no es valido.");
+    const session = JSON.parse(localStorage.getItem(this.sessionKey) || "{}");
+    if (!session?.token) {
+      this.user = {
+        ...(this.user || {}),
+        displayName: cleanName
+      };
+      localStorage.setItem(this.sessionKey, JSON.stringify({ ...session, user: this.user }));
+      Preferences.save({ displayName: this.user.displayName });
+      UI.setMenuUser(this.user);
+      return this.user;
+    }
+    const response = await fetch("/api/auth/profile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.token}`
+      },
+      body: JSON.stringify({ displayName: cleanName })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      if (response.status === 401) {
+        this.user = {
+          ...(this.user || {}),
+          displayName: cleanName
+        };
+        localStorage.setItem(this.sessionKey, JSON.stringify({ ...session, user: this.user }));
+        Preferences.save({ displayName: this.user.displayName });
+        UI.setMenuUser(this.user);
+        return this.user;
+      }
+      throw new Error(data.message || "No se pudo actualizar el perfil.");
+    }
+    this.user = {
+      ...(this.user || {}),
+      ...data.user,
+      displayName: data.user.displayName || cleanName
+    };
+    localStorage.setItem(this.sessionKey, JSON.stringify({ ...session, user: this.user }));
+    Preferences.save({ displayName: this.user.displayName });
+    UI.setMenuUser(this.user);
+    return this.user;
   }
 };

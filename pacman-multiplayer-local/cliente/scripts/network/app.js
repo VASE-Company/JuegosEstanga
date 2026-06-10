@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+﻿document.addEventListener("DOMContentLoaded", () => {
   UI.init();
   Auth.init();
   PacmanAudio.init();
@@ -7,6 +7,38 @@ document.addEventListener("DOMContentLoaded", () => {
   const bind = (id, eventName, handler) => {
     const element = document.getElementById(id);
     if (element) element.addEventListener(eventName, handler);
+  };
+
+  const openHowToPlay = () => {
+    UI.openModal(GameModals.buildHowToPlay());
+    UI.renderIcons();
+  };
+
+  const openPreferences = () => {
+    UI.openModal(GameModals.buildPreferences(Auth.user || {}, Preferences.get()));
+    UI.renderIcons();
+    bind("savePreferencesBtn", "click", async () => {
+      const displayName = document.getElementById("prefsDisplayName").value;
+      const theme = document.getElementById("prefsTheme").value;
+      const musicEnabled = document.getElementById("prefsMusicEnabled").checked;
+      const cleanName = Preferences.cleanDisplayName(displayName);
+      if (cleanName.length < 2) {
+        UI.toast("El nombre visible debe tener al menos 2 caracteres.");
+        return;
+      }
+      Preferences.save({ displayName: cleanName, theme, musicEnabled });
+      if (Auth.user) {
+        try {
+          await Auth.updateProfile(cleanName);
+        } catch (error) {
+          UI.toast(error.message || "No se pudo actualizar el perfil.");
+          return;
+        }
+      }
+      UI.toast("Preferencias guardadas.", false);
+      UI.closeModal();
+      UI.renderIcons();
+    });
   };
 
   if (Auth.user) {
@@ -103,6 +135,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   bind("singlePlayerBtn", "click", () => {
     setupCharacterPicker("singleplayer");
+  });
+
+  bind("howToPlayBtn", "click", openHowToPlay);
+  bind("helpBtn", "click", openHowToPlay);
+
+  bind("preferencesBtn", "click", openPreferences);
+  bind("settingsBtn", "click", openPreferences);
+  bind("profileEditBtn", "click", openPreferences);
+  bind("profileLogoutBtn", "click", () => {
+    Auth.logout();
   });
 
   bind("createRoomBtn", "click", () => {

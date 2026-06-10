@@ -3,8 +3,10 @@ var PacmanAudio = {
   ambientKey: null,
   primed: false,
   primePromise: null,
+  enabled: true,
 
   init() {
+    this.enabled = Preferences.get().musicEnabled !== false;
     this.tracks = {
       lives3: this.createTrack("assets/audio/cancion3corazones.mp3", true),
       lives2: this.createTrack("assets/audio/cancion2corazones.mp3", true),
@@ -22,8 +24,18 @@ var PacmanAudio = {
     return audio;
   },
 
+  setEnabled(enabled) {
+    this.enabled = Boolean(enabled);
+    if (!this.enabled) {
+      this.stopAmbient();
+      this.stopVictory();
+      this.stopDefeat();
+    }
+  },
+
   prime() {
     // aca dejamos los sonidos listos para que el navegador no los bloquee.
+    if (!this.enabled) return Promise.resolve();
     if (this.primed) return Promise.resolve();
     if (this.primePromise) return this.primePromise;
     this.primePromise = Promise.all(Object.values(this.tracks).map((audio) => {
@@ -69,6 +81,7 @@ var PacmanAudio = {
   },
 
   playAmbient(lives) {
+    if (!this.enabled) return;
     const key = this.getAmbientKey(Number(lives) || 3);
     if (!this.primed && this.primePromise) {
       this.primePromise.then(() => this.playAmbient(lives)).catch(() => {});
@@ -86,6 +99,7 @@ var PacmanAudio = {
   },
 
   playVictory() {
+    if (!this.enabled) return;
     this.stopAmbient();
     this.stopVictory();
     this.stopDefeat();
@@ -97,6 +111,7 @@ var PacmanAudio = {
   },
 
   playDefeat() {
+    if (!this.enabled) return;
     this.stopAmbient();
     this.stopVictory();
     this.stopDefeat();
@@ -112,6 +127,7 @@ var PacmanAudio = {
       this.stopAmbient();
       return;
     }
+    if (!this.enabled) return;
     this.playAmbient(state.livesPacman);
   }
 };

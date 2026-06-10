@@ -1,5 +1,175 @@
-.modal-box { width: min(920px, calc(100vw - 24px)); position: relative; background: var(--panel-strong); color: var(--text); border-radius: 20px; padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); max-height: calc(100dvh - 32px); overflow: hidden; display: flex; flex-direction: column; }
+.modal-box { width: min(920px, calc(100vw - 24px)); position: relative; background: var(--panel-strong); color: var(--text); border-radius: 20px; padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); max-height: calc(100dvh - 32px); overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; }
 .modal-close { position: absolute; right: 12px; top: 12px; background: transparent; color: var(--text); border: 1px solid var(--border); box-shadow: none; }
+
+.help-modal,
+.prefs-modal {
+  display: grid;
+  gap: 16px;
+  padding-right: 4px;
+}
+
+.help-hero {
+  display: grid;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255, 72, 95, 0.14), rgba(255, 255, 255, 0.04));
+  border: 1px solid rgba(255, 105, 121, 0.16);
+}
+
+.help-hero strong {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.help-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.help-chips span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 105, 121, 0.14);
+  color: var(--text);
+  font-size: 0.84rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.help-modal h2,
+.prefs-modal h2 {
+  margin: 0;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+}
+
+.help-grid,
+.prefs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.rankings-modal,
+.profile-modal {
+  display: grid;
+  gap: 16px;
+}
+
+.rankings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.profile-modal-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: rgba(4, 12, 28, 0.62);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.profile-modal-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+}
+
+.profile-modal-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.profile-modal-copy strong {
+  font-size: 1.08rem;
+}
+
+.profile-modal-copy span {
+  color: var(--muted);
+  word-break: break-word;
+}
+
+.profile-info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.profile-info-grid .room-field p {
+  margin: 0;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.profile-modal-actions {
+  justify-content: flex-end;
+}
+
+.help-card {
+  padding: 14px 15px;
+  border-radius: 18px;
+  background: rgba(4, 12, 28, 0.62);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  position: relative;
+  overflow: hidden;
+}
+
+.help-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, rgba(255, 72, 95, 0.95), rgba(255, 163, 92, 0.95));
+}
+
+.help-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.help-card p,
+.help-card li {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.help-card ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.prefs-grid .room-switch {
+  grid-column: 1 / -1;
+}
+
+.profile-copy h2 {
+  margin: 0.1rem 0 0.1rem;
+  font-size: clamp(1.35rem, 2.7vw, 1.95rem);
+}
+
+.profile-copy #userEmailLabel {
+  margin: 0 0 0.55rem;
+  font-size: 0.98rem;
+}
+
+.menu-nav-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.menu-nav-actions button,
+.menu-nav-actions .menu-action-link {
+  white-space: nowrap;
+}
 
 .room-modal {
   display: grid;
@@ -246,6 +416,63 @@
   outline-offset: 3px;
 }
 
+.leave-lobby-modal {
+  display: grid;
+  gap: 16px;
+}
+
+.leave-lobby-modal h2 {
+  margin: 0;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+}
+
+.leave-lobby-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255, 72, 95, 0.14), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 105, 121, 0.16);
+}
+
+.leave-lobby-card svg {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  color: var(--accent);
+  margin-top: 2px;
+}
+
+.leave-lobby-card strong,
+.leave-lobby-card span {
+  display: block;
+}
+
+.leave-lobby-card strong {
+  margin-bottom: 0.25rem;
+}
+
+.leave-lobby-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.leave-lobby-actions button {
+  min-width: 150px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.leave-lobby-actions button svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
 .game-loading {
   position: fixed;
   inset: 0;
@@ -445,6 +672,11 @@ body.game-mode #themeToggle {
 
 /* --- Tablet ≤ 768px --- */
 @media (max-width: 768px) {
+  .modal {
+    align-items: start;
+    overflow-y: auto;
+  }
+
   .modal-box {
     width: min(680px, calc(100vw - 20px));
     padding: 20px;
@@ -453,12 +685,24 @@ body.game-mode #themeToggle {
   }
 
   /* Room modal */
+  .room-modal {
+    gap: 14px;
+  }
   .room-modal-header {
     flex-direction: column;
+    flex-wrap: wrap;
     gap: 12px;
+  }
+  .room-modal-header > div {
+    min-width: 0;
   }
   .room-modal-header h2 {
     font-size: clamp(1.25rem, 4vw, 1.75rem);
+  }
+  .room-badge {
+    white-space: normal;
+    justify-content: center;
+    text-align: center;
   }
   .room-grid {
     grid-template-columns: 1fr;
@@ -469,6 +713,7 @@ body.game-mode #themeToggle {
   }
   .room-footer {
     justify-content: stretch;
+    flex-wrap: wrap;
   }
   .room-footer button {
     width: 100%;
@@ -520,6 +765,11 @@ body.game-mode #themeToggle {
 
 /* --- Mobile ≤ 560px --- */
 @media (max-width: 560px) {
+  .modal {
+    align-items: start;
+    overflow-y: auto;
+  }
+
   .modal-box {
     width: min(100vw - 16px, 480px);
     padding: 16px 14px;
@@ -530,8 +780,12 @@ body.game-mode #themeToggle {
   /* Room modal */
   .room-modal-header {
     flex-direction: column;
+    flex-wrap: wrap;
     gap: 10px;
     align-items: flex-start;
+  }
+  .room-modal-header > div {
+    min-width: 0;
   }
   .room-modal-header h2 {
     font-size: clamp(1.1rem, 5.5vw, 1.5rem);
@@ -540,6 +794,7 @@ body.game-mode #themeToggle {
   .room-badge {
     padding: 0.65rem 0.85rem;
     font-size: 0.86rem;
+    white-space: normal;
   }
   .room-grid {
     grid-template-columns: 1fr;
@@ -558,6 +813,7 @@ body.game-mode #themeToggle {
   .room-footer {
     justify-content: stretch;
     margin-top: 2px;
+    flex-wrap: wrap;
   }
   .room-footer button {
     width: 100%;
@@ -590,6 +846,28 @@ body.game-mode #themeToggle {
   }
   .join-room-hint {
     font-size: 0.8rem;
+  }
+
+  .help-grid,
+  .prefs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rankings-grid,
+  .profile-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-modal-card {
+    padding: 14px;
+  }
+
+  .profile-modal-actions {
+    flex-direction: column;
+  }
+
+  .profile-modal-actions button {
+    width: 100%;
   }
 
   /* Character picker */
@@ -643,4 +921,66 @@ body.game-mode #themeToggle {
     font-size: 0.96rem;
     border-radius: 14px;
   }
+}
+
+body.light .modal-box {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(76, 103, 151, 0.18);
+  box-shadow: 0 24px 60px rgba(64, 83, 126, 0.16);
+}
+
+body.light .help-card,
+body.light .room-field,
+body.light .room-switch,
+body.light .join-room-modal .room-field,
+body.light .profile-modal-card,
+body.light .game-loading-card {
+  background: rgba(245, 248, 255, 0.96);
+  border-color: rgba(76, 103, 151, 0.14);
+}
+
+body.light .help-card h3,
+body.light .help-modal h2,
+body.light .prefs-modal h2,
+body.light .help-hero strong,
+body.light .room-modal-header h2,
+body.light .join-room-modal h2,
+body.light .join-room-modal .room-field label,
+body.light .room-field label,
+body.light .game-loading-card strong,
+body.light .game-loading-card span {
+  color: var(--text);
+}
+
+body.light .help-card p,
+body.light .help-card li,
+body.light .profile-modal-copy span,
+body.light .help-chips span,
+body.light .join-room-modal .join-room-hint,
+body.light .game-loading-card span {
+  color: var(--muted);
+}
+
+body.light .profile-info-grid .room-field p {
+  color: var(--text);
+}
+
+body.light .help-hero {
+  background: linear-gradient(135deg, rgba(248, 94, 112, 0.12), rgba(255, 255, 255, 0.88));
+  border-color: rgba(76, 103, 151, 0.14);
+}
+
+body.light .help-chips span {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(76, 103, 151, 0.12);
+  color: var(--text);
+}
+
+body.light .room-badge {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(226, 234, 255, 0.96));
+  border-color: rgba(76, 103, 151, 0.18);
+}
+
+body.light .room-switch {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(226, 234, 255, 0.98));
 }
