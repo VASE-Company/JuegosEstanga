@@ -1,6 +1,10 @@
+// ui.js contiene helpers visuales reutilizables: vistas, modales, toast,
+// botones de tema/musica/pantalla completa y datos del HUD del juego.
 const toast = document.getElementById("toast");
 let toastTimer = null;
 
+// Iconos SVG insertados por JS. Asi el boton puede cambiar entre estados
+// sin duplicar HTML: sol/luna, musica activa/muteada y pantalla completa.
 const icons = {
   sun: `
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -33,6 +37,7 @@ const icons = {
     </svg>`
 };
 
+// Muestra un mensaje flotante temporal. tone permite diferenciar errores.
 export function showToast(message, tone = "info") {
   toast.textContent = message;
   toast.dataset.tone = tone;
@@ -41,12 +46,14 @@ export function showToast(message, tone = "info") {
   toastTimer = setTimeout(() => toast.classList.remove("show"), 4200);
 }
 
+// Cambia entre login, menu principal y pantalla de juego.
 export function showView(view) {
   ["authView", "dashboardView", "gameView"].forEach((id) => {
     document.getElementById(id).classList.toggle("hidden", id !== view);
   });
 }
 
+// Abre el modal de sala. El mismo modal sirve para mostrar codigo o para unirse.
 export function openRoomModal({ title, message, code = "-----", join = false }) {
   document.getElementById("modalTitle").textContent = title;
   document.getElementById("modalMessage").textContent = message;
@@ -56,24 +63,29 @@ export function openRoomModal({ title, message, code = "-----", join = false }) 
   if (join) document.getElementById("joinCodeInput").focus();
 }
 
+// Cierra el modal de sala sin cambiar la partida en curso.
 export function closeRoomModal() {
   document.getElementById("roomModal").classList.add("hidden");
 }
 
+// Actualiza el texto que aparece sobre el mapa. Si llega vacio, lo oculta.
 export function setGameStatus(text) {
   const status = document.getElementById("gameStatus");
   status.textContent = text;
   status.classList.toggle("hidden", !text);
 }
 
+// Refleja el score actual del motor Snake en el HUD.
 export function setScore(score) {
   document.getElementById("scoreValue").textContent = score;
 }
 
+// Cambia la etiqueta de modo: individual o duelo por turnos.
 export function setGameMode(text) {
   document.getElementById("gameModeLabel").textContent = text;
 }
 
+// Habilita/deshabilita las flechas tactiles. En espectador o pausa quedan apagadas.
 export function setControlsEnabled(enabled) {
   document.querySelectorAll("[data-direction]").forEach((button) => {
     button.disabled = !enabled;
@@ -81,6 +93,7 @@ export function setControlsEnabled(enabled) {
   });
 }
 
+// Aplica modo claro/oscuro con una clase en body y guarda la preferencia local.
 export function applyTheme(theme) {
   const nextTheme = theme === "light" ? "light" : "dark";
   document.body.classList.toggle("dark", nextTheme === "dark");
@@ -89,6 +102,7 @@ export function applyTheme(theme) {
   localStorage.setItem("snakeTheme", nextTheme);
 }
 
+// Cambia icono, texto y accesibilidad del boton de musica.
 export function setMusicState(isPlaying) {
   document.getElementById("musicIcon").innerHTML = isPlaying ? icons.musicOn : icons.musicOff;
   document.getElementById("musicLabel").textContent = isPlaying ? "Mutear" : "Escuchar";
@@ -99,6 +113,7 @@ export function setMusicState(isPlaying) {
   document.getElementById("musicToggle").title = isPlaying ? "Mutear musica" : "Escuchar musica";
 }
 
+// Cambia icono, texto y accesibilidad del boton de pantalla completa.
 export function setFullscreenState(isFullscreen) {
   document.getElementById("fullscreenIcon").innerHTML = isFullscreen ? icons.fullscreenExit : icons.fullscreen;
   document.getElementById("fullscreenLabel").textContent = isFullscreen ? "Salir" : "Pantalla";

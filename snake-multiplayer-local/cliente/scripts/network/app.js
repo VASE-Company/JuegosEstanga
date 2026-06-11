@@ -1,3 +1,6 @@
+// app.js es el controlador principal del cliente.
+// Conecta la interfaz con autenticacion, rankings, musica, fullscreen,
+// controles tactiles, teclado, motor Snake y eventos multijugador.
 import { getCurrentUser, logout, requestCode, verifyCode } from "../core/auth.js";
 import { fetchRankings, renderRanking, saveSingleplayerScore } from "../core/rankings.js";
 import { askRankings, createRoom, finishTurn, getSocket, joinRoom, leaveRoom, sendSnakeState } from "./socket.js";
@@ -16,6 +19,8 @@ import {
   showView
 } from "../core/ui.js";
 
+// Referencias a elementos del HTML. Se guardan una vez para no buscarlos
+// de nuevo cada vez que cambia el juego o se toca un boton.
 const authForm = document.getElementById("authForm");
 const codeForm = document.getElementById("codeForm");
 const emailInput = document.getElementById("emailInput");
@@ -46,6 +51,8 @@ const instructionsModal = document.getElementById("instructionsModal");
 const appShell = document.querySelector(".app-shell");
 const gameStatus = document.getElementById("gameStatus");
 
+// Estado vivo de la aplicacion: usuario, modo, sala activa, pausa,
+// musica y timers de mensajes. Estos valores coordinan la UI con el juego.
 let authType = "register";
 let pendingEmail = "";
 let user = getCurrentUser();
@@ -61,6 +68,7 @@ let musicPlaying = false;
 let statusTimer = null;
 const keyboardHintQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
 
+// Verifica que haya usuario logueado antes de jugar o crear/unirse a salas.
 function requireUser() {
   user = getCurrentUser();
   if (!user?.id || !user?.email) {
@@ -70,6 +78,7 @@ function requireUser() {
   return true;
 }
 
+// Carga rankings del servidor y actualiza las tablas del inicio y del juego.
 async function loadRankings() {
   if (!user) return;
   const data = await fetchRankings(user.email);
@@ -83,14 +92,18 @@ async function loadRankings() {
   bestMatchValue.textContent = personalBest;
 }
 
+// Acorta el email para mostrarlo como nombre visible en paneles y mensajes.
 function shortPlayerName(email) {
   return String(email || "").split("@")[0] || "Julian Alvarez";
 }
 
+// Muestra el score al lado del jugador solo cuando ya termino su turno.
 function scoreSuffix(player) {
   return Number.isFinite(player?.score) ? ` - ${player.score}` : "";
 }
 
+// Actualiza el panel "Jugador": en single muestra "Vos"; en multiplayer
+// agrega al rival como "Jugador" cuando se une a la sala.
 function updatePlayerPanel(room = activeRoom) {
   const currentEmail = user?.email || "";
   const currentShortName = shortPlayerName(currentEmail);
@@ -119,11 +132,13 @@ function updatePlayerPanel(room = activeRoom) {
   }
 }
 
+// En PC agrega la pista "(P)"; en celular deja solo el texto del boton.
 function pauseText(isPaused) {
   const action = isPaused ? "Seguir" : "Pausa";
   return keyboardHintQuery.matches ? `${action} (P)` : action;
 }
 
+// Muestra mensajes de estado durante pocos segundos para que no tapen el mapa.
 function showTemporaryStatus(message, duration = 2000) {
   clearTimeout(statusTimer);
   setGameStatus(message);
@@ -132,11 +147,13 @@ function showTemporaryStatus(message, duration = 2000) {
   }, duration);
 }
 
+// Usa un estado fijo. Se usa principalmente para "Pausa".
 function setPersistentStatus(message) {
   clearTimeout(statusTimer);
   setGameStatus(message);
 }
 
+// Vuelve al menu principal, pinta el email conectado y refresca rankings.
 function showDashboard() {
   user = getCurrentUser();
   if (!user) {
@@ -150,6 +167,7 @@ function showDashboard() {
   askRankings(user.email);
 }
 
+// Activa/desactiva el boton de pausa y sincroniza texto, title y aria-label.
 function setPauseButton(isPaused, enabled = controlsActive) {
   paused = isPaused;
   pauseBtn.disabled = !enabled;
@@ -160,6 +178,7 @@ function setPauseButton(isPaused, enabled = controlsActive) {
   pauseBtn.classList.toggle("paused", isPaused);
 }
 
+// Boton de pantalla completa dentro de la partida; replica el de arriba.
 function setGameFullscreenButton(isFullscreen) {
   if (!gameFullscreenBtn) return;
   gameFullscreenBtn.textContent = isFullscreen ? "Salir" : "Pantalla";
@@ -171,6 +190,7 @@ function setGameFullscreenButton(isFullscreen) {
   gameFullscreenBtn.classList.toggle("active", isFullscreen);
 }
 
+// Se llama cuando el motor sube de nivel. Cada 50 puntos aumenta dificultad.
 function announceLevelUp(level) {
   const status = currentMode === "multiplayer"
     ? `Subiste al nivel ${level}. Ahora hay muros en tu turno.`
@@ -179,6 +199,7 @@ function announceLevelUp(level) {
   showToast(`Subiste al nivel ${level}. Esquiva los muros.`);
 }
 
+// Final de partida individual al completar los 5 niveles.
 async function completeSingleplayer(score) {
   setControlsEnabled(false);
   setPauseButton(false, false);
@@ -192,6 +213,7 @@ async function completeSingleplayer(score) {
   }
 }
 
+// Final de turno en multijugador al completar niveles o perder.
 async function completeMultiplayerTurn(score) {
   if (turnFinished) return;
   turnFinished = true;
@@ -203,6 +225,7 @@ async function completeMultiplayerTurn(score) {
   if (!result?.ok) showToast(result?.error || "No se pudo finalizar el turno.", "error");
 }
 
+// Pausa/reanuda el motor sin perder el estado de la serpiente.
 function togglePause() {
   if (!game || !controlsActive || game.gameOver) return;
   setPauseButton(!paused);
@@ -215,6 +238,8 @@ function togglePause() {
   }
 }
 
+// Reproduce o mutea la musica. El try/catch esta porque algunos navegadores
+// bloquean audio hasta que el usuario toca explicitamente un boton.
 async function toggleMusic() {
   if (!gameMusic) return;
 
@@ -237,6 +262,8 @@ async function toggleMusic() {
   }
 }
 
+// Entra o sale de pantalla completa usando el contenedor completo de la app.
+// Incluye fallback webkit para navegadores moviles.
 async function toggleFullscreen() {
   try {
     const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
@@ -255,6 +282,7 @@ async function toggleFullscreen() {
   }
 }
 
+// Preparacion comun para singleplayer, jugador activo y espectador.
 function setupGame({ mode, status, controls = true, room = null }) {
   game?.stop();
   turnFinished = false;
@@ -271,6 +299,7 @@ function setupGame({ mode, status, controls = true, room = null }) {
   showView("gameView");
 }
 
+// Crea una partida individual: el motor guarda score al perder o completar.
 function startSingleplayer() {
   if (!requireUser()) return;
   activeRoomCode = null;
@@ -297,6 +326,7 @@ function startSingleplayer() {
   game.start();
 }
 
+// Empieza el turno propio en multiplayer y envia el estado al rival.
 function startActiveMultiplayerTurn(room) {
   multiplayerActiveTurn = true;
   activeRoomCode = room.codigo;
@@ -320,6 +350,7 @@ function startActiveMultiplayerTurn(room) {
   game.start();
 }
 
+// Crea una vista de espectador: no hay controles, solo se renderiza el estado remoto.
 function startSpectator(room, message) {
   multiplayerActiveTurn = false;
   activeRoomCode = room.codigo;
@@ -330,6 +361,7 @@ function startSpectator(room, message) {
   if (room.currentSnakeState) game.renderState(room.currentSnakeState);
 }
 
+// Sale al menu, detiene el motor y avisa al servidor si habia sala activa.
 function returnToMenu() {
   game?.stop();
   if (activeRoomCode && currentMode === "multiplayer") leaveRoom(activeRoomCode);
@@ -343,16 +375,19 @@ function returnToMenu() {
   showDashboard();
 }
 
+// Modal de instrucciones para cumplir "Como jugar".
 function openInstructions() {
   instructionsModal.classList.remove("hidden");
   document.getElementById("closeInstructionsBtn").focus();
 }
 
+// Cierra instrucciones y devuelve el foco al boton que abre el modal.
 function closeInstructions() {
   instructionsModal.classList.add("hidden");
   document.getElementById("howToPlayBtn")?.focus();
 }
 
+// Registro/login: primero se pide codigo, despues se verifica.
 authForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   pendingEmail = emailInput.value.trim().toLowerCase();
@@ -367,6 +402,7 @@ authForm.addEventListener("submit", async (event) => {
   }
 });
 
+// El usuario ingresa el codigo de 6 digitos recibido por email o consola.
 codeForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   try {
@@ -379,11 +415,13 @@ codeForm.addEventListener("submit", async (event) => {
   }
 });
 
+// Permite corregir email antes de verificar codigo.
 document.getElementById("backToEmailBtn").addEventListener("click", () => {
   codeForm.classList.add("hidden");
   authForm.classList.remove("hidden");
 });
 
+// Cambia entre modo registro y modo iniciar sesion.
 document.querySelectorAll("[data-auth-type]").forEach((button) => {
   button.addEventListener("click", () => {
     authType = button.dataset.authType;
@@ -391,8 +429,10 @@ document.querySelectorAll("[data-auth-type]").forEach((button) => {
   });
 });
 
+// Botones principales del menu.
 document.getElementById("singleBtn").addEventListener("click", startSingleplayer);
 
+// Crea sala local y muestra el codigo para el segundo jugador.
 document.getElementById("createRoomBtn").addEventListener("click", async () => {
   if (!requireUser()) return;
   const result = await createRoom(user);
@@ -410,6 +450,7 @@ document.getElementById("createRoomBtn").addEventListener("click", async () => {
   });
 });
 
+// Abre el modal para ingresar el codigo de otra sala.
 document.getElementById("joinRoomBtn").addEventListener("click", () => {
   if (!requireUser()) return;
   openRoomModal({
@@ -422,6 +463,7 @@ document.getElementById("joinRoomBtn").addEventListener("click", () => {
 
 document.getElementById("howToPlayBtn").addEventListener("click", openInstructions);
 
+// Envia el codigo de sala al servidor para unirse al duelo.
 joinForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!requireUser()) return;
@@ -437,6 +479,7 @@ joinForm.addEventListener("submit", async (event) => {
   closeRoomModal();
 });
 
+// Borra la sesion local y vuelve al login.
 document.getElementById("logoutBtn").addEventListener("click", () => {
   logout().finally(() => {
     user = null;
@@ -444,11 +487,13 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
   });
 });
 
+// Modo claro/oscuro: la funcion cambia la clase body.dark y redibuja canvas.
 document.getElementById("themeToggle").addEventListener("click", () => {
   applyTheme(document.body.classList.contains("dark") ? "light" : "dark");
   game?.draw();
 });
 
+// Botones de musica y pantalla completa.
 musicToggle.addEventListener("click", toggleMusic);
 gameMusic.addEventListener("pause", () => {
   if (!musicPlaying) return;
@@ -457,6 +502,8 @@ gameMusic.addEventListener("pause", () => {
 });
 fullscreenToggle.addEventListener("click", toggleFullscreen);
 gameFullscreenBtn.addEventListener("click", toggleFullscreen);
+
+// Mantiene sincronizados los dos botones de fullscreen si el usuario sale con Esc.
 function updateFullscreenButton() {
   const isFullscreen = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
   setFullscreenState(isFullscreen);
@@ -465,6 +512,8 @@ function updateFullscreenButton() {
 }
 document.addEventListener("fullscreenchange", updateFullscreenButton);
 document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
+
+// En celular permite volver arriba sin arrastrar toda la pantalla.
 scrollTopBtn.addEventListener("click", () => {
   const target = document.fullscreenElement || document.scrollingElement || document.documentElement;
   if (target === document.documentElement || target === document.body) {
@@ -474,6 +523,7 @@ scrollTopBtn.addEventListener("click", () => {
   target.scrollTo?.({ top: 0, behavior: "smooth" });
 });
 
+// Cierre de modales por boton o clic en fondo.
 document.getElementById("closeModalBtn").addEventListener("click", closeRoomModal);
 document.getElementById("roomModal").addEventListener("click", (event) => {
   if (event.target.id === "roomModal") closeRoomModal();
@@ -483,15 +533,20 @@ instructionsModal.addEventListener("click", (event) => {
   if (event.target.id === "instructionsModal") closeInstructions();
 });
 
+// Controles de partida basicos.
 restartBtn.addEventListener("click", startSingleplayer);
 backMenuBtn.addEventListener("click", returnToMenu);
 pauseBtn.addEventListener("click", togglePause);
+
+// Si cambia el dispositivo (PC/celular), actualiza si se muestra "(P)".
 if (keyboardHintQuery.addEventListener) {
   keyboardHintQuery.addEventListener("change", () => setPauseButton(paused, controlsActive));
 } else {
   keyboardHintQuery.addListener(() => setPauseButton(paused, controlsActive));
 }
 
+// Flechas tactiles del celular. pointerdown mejora respuesta y click queda
+// como respaldo para navegadores que no soporten pointer events.
 document.querySelectorAll("[data-direction]").forEach((button) => {
   const pressDirection = (event) => {
     event.preventDefault();
@@ -504,6 +559,7 @@ document.querySelectorAll("[data-direction]").forEach((button) => {
   button.addEventListener("click", pressDirection);
 });
 
+// Teclado de PC: flechas/WASD mueven y P pausa. No responde si estas escribiendo.
 window.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !instructionsModal.classList.contains("hidden")) {
     closeInstructions();
@@ -549,14 +605,17 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
+// Desde aca se escuchan todos los eventos Socket.IO del servidor.
 const socket = getSocket();
 
+// Se creo una sala y este cliente queda como jugador 1.
 socket.on("partida-creada-snake", (room) => {
   activeRoomCode = room.codigo;
   activeRoom = room;
   updatePlayerPanel(room);
 });
 
+// El rival entro: se actualiza panel y se informa al creador.
 socket.on("jugador-unido-snake", (room) => {
   activeRoom = room;
   activeRoomCode = room.codigo;
@@ -564,6 +623,7 @@ socket.on("jugador-unido-snake", (room) => {
   showToast("El segundo jugador se unio.");
 });
 
+// La sala ya tiene dos jugadores y el servidor reparte turnos.
 socket.on("partida-iniciada-snake", (room) => {
   activeRoom = room;
   activeRoomCode = room.codigo;
@@ -571,11 +631,13 @@ socket.on("partida-iniciada-snake", (room) => {
   closeRoomModal();
 });
 
+// Mensaje breve para quien espera mientras juega el rival.
 socket.on("esperar-rival-snake", ({ jugadorActivo }) => {
   showTemporaryStatus(`Turno de ${shortPlayerName(jugadorActivo)}. Espera tu turno.`);
   setControlsEnabled(false);
 });
 
+// El servidor indica si este cliente juega ahora o mira como espectador.
 socket.on("turno-snake", ({ room, activo, jugadorActivo }) => {
   activeRoom = room;
   updatePlayerPanel(room);
@@ -586,11 +648,13 @@ socket.on("turno-snake", ({ room, activo, jugadorActivo }) => {
   }
 });
 
+// Renderiza en vivo la serpiente del rival durante su turno.
 socket.on("estado-snake-espectador", ({ state }) => {
   if (!game || multiplayerActiveTurn) return;
   game.renderState(state);
 });
 
+// Un jugador termino su turno; se muestra score por 2 segundos.
 socket.on("turno-finalizado-snake", ({ room, jugador, score }) => {
   if (room) {
     activeRoom = room;
@@ -599,6 +663,7 @@ socket.on("turno-finalizado-snake", ({ room, jugador, score }) => {
   showTemporaryStatus(`${shortPlayerName(jugador)} termino con ${score} puntos.`);
 });
 
+// Cuando jugaron ambos, muestra ganador/empate y actualiza ranking.
 socket.on("partida-finalizada-snake", async ({ room, winner, empate }) => {
   game?.stop();
   setControlsEnabled(false);
@@ -614,6 +679,7 @@ socket.on("partida-finalizada-snake", async ({ room, winner, empate }) => {
   await loadRankings().catch(() => {});
 });
 
+// Si alguien abandona o se desconecta, se cancela la partida local.
 socket.on("rival-desconectado", ({ message }) => {
   game?.stop();
   setControlsEnabled(false);
@@ -625,14 +691,17 @@ socket.on("rival-desconectado", ({ message }) => {
   updatePlayerPanel(null);
 });
 
+// Errores enviados por el servidor, por ejemplo codigo inexistente.
 socket.on("error-partida", ({ message }) => {
   showToast(message || "Error de partida.", "error");
 });
 
+// Ranking actualizado por guardado de score o fin de multiplayer.
 socket.on("rankings-actualizados", () => {
   if (user) loadRankings().catch(() => {});
 });
 
+// Estado inicial de la app al cargar la pagina.
 applyTheme(localStorage.getItem("snakeTheme") || "dark");
 setMusicState(false);
 setFullscreenState(false);

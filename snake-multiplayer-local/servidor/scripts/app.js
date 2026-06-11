@@ -1,3 +1,6 @@
+// app.js del servidor local.
+// Sirve los archivos del cliente, maneja login por codigo, guarda puntajes
+// en archivos JSON/TXT y coordina partidas Snake de 2 jugadores con Socket.IO.
 const path = require("path");
 require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
 
@@ -25,9 +28,12 @@ const CODE_TTL_MS = 10 * 60 * 1000;
 const rooms = new Map();
 const socketUsers = new Map();
 
+// JSON para la API y archivos estaticos para abrir el juego desde el navegador.
 app.use(express.json({ limit: "64kb" }));
 app.use(express.static(CLIENT_DIR));
 
+// Crea los archivos de datos si no existen. Asi el proyecto arranca limpio
+// en cualquier PC sin configurar base de datos.
 async function ensureDataFiles() {
   await fs.mkdir(DATA_DIR, { recursive: true });
   const files = [
@@ -45,6 +51,7 @@ async function ensureDataFiles() {
   }
 }
 
+// Lee archivos JSON y se recupera si estan vacios o corruptos.
 async function readJson(filePath) {
   try {
     const content = await fs.readFile(filePath, "utf8");
@@ -58,18 +65,22 @@ async function readJson(filePath) {
   }
 }
 
+// Escribe JSON con formato legible para poder revisar puntajes manualmente.
 async function writeJson(filePath, data) {
   await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
 }
 
+// Agrega una linea al historial de partidas multijugador.
 async function appendTxt(filePath, text) {
   await fs.appendFile(filePath, `${text}\n`, "utf8");
 }
 
+// Genera ids simples para usuarios y scores.
 function generateId(prefix) {
   return `${prefix}_${crypto.randomBytes(8).toString("hex")}`;
 }
 
+// Codigo corto de sala, evitando letras confusas y codigos repetidos activos.
 function generateRoomCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
@@ -79,10 +90,12 @@ function generateRoomCode() {
   return code;
 }
 
+// Normaliza email para que "Test@Mail.com" y "test@mail.com" sean el mismo usuario.
 function normalizeEmail(email) {
   return String(email || "").trim().toLowerCase();
 }
 
+// Validaciones basicas antes de guardar o procesar datos.
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
@@ -96,11 +109,13 @@ function safeScore(score) {
   return Number.isFinite(value) && value >= 0 ? Math.floor(value) : null;
 }
 
+// Busca un usuario guardado en users.json.
 async function findUserByEmail(email) {
   const users = await readJson(USERS_FILE);
   return users.find((user) => user.email === email) || null;
 }
 
+// Ranking personal: mejores 3 scores del email conectado.
 async function getTop3UserScores(email) {
   const scores = await readJson(SCORES_FILE);
   return scores
@@ -109,6 +124,7 @@ async function getTop3UserScores(email) {
     .slice(0, 3);
 }
 
+// Ranking general: mejores 10 scores del servidor local.
 async function getTop10GeneralScores() {
   const scores = await readJson(SCORES_FILE);
   return scores
@@ -117,6 +133,7 @@ async function getTop10GeneralScores() {
     .slice(0, 10);
 }
 
+// Guarda un score en scores.json con modo, resultado y fecha.
 async function saveScore(scoreData) {
   const email = normalizeEmail(scoreData.email);
   const user = await findUserByEmail(email);
@@ -140,15 +157,18 @@ async function saveScore(scoreData) {
   return record;
 }
 
+// Deja registro de cada duelo en matches.txt para mostrar persistencia en archivo.
 async function saveMatchLog(matchData) {
   const line = `[${new Date().toISOString()}] SNAKE MULTIPLAYER | Código: ${matchData.codigo} | J1: ${matchData.jugador1.email} Score: ${matchData.jugador1.score ?? "-"} | J2: ${matchData.jugador2?.email || "-"} Score: ${matchData.jugador2?.score ?? "-"} | ${matchData.resultado}`;
   await appendTxt(MATCHES_FILE, line);
 }
 
+// Permite enviar emails reales si se configuran variables SMTP.
 function smtpConfigured() {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS);
 }
 
+// Envia codigo por email; si no hay SMTP, lo imprime en la consola del servidor.
 async function sendVerificationCode(email, code, type) {
   if (!smtpConfigured()) {
     console.log(`[DESARROLLO SIN SMTP] Código ${type} para ${email}: ${code}`);
@@ -168,6 +188,7 @@ async function sendVerificationCode(email, code, type) {
   });
 }
 
+// Avisa rankings actualizados por socket para no recargar la pagina.
 async function emitRankings(email) {
   const payload = {
     personalTop3: email ? await getTop3UserScores(email) : [],
@@ -177,6 +198,7 @@ async function emitRankings(email) {
   return payload;
 }
 
+// Ruta 1 de login: pide codigo de registro o acceso.
 app.post("/api/auth/request-code", async (req, res) => {
   const email = normalizeEmail(req.body.email);
   const type = req.body.type;
@@ -195,6 +217,7 @@ app.post("/api/auth/request-code", async (req, res) => {
   res.json({ ok: true, message: "Código enviado. Si no configuraste SMTP, mirá la consola del servidor." });
 });
 
+// Ruta 2 de login: verifica el codigo y crea el usuario si era registro.
 app.post("/api/auth/verify-code", async (req, res) => {
   const email = normalizeEmail(req.body.email);
   const code = String(req.body.code || "").trim();
@@ -220,6 +243,7 @@ app.post("/api/auth/verify-code", async (req, res) => {
   res.json({ ok: true, user });
 });
 
+// Rankings del juego Snake: Top 3 personal y Top 10 general.
 app.get("/api/rankings/snake", async (req, res) => {
   const email = normalizeEmail(req.query.email);
   res.json({
@@ -228,10 +252,12 @@ app.get("/api/rankings/snake", async (req, res) => {
   });
 });
 
+// Endpoint simple para comprobar que el servidor esta vivo.
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, message: "Servidor funcionando" });
 });
 
+// Guarda puntaje individual cuando termina una partida singleplayer.
 app.post("/api/scores/snake", async (req, res) => {
   try {
     const record = await saveScore({ email: req.body.email, score: req.body.score, mode: "singleplayer", result: "finalizado" });
@@ -242,12 +268,14 @@ app.post("/api/scores/snake", async (req, res) => {
   }
 });
 
+// Identifica si el socket pertenece al jugador 1 o jugador 2 de una sala.
 function getRoomPlayer(room, socketId) {
   if (room.jugador1?.socketId === socketId) return "jugador1";
   if (room.jugador2?.socketId === socketId) return "jugador2";
   return null;
 }
 
+// Version publica de una sala. Se manda al cliente sin estructuras internas extra.
 function publicRoom(room) {
   return {
     codigo: room.codigo,
@@ -259,6 +287,7 @@ function publicRoom(room) {
   };
 }
 
+// Envia el turno al jugador activo y deja al otro como espectador.
 function emitTurn(room) {
   const active = room[room.turnoActual];
   const spectatorKey = room.turnoActual === "jugador1" ? "jugador2" : "jugador1";
@@ -268,6 +297,7 @@ function emitTurn(room) {
   io.to(spectator.socketId).emit("esperar-rival-snake", { message: "Esperando tu turno...", jugadorActivo: active.email });
 }
 
+// Cancela una sala cuando alguien abandona o se desconecta.
 function cancelRoom(room, reason) {
   room.estado = "cancelada";
   rooms.delete(room.codigo);
@@ -276,9 +306,11 @@ function cancelRoom(room, reason) {
   saveMatchLog({ codigo: room.codigo, jugador1: room.jugador1, jugador2: room.jugador2, resultado: `Cancelada: ${reason}` }).catch(console.error);
 }
 
+// Conexion Socket.IO: todo lo que pasa en multijugador entra por estos eventos.
 io.on("connection", (socket) => {
   console.log(`Jugador conectado: ${socket.id}`);
 
+  // Crea una sala nueva para el jugador 1.
   socket.on("crear-partida-snake", async (user, ack) => {
     try {
       const email = normalizeEmail(user?.email);
@@ -314,6 +346,7 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Une al jugador 2 y arranca la partida por turnos.
   socket.on("unirse-partida-snake", async ({ user, codigo }, ack) => {
     try {
       const email = normalizeEmail(user?.email);
@@ -343,6 +376,7 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Recibe el estado del Snake del jugador activo y lo reenvia al espectador.
   socket.on("estado-snake", ({ codigo, state }) => {
     const room = rooms.get(String(codigo || "").trim().toUpperCase());
     if (!room) return socket.emit("error-partida", { message: "La sala no existe." });
@@ -355,6 +389,7 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Cierra el turno actual, guarda score temporal y decide si pasa turno o termina.
   socket.on("finalizar-turno-snake", async ({ codigo, score }, ack) => {
     try {
       const room = rooms.get(String(codigo || "").trim().toUpperCase());
@@ -403,15 +438,18 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Boton "Volver al menu" en multiplayer: cancela para ambos.
   socket.on("abandonar-partida", ({ codigo }) => {
     const room = rooms.get(String(codigo || "").trim().toUpperCase());
     if (room) cancelRoom(room, "un jugador abandonó la partida");
   });
 
+  // Pedido manual de rankings desde el cliente.
   socket.on("pedir-rankings", async ({ email } = {}) => {
     socket.emit("rankings-actualizados", await emitRankings(normalizeEmail(email)));
   });
 
+  // Si se corta conexion, se cancela la sala activa para no dejar al otro esperando.
   socket.on("disconnect", () => {
     console.log(`Jugador desconectado: ${socket.id}`);
     const meta = socketUsers.get(socket.id);
@@ -424,6 +462,7 @@ io.on("connection", (socket) => {
   });
 });
 
+// Arranque del servidor despues de asegurar archivos de datos.
 ensureDataFiles().then(() => {
   server.listen(PORT, "0.0.0.0", () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);

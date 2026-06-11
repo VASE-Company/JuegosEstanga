@@ -12,6 +12,7 @@
 </head>
 <body>
   <div class="app-shell">
+    <!-- Controles globales: modo claro/oscuro, musica y pantalla completa. -->
     <div class="utility-controls" aria-label="Controles visuales y audio">
       <button class="utility-button theme-switcher" id="themeToggle" aria-label="Cambiar modo visual" title="Cambiar modo visual">
         <span class="utility-icon" id="themeIcon" aria-hidden="true"></span>
@@ -28,6 +29,7 @@
     </div>
 
     <main>
+      <!-- Vista de acceso: pide email y luego codigo de 6 digitos. -->
       <section class="auth-view panel" id="authView">
         <div class="section-heading">
           <p class="eyebrow">acceso con email</p>
@@ -51,6 +53,7 @@
         </form>
       </section>
 
+      <!-- Inicio/menu principal: jugador conectado, acciones y rankings. -->
       <section class="dashboard dashboard-home hidden" id="dashboardView">
         <div class="home-shell">
           <header class="home-header">
@@ -60,9 +63,11 @@
             </div>
             <div class="home-badges" aria-hidden="true">
               <span class="home-badge">
+                <!-- Imagen del escudo usada como marca visual del juego. -->
                 <img src="./assets/julian-trophy-hunter/branding/atleti_shield.png" alt="">
               </span>
               <span class="home-badge">
+                <!-- Trofeo principal para reforzar el objetivo de juntar copas. -->
                 <img src="./assets/julian-trophy-hunter/trophies/trophy_champions.png" alt="">
               </span>
             </div>
@@ -98,6 +103,7 @@
             </section>
 
             <figure class="home-player-art" aria-label="Julian Alvarez corriendo">
+              <!-- Imagen principal del inicio. Se puede reemplazar desde assets/branding. -->
               <img src="./assets/julian-trophy-hunter/branding/home_player_reference.png" alt="Julian Alvarez con camiseta del Atletico">
             </figure>
 
@@ -128,8 +134,10 @@
         </div>
       </section>
 
+      <!-- Vista de juego: HUD, canvas, jugadores, rankings y controles tactiles. -->
       <section class="game-view hidden" id="gameView">
         <div class="hunter-layout">
+          <!-- Barra superior de partida: modo, marca, score, pausa y fullscreen. -->
           <header class="hunter-top">
             <div class="mode-card">
               <img src="./assets/julian-trophy-hunter/trophies/trophy_champions.png" alt="">
@@ -156,6 +164,7 @@
             </div>
           </header>
 
+          <!-- Panel izquierdo: ranking compacto y datos de jugador/rival. -->
           <aside class="hunter-side hunter-left">
             <section class="hud-panel ranking-panel">
               <p class="eyebrow">Top cazadores</p>
@@ -182,6 +191,7 @@
             </section>
           </aside>
 
+          <!-- Canvas principal. El motor Snake dibuja todo dentro de este elemento. -->
           <main class="arena-panel">
             <div class="arena-status" id="gameStatus">Listo</div>
             <div class="canvas-wrap">
@@ -189,6 +199,7 @@
             </div>
           </main>
 
+          <!-- Panel derecho: trofeos disponibles y records del servidor/local. -->
           <aside class="hunter-side hunter-right">
             <section class="hud-panel trophies-panel">
               <p class="eyebrow">Trofeos</p>
@@ -204,6 +215,7 @@
             </section>
           </aside>
 
+          <!-- Flechas tactiles para celular. Cada boton manda data-direction a app.js. -->
           <div class="game-controls" id="touchControls" aria-label="Controles tactiles">
             <button class="control up" data-direction="up" aria-label="Arriba">
               <img src="./assets/julian-trophy-hunter/ui/dpad_up.png" alt="">
@@ -219,6 +231,7 @@
             </button>
           </div>
 
+          <!-- Recordatorio breve del objetivo, visible en escritorio. -->
           <section class="hud-panel objective-panel">
             <p class="eyebrow">Objetivo</p>
             <strong>Colecciona todos los trofeos y obten el mejor score</strong>
@@ -230,6 +243,7 @@
     </main>
   </div>
 
+  <!-- Modal reutilizable para crear sala o unirse con codigo. -->
   <div class="modal hidden" id="roomModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-card">
       <button class="modal-close" id="closeModalBtn" aria-label="Cerrar">x</button>
@@ -245,6 +259,7 @@
     </div>
   </div>
 
+  <!-- Modal de instrucciones pedido para explicar como jugar. -->
   <div class="modal hidden" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsTitle">
     <div class="modal-card instructions-card">
       <button class="modal-close" id="closeInstructionsBtn" aria-label="Cerrar">x</button>
@@ -262,15 +277,19 @@
     </div>
   </div>
 
+  <!-- Toast para mensajes cortos: errores, score guardado, nivel nuevo, etc. -->
   <div class="toast" id="toast" aria-live="polite"></div>
+  <!-- Boton flotante para volver arriba en celular o fullscreen. -->
   <button class="scroll-top-button" id="scrollTopBtn" type="button" aria-label="Volver arriba" title="Volver arriba">
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M12 19V5"></path>
       <path d="m5 12 7-7 7 7"></path>
     </svg>
   </button>
+  <!-- Musica de fondo. app.js la reproduce/mutea desde el boton Escuchar. -->
   <audio id="gameMusic" preload="auto" loop src="./assets/julian-trophy-hunter/audio/game-theme.mp3"></audio>
 
+  <!-- Socket.IO viene del servidor; app.js es el modulo principal del cliente. -->
   <script src="/socket.io/socket.io.js"></script>
   <script type="module" src="./scripts/network/app.js"></script>
 </body>

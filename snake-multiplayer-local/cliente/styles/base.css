@@ -1,3 +1,4 @@
+/* Variables principales del tema claro. Modo oscuro cambia estos valores en body.dark. */
 :root {
   color-scheme: light;
   --bg: #f5f6f8;
@@ -26,6 +27,7 @@
   --game-shadow: 0 20px 48px rgba(15, 23, 42, 0.18);
 }
 
+/* Modo oscuro: app.js agrega/quita esta clase con el boton Claro/Oscuro. */
 body.dark {
   color-scheme: dark;
   --bg: #080d1c;
@@ -54,6 +56,7 @@ body.dark {
   --game-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
 }
 
+/* Base general: tipografia, fondo y controles comunes. */
 * { box-sizing: border-box; }
 
 body {
@@ -142,6 +145,7 @@ body.dark .topbar h1 {
   color: var(--text);
 }
 
+/* Botones fijos de arriba: tema, musica y pantalla completa. */
 .utility-controls {
   position: fixed;
   top: 10px;
@@ -198,6 +202,7 @@ body.dark .topbar h1 {
   color: var(--gold);
 }
 
+/* Textos chicos de seccion usados en login, menu y HUD. */
 .eyebrow {
   color: var(--primary);
   font-size: 0.76rem;
@@ -206,6 +211,7 @@ body.dark .topbar h1 {
   text-transform: uppercase;
 }
 
+/* Paneles y formularios compartidos por login, rankings y HUD. */
 .panel {
   background: color-mix(in srgb, var(--surface) 94%, transparent);
   border: 1px solid var(--line);
@@ -269,6 +275,7 @@ label {
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
 }
 
+/* Botones principales del proyecto. */
 .primary {
   background: var(--primary);
   color: #ffffff;
@@ -327,6 +334,7 @@ label {
   height: 54px;
 }
 
+/* Inicio estilo Julian Trophy Hunter: acciones, jugador, rankings y banner. */
 .dashboard-home {
   min-height: calc(100dvh - 20px);
 }
@@ -416,7 +424,7 @@ body.dark .home-user h2 {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(350px, 1fr) minmax(360px, 0.92fr) minmax(300px, 0.76fr);
+  grid-template-columns: minmax(350px, 0.95fr) minmax(420px, 1.12fr) minmax(300px, 0.76fr);
   align-items: center;
   gap: clamp(10px, 1.6vw, 20px);
 }
@@ -608,14 +616,14 @@ body.dark .home-title h2 span {
   align-self: end;
   display: grid;
   place-items: end center;
-  min-height: clamp(390px, 55vh, 540px);
+  min-height: clamp(440px, 62vh, 660px);
   margin: 0;
   pointer-events: none;
 }
 
 .home-player-art img {
-  width: min(100%, 510px);
-  max-height: min(58vh, 560px);
+  width: min(108%, 640px);
+  max-height: min(68vh, 680px);
   object-fit: contain;
   object-position: center bottom;
   filter: drop-shadow(0 22px 24px rgba(15, 23, 42, 0.14));
@@ -727,6 +735,7 @@ body.dark .home-banner span {
   box-shadow: 0 0 18px rgba(255, 214, 107, 0.18);
 }
 
+/* Distribucion alternativa anterior del dashboard, se conserva por compatibilidad. */
 .dashboard-grid {
   display: grid;
   grid-template-columns: minmax(240px, 0.9fr) repeat(2, minmax(260px, 1fr));
@@ -768,6 +777,7 @@ body.dark .home-banner span {
   color: var(--muted);
 }
 
+/* Estilos base del juego y controles tactiles. */
 .game-view {
   display: grid;
   gap: 16px;
@@ -847,6 +857,7 @@ canvas {
   gap: 10px;
 }
 
+/* Layout principal de la partida: tablero al centro y HUD a los costados. */
 .game-view {
   min-height: calc(100dvh - 20px);
   margin-top: 0;
@@ -1244,6 +1255,7 @@ canvas {
   line-height: 1;
 }
 
+/* Pantalla completa: se aplica sobre .app-shell para incluir tablero y botones. */
 .app-shell:fullscreen,
 .app-shell:-webkit-full-screen {
   width: 100vw;
@@ -1276,6 +1288,7 @@ canvas {
   width: min(100%, 880px);
 }
 
+/* Modales de sala e instrucciones. */
 .modal {
   position: fixed;
   inset: 0;
@@ -1343,6 +1356,7 @@ canvas {
   color: var(--gold);
 }
 
+/* Mensajes flotantes y boton de volver arriba. */
 .toast {
   position: fixed;
   left: 50%;
@@ -1402,6 +1416,7 @@ canvas {
   display: none !important;
 }
 
+/* Responsive escritorio chico/tablet. */
 @media (max-width: 1180px) {
   .home-stage {
     grid-template-columns: minmax(330px, 1fr) minmax(340px, 0.86fr);
@@ -1524,6 +1539,7 @@ canvas {
   }
 }
 
+/* Responsive celular vertical. */
 @media (max-width: 520px) {
   .utility-controls {
     top: 6px;
@@ -1734,6 +1750,7 @@ canvas {
   }
 }
 
+/* Responsive celular horizontal: tablero y joystick quedan lado a lado. */
 @media (orientation: landscape) and (max-height: 560px) and (max-width: 950px) {
   .utility-controls {
     top: 4px;
@@ -1920,6 +1937,7 @@ canvas {
   }
 }
 
+/* Accesibilidad: si el sistema pide menos movimiento, se apagan transiciones. */
 @media (prefers-reduced-motion: reduce) {
   * {
     scroll-behavior: auto !important;

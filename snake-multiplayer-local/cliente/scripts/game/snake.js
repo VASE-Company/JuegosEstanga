@@ -1,3 +1,7 @@
+// snake.js contiene el motor del juego. No maneja botones ni login:
+// recibe un canvas y callbacks desde app.js, calcula la partida y dibuja todo.
+
+// Vectores de movimiento por celda. Cada paso mueve la cabeza una casilla.
 const DIRECTIONS = {
   up: { x: 0, y: -1 },
   down: { x: 0, y: 1 },
@@ -5,22 +9,37 @@ const DIRECTIONS = {
   right: { x: 1, y: 0 }
 };
 
+// Direcciones opuestas para evitar que la serpiente se de vuelta sobre si misma.
 const OPPOSITES = { up: "down", down: "up", left: "right", right: "left" };
+
+// Datos de assets y balance del juego.
 const TROPHY_KEYS = ["champions", "worldCup", "laLiga"];
 const ATLAS_URL = "/assets/julian-trophy-hunter/sprites.json";
 const TROPHY_GROWTH = 1;
+
+// Velocidad: arranca lento y cada nivel baja el tiempo entre pasos.
 const BASE_TICK_MS = 380;
 const MIN_TICK_MS = 220;
 const LEVEL_SPEED_STEP_MS = 40;
+
+// Tablero: 18 columnas por 12 filas dentro del campo del mapa.
 const GRID_WIDTH = 18;
 const GRID_HEIGHT = 12;
+
+// Niveles: cada 50 puntos sube un nivel, maximo 5 niveles.
 const LEVEL_SCORE_STEP = 50;
 const MAX_LEVEL = 5;
 const COMPLETION_SCORE = MAX_LEVEL * LEVEL_SCORE_STEP;
+
+// Muros: empiezan a aparecer al subir niveles y no se colocan sobre la serpiente.
 const MAX_OBSTACLES = 14;
 const OBSTACLES_PER_LEVEL = 2;
+
+// Insets negativos hacen que la cabeza y los trofeos se dibujen mas grandes.
 const HEAD_SCALE_INSET = -1.00;
 const TROPHY_SCALE_INSET = -0.2;
+
+// Ubicacion del campo jugable dentro de la imagen del estadio/mapa.
 const MAP_FIELD = {
   left: 96 / 1402,
   top: 141 / 1122,
@@ -32,6 +51,7 @@ let spriteAtlas = null;
 let spriteImages = null;
 let spriteLoadPromise = null;
 
+// Recorre sprites.json y arma una lista plana de imagenes .png para precargar.
 function flattenAtlas(value, output = {}) {
   if (typeof value === "string" && value.endsWith(".png")) {
     output[value] = value;
@@ -47,15 +67,18 @@ function flattenAtlas(value, output = {}) {
   return output;
 }
 
+// Busca una ruta tipo "heads.left" dentro del atlas de sprites.
 function getPath(path) {
   return path.split(".").reduce((current, part) => current?.[part], spriteAtlas);
 }
 
+// Devuelve la imagen ya cargada desde el atlas.
 function getImage(path) {
   const src = getPath(path);
   return src ? spriteImages?.get(src) || null : null;
 }
 
+// Carga una imagen y nunca rompe el juego si falla: devuelve null como respaldo.
 function loadImage(src) {
   return new Promise((resolve) => {
     const image = new Image();
@@ -65,6 +88,7 @@ function loadImage(src) {
   });
 }
 
+// Precarga una sola vez todos los sprites: cabezas, trofeos, mapa y efectos.
 function loadSprites() {
   if (!spriteLoadPromise) {
     spriteLoadPromise = fetch(ATLAS_URL)
@@ -88,10 +112,12 @@ function loadSprites() {
   return spriteLoadPromise;
 }
 
+// Elige al azar que trofeo aparece en la siguiente comida.
 function randomTrophyKey() {
   return TROPHY_KEYS[Math.floor(Math.random() * TROPHY_KEYS.length)];
 }
 
+// Detecta si dos celdas estan unidas horizontal o verticalmente.
 function directionFrom(from, to) {
   const dx = to.x - from.x;
   const dy = to.y - from.y;
@@ -102,6 +128,7 @@ function directionFrom(from, to) {
   return null;
 }
 
+// Convierte coordenadas de grilla a pixeles centrales del canvas.
 function pointCenter(point, board) {
   return {
     x: board.x + (point.x + 0.5) * board.cell,
@@ -109,20 +136,25 @@ function pointCenter(point, board) {
   };
 }
 
+// Normaliza un vector para usarlo en curvas, flecos y direcciones de dibujo.
 function normalizeVector(vector) {
   const length = Math.hypot(vector.x, vector.y) || 1;
   return { x: vector.x / length, y: vector.y / length };
 }
 
+// Calcula el nivel segun score: 0-49 nivel 1, 50-99 nivel 2, etc.
 function levelFromScore(score) {
   return Math.min(MAX_LEVEL, Math.floor(score / LEVEL_SCORE_STEP) + 1);
 }
 
+// Calcula la velocidad del nivel respetando un minimo para no hacerlo imposible.
 function tickMsForLevel(level) {
   return Math.max(MIN_TICK_MS, BASE_TICK_MS - (level - 1) * LEVEL_SPEED_STEP_MS);
 }
 
 export class SnakeGame {
+  // El constructor recibe el canvas y callbacks: onScore, onGameOver,
+  // onLevelUp, onGameComplete y onState para multijugador.
   constructor(canvas, options = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
@@ -148,6 +180,7 @@ export class SnakeGame {
     this.reset();
   }
 
+  // Reinicia toda la partida: serpiente inicial, score, nivel, muros y trofeo.
   reset() {
     cancelAnimationFrame(this.animationFrame);
     this.animationFrame = null;
@@ -175,6 +208,7 @@ export class SnakeGame {
     this.emitState();
   }
 
+  // Arranca el loop. Si todavia no se toco una direccion, muestra animacion idle.
   start() {
     this.stop();
     this.active = true;
@@ -187,6 +221,7 @@ export class SnakeGame {
     this.loop();
   }
 
+  // Detiene frames pendientes; se usa al pausar, volver al menu o reiniciar.
   stop() {
     cancelAnimationFrame(this.timer);
     cancelAnimationFrame(this.animationFrame);
@@ -195,6 +230,7 @@ export class SnakeGame {
     this.lastStepTime = 0;
   }
 
+  // Redibuja mientras espera el primer movimiento para que brillos/efectos respiren.
   startIdleAnimation() {
     cancelAnimationFrame(this.animationFrame);
 
@@ -210,10 +246,13 @@ export class SnakeGame {
     this.animationFrame = requestAnimationFrame(animate);
   }
 
+  // Activa o congela el motor sin borrar la partida.
   setActive(active) {
     this.active = active;
   }
 
+  // Loop principal con requestAnimationFrame. La serpiente se mueve por tiempo,
+  // no por setInterval, para verse mas fluida.
   loop(time = performance.now()) {
     if (!this.gameOver && this.active) {
       if (!this.lastStepTime) this.lastStepTime = time - this.tickMs;
@@ -226,6 +265,7 @@ export class SnakeGame {
     }
   }
 
+  // Primer paso inmediato despues de tocar direccion: evita que parezca trabado.
   runImmediateStep() {
     if (!this.gameOver && this.active) {
       this.lastStepTime = performance.now();
@@ -234,6 +274,7 @@ export class SnakeGame {
     }
   }
 
+  // Cambia la direccion. Bloquea giros de 180 grados para no chocar injustamente.
   setDirection(direction) {
     if (!this.active || this.gameOver || !DIRECTIONS[direction]) return;
     if (this.waitingForInput) {
@@ -251,6 +292,8 @@ export class SnakeGame {
     this.nextDirection = direction;
   }
 
+  // Un paso completo de juego: mover cabeza, detectar choque, comer trofeo,
+  // crecer, subir nivel, crear muros y avisar estado.
   step() {
     this.advanceEffects();
     this.direction = this.nextDirection;
@@ -302,6 +345,7 @@ export class SnakeGame {
     this.emitState();
   }
 
+  // Interpola entre la posicion anterior y la nueva para que el movimiento no corte.
   startMoveAnimation() {
     cancelAnimationFrame(this.animationFrame);
     this.animationStart = performance.now();
@@ -325,6 +369,7 @@ export class SnakeGame {
     this.animationFrame = requestAnimationFrame(animate);
   }
 
+  // Avanza contadores de efectos visuales de pickup y choque.
   advanceEffects() {
     if (this.pickupEffect) {
       this.pickupEffect.frame += 1;
@@ -336,6 +381,7 @@ export class SnakeGame {
     }
   }
 
+  // Dispara el efecto de choque durante algunos frames antes de quedar detenido.
   playCollisionEffect(cell) {
     this.collisionEffect = { x: cell.x, y: cell.y, frame: 0 };
     this.draw();
@@ -350,24 +396,29 @@ export class SnakeGame {
     }
   }
 
+  // Detecta salida del mapa: condicion de fin por pared.
   hitWall(cell) {
     return cell.x < 0 || cell.y < 0 || cell.x >= this.gridWidth || cell.y >= this.gridHeight;
   }
 
+  // Detecta choque contra el propio cuerpo. Si crece, tambien cuenta la cola actual.
   hitSelf(cell, willGrow = false) {
     const body = willGrow || this.pendingGrowth > 0 ? this.snake : this.snake.slice(0, -1);
     return body.some((segment) => segment.x === cell.x && segment.y === cell.y);
   }
 
+  // Detecta choque contra los muros aleatorios del nivel.
   hitObstacle(cell) {
     return this.obstacles.some((obstacle) => obstacle.x === cell.x && obstacle.y === cell.y);
   }
 
+  // Recalcula la cantidad de muros cuando se sube de nivel.
   updateObstacles() {
     const obstacleCount = Math.min(MAX_OBSTACLES, Math.max(0, (this.level - 1) * OBSTACLES_PER_LEVEL));
     this.obstacles = this.createObstacles(obstacleCount);
   }
 
+  // Genera muros aleatorios evitando serpiente, trofeo y zona inicial segura.
   createObstacles(count) {
     if (count <= 0) return [];
 
@@ -398,6 +449,7 @@ export class SnakeGame {
     return obstacles;
   }
 
+  // Crea un trofeo en una celda libre.
   createFood() {
     let food;
     let attempts = 0;
@@ -415,6 +467,7 @@ export class SnakeGame {
     return food;
   }
 
+  // Estado serializable para mandar por Socket.IO al rival espectador.
   getState() {
     return {
       grid: this.grid,
@@ -434,10 +487,12 @@ export class SnakeGame {
     };
   }
 
+  // Llama al callback onState si existe. En singleplayer no hace nada.
   emitState() {
     this.options.onState?.(this.getState());
   }
 
+  // Recibe el estado remoto y lo dibuja. Lo usa el jugador que espera turno.
   renderState(state) {
     if (!state) return;
     this.gridWidth = state.gridWidth || state.grid || this.gridWidth;
@@ -461,6 +516,7 @@ export class SnakeGame {
     this.options.onScore?.(this.score);
   }
 
+  // Dibuja un frame completo: mapa, grilla, muros, trofeo, serpiente y efectos.
   draw() {
     const width = this.canvas.width;
     const height = this.canvas.height;
@@ -482,6 +538,7 @@ export class SnakeGame {
     this.ctx.restore();
   }
 
+  // Calcula el rectangulo real del tablero dentro del canvas responsive.
   getBoardMetrics() {
     const width = this.canvas.width;
     const height = this.canvas.height;
@@ -503,6 +560,7 @@ export class SnakeGame {
     };
   }
 
+  // Fondo del mapa. Si no cargo la imagen, usa un color verde de emergencia.
   drawMapBackground(width, height) {
     const image = getImage("map.field");
     if (image) {
@@ -514,6 +572,7 @@ export class SnakeGame {
     this.ctx.fillRect(0, 0, width, height);
   }
 
+  // Dibuja lineas suaves de grilla para ubicar las celdas.
   drawBoardGrid(board, color) {
     this.ctx.strokeStyle = color;
     this.ctx.lineWidth = 1;
@@ -533,12 +592,14 @@ export class SnakeGame {
     }
   }
 
+  // Limita dibujos al campo para que nada salga por fuera del mapa.
   clipToBoard(board) {
     this.ctx.beginPath();
     this.ctx.rect(board.x, board.y, board.width, board.height);
     this.ctx.clip();
   }
 
+  // Dibuja el trofeo actual y su brillo.
   drawTrophy(board) {
     if (!this.food) return;
     const trophy = this.food?.trophy || "champions";
@@ -553,10 +614,12 @@ export class SnakeGame {
     this.roundCell(this.food.x, this.food.y, board, board.cell * 0.28);
   }
 
+  // Dibuja todos los muros del nivel.
   drawObstacles(board) {
     this.obstacles.forEach((obstacle) => this.drawObstacle(obstacle, board));
   }
 
+  // Dibuja un muro con colores del tema Atletico.
   drawObstacle(obstacle, board) {
     const cell = board.cell;
     const gap = Math.max(2, cell * 0.08);
@@ -584,6 +647,7 @@ export class SnakeGame {
     this.ctx.restore();
   }
 
+  // Brillo animado alrededor del trofeo para que sea facil verlo.
   drawTrophyGlow(x, y, board) {
     const center = pointCenter({ x, y }, board);
     const pulse = 0.88 + Math.sin(performance.now() / 260) * 0.08;
@@ -612,6 +676,7 @@ export class SnakeGame {
     }
   }
 
+  // Estrellita pequena usada en el brillo del trofeo.
   drawSparkle(x, y, size) {
     this.ctx.beginPath();
     this.ctx.moveTo(x, y - size);
@@ -626,6 +691,7 @@ export class SnakeGame {
     this.ctx.fill();
   }
 
+  // Dibuja la serpiente completa: bufanda, flecos, detalles y cabeza.
   drawSnake(board) {
     const renderSnake = this.getRenderSnake();
     this.drawSmoothScarf(renderSnake, board);
@@ -634,6 +700,7 @@ export class SnakeGame {
     if (this.snake[0]) this.drawHead(this.snake[0], board, renderSnake[0]);
   }
 
+  // Cuerpo de la serpiente: una bufanda rojiblanca, no rectangulos simples.
   drawSmoothScarf(renderSnake, board) {
     if (!renderSnake?.length) return;
 
@@ -655,6 +722,7 @@ export class SnakeGame {
     this.ctx.restore();
   }
 
+  // Traza la bufanda con curvas en las esquinas para que no se vea cortada.
   strokeRoundedScarfPath(points, board, width, color) {
     if (!points.length) return;
     const centers = points.map((point) => pointCenter(point, board));
@@ -699,6 +767,7 @@ export class SnakeGame {
     this.ctx.stroke();
   }
 
+  // Flecos al final de la cola para reforzar la idea de bufanda.
   drawTailFringes(renderSnake, board) {
     if (!renderSnake || renderSnake.length < 2) return;
     const tail = pointCenter(renderSnake[renderSnake.length - 1], board);
@@ -740,6 +809,7 @@ export class SnakeGame {
     }
   }
 
+  // Cada algunos segmentos agrega insignias "ALVAREZ" o "19".
   drawScarfBadges(renderSnake, board) {
     if (!renderSnake || renderSnake.length < 5) return;
 
@@ -763,6 +833,7 @@ export class SnakeGame {
     }
   }
 
+  // Dibuja una insignia individual sobre un tramo recto.
   drawScarfBadge(segment, board, text, horizontal) {
     const center = pointCenter(segment, board);
     const width = horizontal ? board.cell * 0.95 : board.cell * 0.78;
@@ -787,6 +858,7 @@ export class SnakeGame {
     this.ctx.restore();
   }
 
+  // Helper para rectangulos redondeados en canvas.
   roundedRectPath(x, y, width, height, radius) {
     const r = Math.min(radius, width / 2, height / 2);
     this.ctx.beginPath();
@@ -797,6 +869,7 @@ export class SnakeGame {
     this.ctx.arcTo(x, y, x + width, y, r);
   }
 
+  // Devuelve posiciones interpoladas entre frames para que el snake sea fluido.
   getRenderSnake() {
     if (!this.previousSnake || this.renderProgress >= 1) return this.snake;
     const progress = this.renderProgress;
@@ -809,6 +882,7 @@ export class SnakeGame {
     });
   }
 
+  // Cabeza de Julian segun direccion. Si falta la imagen, usa un fallback azul.
   drawHead(segment, board, renderSegment = segment) {
     const image = getImage(`heads.${this.direction}`);
     if (image) {
@@ -819,6 +893,7 @@ export class SnakeGame {
     this.roundCell(renderSegment.x, renderSegment.y, board, board.cell * 0.18);
   }
 
+  // Dibuja efectos animados desde el atlas: pickup y collision.
   drawEffect(effect, pathPrefix, board) {
     if (!effect) return;
     const frame = Math.min(4, Math.max(1, Number(effect.frame || 0) + 1));
@@ -829,6 +904,7 @@ export class SnakeGame {
     this.drawImageCell(image, effect.x, effect.y, board, -board.cell * 0.18);
   }
 
+  // Dibuja cualquier sprite dentro de una celda con escala configurable.
   drawImageCell(image, x, y, board, inset = 0) {
     if (!image) return;
     const cell = board.cell;
@@ -839,6 +915,7 @@ export class SnakeGame {
     this.ctx.drawImage(image, left, top, size, size);
   }
 
+  // Fallback simple para dibujar una celda redondeada si falta algun sprite.
   roundCell(x, y, board, radius) {
     const cell = board.cell;
     const gap = Math.max(2, cell * 0.08);
