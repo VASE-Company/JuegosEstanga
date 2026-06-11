@@ -32,6 +32,12 @@ var PacmanCore = {
     this.ctx = this.canvas.getContext("2d");
     window.addEventListener("resize", () => this.render());
     document.addEventListener("keydown", (event) => {
+      const target = event.target;
+      const isTypingField = target && (
+        target.isContentEditable ||
+        ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)
+      );
+      if (isTypingField) return;
       if (event.key === "p" || event.key === "P" || event.key === " ") {
         event.preventDefault();
         this.togglePause();
