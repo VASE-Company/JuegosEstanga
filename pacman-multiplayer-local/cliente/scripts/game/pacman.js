@@ -16,7 +16,7 @@ var PacmanGame = window.PacmanGame || {
   assetReady: {},
   spriteAssets: {},
   loadingUntil: 0,
-  releaseDelayMs: 2200,
+  releaseDelayMs: 3000,
   ghostProfiles: [
     { club: "boca", asset: "assets/images/characters/bocafantasma.png", vulnerableAsset: "assets/images/characters/bocafantasma-perseguido.png", speed: 1.35, wobble: 0.04 },
     { club: "independiente", asset: "assets/images/characters/independientefantasma.png", vulnerableAsset: "assets/images/characters/independientefantasma-perseguido.png", speed: 1.15, wobble: 0.07 },

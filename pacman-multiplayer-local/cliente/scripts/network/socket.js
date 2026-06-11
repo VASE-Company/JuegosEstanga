@@ -44,17 +44,29 @@ const Multiplayer = {
 
   createRoom(config) {
     if (!Auth.user) return UI.toast("Debes iniciar sesion.");
-    this.socket.emit("crear-partida-pacman", { ...config, userId: Auth.user.id, email: Auth.user.email, displayName: Auth.user.displayName });
+    this.socket.emit("crear-partida-pacman", {
+      ...config,
+      userId: Auth.user.id,
+      email: Auth.user.email,
+      displayName: Auth.user.displayName,
+      token: Auth.getToken()
+    });
   },
 
   joinRoom(config) {
     if (!Auth.user) return UI.toast("Debes iniciar sesion.");
-    this.socket.emit("unirse-partida-pacman", { ...config, userId: Auth.user.id, email: Auth.user.email, displayName: Auth.user.displayName });
+    this.socket.emit("unirse-partida-pacman", {
+      ...config,
+      userId: Auth.user.id,
+      email: Auth.user.email,
+      displayName: Auth.user.displayName,
+      token: Auth.getToken()
+    });
   },
 
   startRoom() {
     if (!this.currentLobby || !Auth.user) return;
-    this.socket.emit("iniciar-partida-pacman", { codigo: this.currentLobby.codigo, userId: Auth.user.id });
+    this.socket.emit("iniciar-partida-pacman", { codigo: this.currentLobby.codigo, userId: Auth.user.id, token: Auth.getToken() });
   },
 
   leaveLobby() {
@@ -82,13 +94,13 @@ const Multiplayer = {
   changeLobbyRole() {
     if (!this.currentLobby || !Auth.user) return;
     // acá se pide al server que mueva al usuario de pacman a fantasma, o al revés
-    this.socket.emit("cambiar-rol-pacman", { codigo: this.currentLobby.codigo, userId: Auth.user.id });
+    this.socket.emit("cambiar-rol-pacman", { codigo: this.currentLobby.codigo, userId: Auth.user.id, token: Auth.getToken() });
   },
 
   restartLobby() {
     if (!this.currentLobby || !Auth.user) return;
     // el reinicio queda del lado del server para no desordenar la sala entre dispositivos
-    this.socket.emit("reiniciar-sala-pacman", { codigo: this.currentLobby.codigo, userId: Auth.user.id });
+    this.socket.emit("reiniciar-sala-pacman", { codigo: this.currentLobby.codigo, userId: Auth.user.id, token: Auth.getToken() });
   },
 
   abandonGame() {

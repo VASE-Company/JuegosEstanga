@@ -47,7 +47,7 @@ const rooms = new Map();
 const socketUsers = new Map();
 const sessions = new Map();
 let liveSnapshotQueue = Promise.resolve();
-const GHOST_INITIAL_RELEASE_SCHEDULE = [0, 10000, 15000, 20000];
+const GHOST_INITIAL_RELEASE_SCHEDULE = [0, 3000, 6000, 9000];
 const GHOST_RESPAWN_DELAY = 5000;
 
 app.use(express.json());
@@ -84,6 +84,18 @@ function sessionFromRequest(req) {
     return null;
   }
   return { token, ...session };
+}
+
+function sessionFromToken(token) {
+  const cleanToken = String(token || "").trim();
+  if (!cleanToken) return null;
+  const session = sessions.get(cleanToken);
+  if (!session) return null;
+  if (session.expiresAt < Date.now()) {
+    sessions.delete(cleanToken);
+    return null;
+  }
+  return { token: cleanToken, ...session };
 }
 
 async function getUserByEmail(email) {
@@ -350,6 +362,7 @@ function createGameState(room) {
     levelName: level.name,
     scorePacman: 0,
     livesPacman: level.lives,
+    totalPotentialPoints: parsed.pellets.length * 10 + parsed.powerPellets.length * 50,
     pelletsRemaining: parsed.pellets.length + parsed.powerPellets.length,
     width: parsed.width,
     height: parsed.height,
@@ -380,10 +393,13 @@ function resetPositions(state) {
   state.pacman.x = state.pacman.startX;
   state.pacman.y = state.pacman.startY;
   state.pacman.direction = "left";
-  state.ghosts.forEach((ghost) => {
+  const now = Date.now();
+  state.ghosts.forEach((ghost, index) => {
     ghost.x = ghost.startX;
     ghost.y = ghost.startY;
     ghost.vulnerable = false;
+    ghost.released = index === 0;
+    ghost.releaseAt = index === 0 ? 0 : now + (GHOST_INITIAL_RELEASE_SCHEDULE[index] || (index * 3000));
   });
 }
 
@@ -508,7 +524,7 @@ async function tickRoom(room) {
     if (ghost.x === state.pacman.x && ghost.y === state.pacman.y) {
         if (ghost.vulnerable) {
           state.scorePacman += 200;
-          ghost.score += 0;
+          ghost.score = Math.max(0, (ghost.score || 0) - 500);
           ghost.x = ghost.startX;
           ghost.y = ghost.startY;
           ghost.vulnerable = false;
@@ -516,7 +532,8 @@ async function tickRoom(room) {
           ghost.releaseAt = now + GHOST_RESPAWN_DELAY;
         } else {
         state.livesPacman -= 1;
-        ghost.score += 100;
+        const rewardPoints = Math.max(0, (state.totalPotentialPoints || 0) - (state.scorePacman || 0));
+        ghost.score = Math.max(0, (ghost.score || 0) + rewardPoints);
         if (state.livesPacman <= 0) {
           await finishRoom(room, "Fantasmas", "Los fantasmas atraparon a Pac-Man.");
           return;
@@ -654,7 +671,13 @@ function lobbyPayload(room) {
   };
 }
 
-async function assertRegistered(userId, email) {
+async function assertRegistered(userId, email, token) {
+  const session = sessionFromToken(token);
+  if (session) {
+    const user = await getUserByEmail(session.email);
+    if (!user || user.id !== session.userId) throw new Error("Debes iniciar sesion con un usuario valido.");
+    return user;
+  }
   const user = await getUserByEmail(email);
   if (!user || user.id !== userId) throw new Error("Debes iniciar sesion con un usuario valido.");
   return user;
@@ -893,7 +916,7 @@ io.on("connection", (socket) => {
 
   socket.on("crear-partida-pacman", async (payload = {}) => {
     try {
-      const user = await assertRegistered(payload.userId, payload.email);
+      const user = await assertRegistered(payload.userId, payload.email, payload.token);
       const role = payload.role === "ghost" ? "ghost" : "pacman";
       const character = payload.character || (role === "pacman" ? "pacman" : "boca");
       const displayName = sanitizeDisplayName(payload.displayName || user.displayName || defaultDisplayName(user.email));
@@ -930,7 +953,7 @@ io.on("connection", (socket) => {
 
   socket.on("unirse-partida-pacman", async (payload = {}) => {
     try {
-      const user = await assertRegistered(payload.userId, payload.email);
+      const user = await assertRegistered(payload.userId, payload.email, payload.token);
       const codigo = String(payload.codigo || "").trim().toUpperCase();
       const room = rooms.get(codigo);
       if (!room) throw new Error("La sala no existe.");
@@ -964,28 +987,32 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("cambiar-rol-pacman", ({ codigo, userId } = {}) => {
+  socket.on("cambiar-rol-pacman", ({ codigo, userId, token } = {}) => {
     try {
       // este cambio lo valida el server para que no se pueda tunear desde el navegador
       const room = rooms.get(String(codigo || "").trim().toUpperCase());
       if (!room) throw new Error("La sala no existe.");
       if (room.estado !== "lobby") throw new Error("Solo podés cambiar roles en la sala de espera.");
       const participant = room.sockets[socket.id];
-      if (!participant || participant.userId !== userId) throw new Error("No perteneces a la sala.");
-      toggleLobbyRole(room, userId);
+      const session = sessionFromToken(token);
+      const validUserId = session?.userId || userId;
+      if (!participant || participant.userId !== validUserId) throw new Error("No perteneces a la sala.");
+      toggleLobbyRole(room, validUserId);
       io.to(room.codigo).emit("lobby-actualizado-pacman", lobbyPayload(room));
     } catch (error) {
       socket.emit("error-partida", { message: error.message });
     }
   });
 
-  socket.on("reiniciar-sala-pacman", ({ codigo, userId } = {}) => {
+  socket.on("reiniciar-sala-pacman", ({ codigo, userId, token } = {}) => {
     try {
       // reiniciar desde acá evita que queden restos de una partida vieja en otros clientes
       const room = rooms.get(String(codigo || "").trim().toUpperCase());
       if (!room) throw new Error("La sala no existe.");
-      if (!room.sockets[socket.id] || room.sockets[socket.id].userId !== userId) throw new Error("No perteneces a la sala.");
-      if (room.hostUserId !== userId) throw new Error("Solo el creador puede reiniciar la sala.");
+      const session = sessionFromToken(token);
+      const validUserId = session?.userId || userId;
+      if (!room.sockets[socket.id] || room.sockets[socket.id].userId !== validUserId) throw new Error("No perteneces a la sala.");
+      if (room.hostUserId !== validUserId) throw new Error("Solo el creador puede reiniciar la sala.");
       if (room.interval) {
         clearInterval(room.interval);
         room.interval = null;
@@ -1001,14 +1028,16 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("iniciar-partida-pacman", async ({ codigo, userId } = {}) => {
+  socket.on("iniciar-partida-pacman", async ({ codigo, userId, token } = {}) => {
     try {
       // arrancamos solo cuando la sala está completa y el host lo confirma
       const room = rooms.get(String(codigo || "").trim().toUpperCase());
       if (!room) throw new Error("La sala no existe.");
       if (room.estado !== "lobby") throw new Error("La sala no esta en lobby.");
-      if (!room.sockets[socket.id] || room.sockets[socket.id].userId !== userId) throw new Error("No perteneces a la sala.");
-      if (room.hostUserId !== userId) throw new Error("Solo el creador puede iniciar.");
+      const session = sessionFromToken(token);
+      const validUserId = session?.userId || userId;
+      if (!room.sockets[socket.id] || room.sockets[socket.id].userId !== validUserId) throw new Error("No perteneces a la sala.");
+      if (room.hostUserId !== validUserId) throw new Error("Solo el creador puede iniciar.");
       if (!room.jugadores.pacman) throw new Error("Falta un Pac-Man.");
       if (room.jugadores.fantasmas.length < 1) throw new Error("Falta al menos un fantasma.");
       room.estado = "jugando";

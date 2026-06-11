@@ -46,6 +46,16 @@ const Auth = {
       return null;
     }
   },
+  getSession() {
+    try {
+      return JSON.parse(localStorage.getItem(this.sessionKey) || "{}");
+    } catch {
+      return {};
+    }
+  },
+  getToken() {
+    return this.getSession()?.token || "";
+  },
   setUser(user) {
     this.user = {
       ...user,

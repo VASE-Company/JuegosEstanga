@@ -271,7 +271,14 @@ function parseLevel(level, seed = level.id) {
   };
 }
 
-module.exports = {
-  LEVELS,
-  parseLevel
-};
+if (typeof window !== "undefined") {
+  window.LEVELS = LEVELS;
+  window.parseLevel = parseLevel;
+}
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    LEVELS,
+    parseLevel
+  };
+}

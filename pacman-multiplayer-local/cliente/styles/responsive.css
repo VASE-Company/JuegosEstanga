@@ -257,7 +257,7 @@
 
   .hud-card:not(.is-result) .hud-actions button {
     min-height: 40px;
-    font-size: 0.84rem;
+    font-size: 0.8rem;
   }
 
   .hud-actions-shell {
@@ -270,6 +270,21 @@
     left: 0;
     right: 0;
     width: 100%;
+  }
+
+  .hud-actions-shell .hud-actions button {
+    justify-content: flex-start;
+    gap: 10px;
+    padding-inline: 0.8rem;
+  }
+
+  .hud-actions-shell .hud-actions button span {
+    min-width: 0;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.1;
+    text-align: left;
   }
 }
 
@@ -708,6 +723,22 @@
 
   .hud-actions-shell .hud-actions {
     width: min(100%, 320px);
+  }
+
+  .hud-actions-shell .hud-actions button {
+    justify-content: flex-start;
+    gap: 10px;
+    padding-inline: 0.8rem;
+    min-height: 40px;
+  }
+
+  .hud-actions-shell .hud-actions button span {
+    min-width: 0;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.08;
+    text-align: left;
   }
 }
 

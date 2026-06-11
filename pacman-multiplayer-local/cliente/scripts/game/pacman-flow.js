@@ -80,6 +80,7 @@
     const ghostSkill = Math.max(0.18, Math.min(1, 0.2 + (level.id - 1) * 0.2));
     const countdownMs = this.mode === "singleplayer" ? 4200 : 0;
     const introMs = this.mode === "singleplayer" ? 1000 : 0;
+    const ghostReleaseBaseAt = Date.now() + introMs + countdownMs;
     const playerVisuals = this.getCharacterVisuals(this.singleCharacter);
     this.state = {
       status: "playing",
@@ -154,7 +155,7 @@
           direction: index % 2 ? "left" : "right",
           lastMoveAt: 0,
           released: index === 0,
-          releaseAt: releaseSchedule[index] ?? 20000 + ((index - 3) * 5000),
+          releaseAt: ghostReleaseBaseAt + (releaseSchedule[index] ?? (index * this.releaseDelayMs)),
           vulnerable: false,
           eatenAtVulnerableUntil: 0,
           isBot: !(this.role === "ghost" && index === 0),
@@ -176,14 +177,12 @@
 
   calculateGhostScore(state = this.state) {
     if (!state) return 0;
-    const missedPoints = Math.max(0, (state.totalPotentialPoints || 0) - (state.scorePacman || 0));
-    const deathPenalty = Math.max(0, state.ghostDeaths || 0) * 200;
-    return Math.max(0, missedPoints - deathPenalty);
+    return Math.max(0, Number(state.scoreGhost || 0));
   },
 
   syncGhostScore(state = this.state) {
     if (!state || this.role !== "ghost") return 0;
-    state.scoreGhost = this.calculateGhostScore(state);
+    state.scoreGhost = Math.max(0, Number(state.scoreGhost || 0));
     return state.scoreGhost;
   },
 
@@ -316,6 +315,9 @@
     for (const ghost of state.ghosts) {
       if (ghost.x === state.pacman.x && ghost.y === state.pacman.y) {
         if (ghost.released && ghost.vulnerable && ghost.eatenAtVulnerableUntil !== state.vulnerableUntil) {
+          if (this.role === "ghost" && !ghost.isBot) {
+            state.scoreGhost = Math.max(0, (state.scoreGhost || 0) - 500);
+          }
           state.ghostCombo = (state.ghostCombo || 0) + 1;
           const comboPoints = state.ghostCombo * 200;
           state.scorePacman += comboPoints;
@@ -337,14 +339,18 @@
           ghost.eatenAtVulnerableUntil = state.vulnerableUntil;
           ghost.releaseAt = now + (this.ghostRespawnDelayMs || 5000);
           ghost.lastMoveAt = now;
-          state.ghostDeaths += 1;
           this.syncGhostScore(state);
         } else if (this.role === "ghost") {
+          if (!ghost.isBot) {
+            const rewardPoints = Math.max(0, (state.totalPotentialPoints || 0) - (state.scorePacman || 0));
+            state.scoreGhost = Math.max(0, (state.scoreGhost || 0) + rewardPoints);
+          }
+          this.syncGhostScore(state);
           if (state.level >= 5) {
-            this.finishSingle("ganó", this.calculateGhostScore(state), "Ganaste. Atrapaste al Pac-Man bot.");
+            this.finishSingle("ganó", state.scoreGhost, "Ganaste. Atrapaste al Pac-Man bot.");
             return;
           }
-          this.showLevelResult("victory", this.calculateGhostScore(state), "Pasaste al siguiente nivel.", state.level + 1);
+          this.showLevelResult("victory", state.scoreGhost, "Pasaste al siguiente nivel.", state.level + 1);
           return;
         } else {
           state.livesPacman -= 1;
@@ -362,7 +368,7 @@
 
     if (state.pelletsRemaining <= 0) {
       if (this.role === "ghost") {
-        this.finishSingle("perdió", this.calculateGhostScore(state), "Perdiste. El Pac-Man bot limpió el nivel.");
+        this.finishSingle("perdió", state.scoreGhost, "Perdiste. El Pac-Man bot limpió el nivel.");
         return;
       }
       if (state.level >= 5) {
@@ -381,7 +387,7 @@
 
   async finishSingle(result, score, message) {
     const kind = String(result).startsWith("gan") ? "victory" : "defeat";
-    const finalScore = this.role === "ghost" ? this.calculateGhostScore(this.state) : score;
+    const finalScore = this.role === "ghost" ? Math.max(0, Number(this.state?.scoreGhost || 0)) : score;
     this.showLevelResult(kind, finalScore, message);
     try {
       await fetch("/api/scores/pacman", {
@@ -389,7 +395,7 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: Auth.user.email,
-          score: Math.max(0, Math.round(score)),
+          score: Math.max(0, Math.round(finalScore)),
           mode: "singleplayer",
           role: this.role,
           level: this.state.level,

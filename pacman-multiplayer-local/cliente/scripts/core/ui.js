@@ -319,9 +319,11 @@
     const isResult = state.status !== "playing";
     const hudCard = document.querySelector(".hud-card");
     const hudOverlay = document.querySelector(".hud-overlay");
+    const hudStatusRow = document.querySelector(".hud-status-row");
     if (gameScene) gameScene.classList.toggle("is-result", isResult);
     if (hudCard) hudCard.classList.toggle("is-result", isResult);
     if (hudOverlay) hudOverlay.classList.toggle("is-result", isResult);
+    if (hudStatusRow) hudStatusRow.classList.toggle("hidden", isResult);
     const resultVisual = document.getElementById("resultVisual");
     const resultVisualImage = document.getElementById("resultVisualImage");
     const isDefeat = isResult && state.resultType === "defeat";
