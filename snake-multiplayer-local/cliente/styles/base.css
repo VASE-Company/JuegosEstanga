@@ -1,3 +1,4 @@
+/* Variables principales del tema claro. Modo oscuro cambia estos valores en body.dark. */
 :root {
   color-scheme: light;
   --bg: #f5f6f8;
@@ -26,6 +27,7 @@
   --game-shadow: 0 20px 48px rgba(15, 23, 42, 0.18);
 }
 
+/* Modo oscuro: app.js agrega/quita esta clase con el boton Claro/Oscuro. */
 body.dark {
   color-scheme: dark;
   --bg: #080d1c;
@@ -54,6 +56,7 @@ body.dark {
   --game-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
 }
 
+/* Base general: tipografia, fondo y controles comunes. */
 * { box-sizing: border-box; }
 
 body {
@@ -142,6 +145,7 @@ body.dark .topbar h1 {
   color: var(--text);
 }
 
+/* Botones fijos de arriba: tema, musica y pantalla completa. */
 .utility-controls {
   position: fixed;
   top: 10px;
@@ -198,6 +202,7 @@ body.dark .topbar h1 {
   color: var(--gold);
 }
 
+/* Textos chicos de seccion usados en login, menu y HUD. */
 .eyebrow {
   color: var(--primary);
   font-size: 0.76rem;
@@ -206,6 +211,7 @@ body.dark .topbar h1 {
   text-transform: uppercase;
 }
 
+/* Paneles y formularios compartidos por login, rankings y HUD. */
 .panel {
   background: color-mix(in srgb, var(--surface) 94%, transparent);
   border: 1px solid var(--line);
@@ -269,6 +275,7 @@ label {
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
 }
 
+/* Botones principales del proyecto. */
 .primary {
   background: var(--primary);
   color: #ffffff;
@@ -327,6 +334,7 @@ label {
   height: 54px;
 }
 
+/* Inicio estilo Julian Trophy Hunter: acciones, jugador, rankings y banner. */
 .dashboard-home {
   min-height: calc(100dvh - 20px);
 }
@@ -416,7 +424,7 @@ body.dark .home-user h2 {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(350px, 1fr) minmax(360px, 0.92fr) minmax(300px, 0.76fr);
+  grid-template-columns: minmax(350px, 0.95fr) minmax(420px, 1.12fr) minmax(300px, 0.76fr);
   align-items: center;
   gap: clamp(10px, 1.6vw, 20px);
 }
@@ -608,14 +616,14 @@ body.dark .home-title h2 span {
   align-self: end;
   display: grid;
   place-items: end center;
-  min-height: clamp(390px, 55vh, 540px);
+  min-height: clamp(440px, 62vh, 660px);
   margin: 0;
   pointer-events: none;
 }
 
 .home-player-art img {
-  width: min(100%, 510px);
-  max-height: min(58vh, 560px);
+  width: min(108%, 640px);
+  max-height: min(68vh, 680px);
   object-fit: contain;
   object-position: center bottom;
   filter: drop-shadow(0 22px 24px rgba(15, 23, 42, 0.14));
@@ -665,28 +673,69 @@ body.dark .home-ranking-card .section-heading h2 {
 }
 
 .home-banner {
+  position: relative;
   min-height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 20px;
   border-radius: 8px;
-  background: linear-gradient(135deg, var(--secondary), var(--secondary-strong));
+  border: 1px solid color-mix(in srgb, var(--secondary) 42%, transparent);
+  background:
+    linear-gradient(135deg, rgba(200, 16, 46, 0.18), transparent 42%),
+    linear-gradient(135deg, var(--secondary), var(--secondary-strong));
   color: #ffffff;
   box-shadow: 0 16px 30px rgba(11, 31, 85, 0.24);
+  overflow: hidden;
   text-transform: uppercase;
 }
 
 .home-banner strong {
   font-size: clamp(0.92rem, 1.35vw, 1.12rem);
   letter-spacing: 0.08em;
+  position: relative;
+  z-index: 1;
 }
 
 .home-banner span {
-  color: var(--primary);
+  position: relative;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
   font-size: 1.1rem;
 }
 
+body.dark .home-banner {
+  border-color: color-mix(in srgb, var(--primary) 38%, var(--line));
+  background:
+    radial-gradient(circle at 20% 50%, rgba(255, 64, 91, 0.22), transparent 28%),
+    radial-gradient(circle at 80% 50%, rgba(255, 214, 107, 0.16), transparent 24%),
+    linear-gradient(135deg, #050816 0%, #0b1636 48%, #160b1d 100%);
+  color: #f8fafc;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 18px 42px rgba(0, 0, 0, 0.36);
+}
+
+body.dark .home-banner strong {
+  color: #f8fafc;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.42);
+}
+
+body.dark .home-banner span {
+  border-color: color-mix(in srgb, var(--gold) 50%, transparent);
+  background: rgba(255, 214, 107, 0.1);
+  color: var(--gold);
+  box-shadow: 0 0 18px rgba(255, 214, 107, 0.18);
+}
+
+/* Distribucion alternativa anterior del dashboard, se conserva por compatibilidad. */
 .dashboard-grid {
   display: grid;
   grid-template-columns: minmax(240px, 0.9fr) repeat(2, minmax(260px, 1fr));
@@ -728,6 +777,7 @@ body.dark .home-ranking-card .section-heading h2 {
   color: var(--muted);
 }
 
+/* Estilos base del juego y controles tactiles. */
 .game-view {
   display: grid;
   gap: 16px;
@@ -799,13 +849,15 @@ canvas {
 .control.down { grid-column: 2; }
 .control.right { grid-column: 3; }
 
-.game-actions {
+.game-actions,
+.player-actions {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 10px;
 }
 
+/* Layout principal de la partida: tablero al centro y HUD a los costados. */
 .game-view {
   min-height: calc(100dvh - 20px);
   margin-top: 0;
@@ -824,8 +876,7 @@ canvas {
   grid-template-areas:
     "top top top"
     "left arena right"
-    ". dpad objective"
-    "actions actions actions";
+    ". dpad objective";
   gap: 14px;
   align-items: start;
 }
@@ -1006,6 +1057,56 @@ canvas {
   white-space: nowrap;
 }
 
+.player-roster {
+  width: 100%;
+  display: grid;
+  gap: 8px;
+}
+
+.player-row {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 1px solid color-mix(in srgb, var(--game-card-border) 72%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--game-control-bg) 62%, transparent);
+  text-align: left;
+}
+
+.player-row span {
+  color: var(--game-accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.player-row strong {
+  min-width: 0;
+  color: var(--game-text);
+  font-size: 0.76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.player-actions {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.player-actions button {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
 .arena-panel {
   grid-area: arena;
   position: relative;
@@ -1073,7 +1174,8 @@ canvas {
     var(--game-control-bg);
 }
 
-.pause-button {
+.pause-button,
+.game-fullscreen-button {
   width: 100%;
   min-height: 58px;
   border: 1px solid var(--game-card-border);
@@ -1082,18 +1184,29 @@ canvas {
   text-transform: uppercase;
 }
 
-.hunter-top .pause-button {
-  min-height: 86px;
+.game-quick-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
   align-self: stretch;
-  font-size: 0.9rem;
 }
 
-.pause-button.paused {
+.hunter-top .pause-button,
+.hunter-top .game-fullscreen-button {
+  min-height: 39px;
+  align-self: stretch;
+  padding: 6px 8px;
+  font-size: 0.78rem;
+}
+
+.pause-button.paused,
+.game-fullscreen-button.active {
   border-color: color-mix(in srgb, var(--game-gold) 68%, var(--game-card-border));
   color: var(--game-gold);
 }
 
-.pause-button:disabled {
+.pause-button:disabled,
+.game-fullscreen-button:disabled {
   cursor: default;
   opacity: 0.45;
 }
@@ -1142,11 +1255,19 @@ canvas {
   line-height: 1;
 }
 
-.hunter-layout .game-actions {
-  grid-area: actions;
+/* Pantalla completa: se aplica sobre .app-shell para incluir tablero y botones. */
+.app-shell:fullscreen,
+.app-shell:-webkit-full-screen {
+  width: 100vw;
+  min-height: 100vh;
+  overflow: auto;
+  padding: 0;
+  background: var(--bg);
 }
 
-.game-view:fullscreen {
+.game-view:fullscreen,
+.app-shell:fullscreen .game-view,
+.app-shell:-webkit-full-screen .game-view {
   width: 100vw;
   min-height: 100vh;
   padding: 12px;
@@ -1155,14 +1276,19 @@ canvas {
   overflow: auto;
 }
 
-.game-view:fullscreen .hunter-layout {
+.game-view:fullscreen .hunter-layout,
+.app-shell:fullscreen .hunter-layout,
+.app-shell:-webkit-full-screen .hunter-layout {
   min-height: calc(100vh - 24px);
 }
 
-.game-view:fullscreen .canvas-wrap {
+.game-view:fullscreen .canvas-wrap,
+.app-shell:fullscreen .canvas-wrap,
+.app-shell:-webkit-full-screen .canvas-wrap {
   width: min(100%, 880px);
 }
 
+/* Modales de sala e instrucciones. */
 .modal {
   position: fixed;
   inset: 0;
@@ -1230,6 +1356,7 @@ canvas {
   color: var(--gold);
 }
 
+/* Mensajes flotantes y boton de volver arriba. */
 .toast {
   position: fixed;
   left: 50%;
@@ -1289,6 +1416,7 @@ canvas {
   display: none !important;
 }
 
+/* Responsive escritorio chico/tablet. */
 @media (max-width: 1180px) {
   .home-stage {
     grid-template-columns: minmax(330px, 1fr) minmax(340px, 0.86fr);
@@ -1361,8 +1489,7 @@ canvas {
       "dpad"
       "left"
       "right"
-      "objective"
-      "actions";
+      "objective";
   }
 
   .hunter-top {
@@ -1374,7 +1501,13 @@ canvas {
     order: -1;
   }
 
-  .hunter-top .pause-button {
+  .game-quick-actions {
+    grid-template-columns: 1fr 1fr;
+    grid-column: 1 / -1;
+  }
+
+  .hunter-top .pause-button,
+  .hunter-top .game-fullscreen-button {
     min-height: 72px;
   }
 
@@ -1406,6 +1539,7 @@ canvas {
   }
 }
 
+/* Responsive celular vertical. */
 @media (max-width: 520px) {
   .utility-controls {
     top: 6px;
@@ -1561,7 +1695,8 @@ canvas {
     grid-template-columns: 1fr;
   }
 
-  .hunter-top .pause-button {
+  .hunter-top .pause-button,
+  .hunter-top .game-fullscreen-button {
     min-height: 52px;
   }
 
@@ -1580,11 +1715,10 @@ canvas {
   }
 
   .game-view .game-controls {
-    position: sticky;
-    bottom: 8px;
-    z-index: 5;
+    position: static;
     grid-template-columns: repeat(3, 72px);
     grid-template-rows: repeat(3, 64px);
+    margin-top: 4px;
     padding: 4px 0 max(4px, env(safe-area-inset-bottom));
   }
 
@@ -1616,6 +1750,194 @@ canvas {
   }
 }
 
+/* Responsive celular horizontal: tablero y joystick quedan lado a lado. */
+@media (orientation: landscape) and (max-height: 560px) and (max-width: 950px) {
+  .utility-controls {
+    top: 4px;
+    right: 4px;
+    gap: 4px;
+  }
+
+  .utility-button {
+    width: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0;
+  }
+
+  .utility-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .app-shell {
+    padding: 4px;
+  }
+
+  .game-view {
+    min-height: calc(100dvh - 8px);
+    padding: 6px;
+  }
+
+  .hunter-layout {
+    min-height: auto;
+    grid-template-columns: minmax(0, 1fr) minmax(138px, 0.34fr);
+    grid-template-areas:
+      "top top"
+      "arena dpad"
+      "left right";
+    gap: 6px;
+    align-items: start;
+  }
+
+  .hunter-top {
+    grid-template-columns: minmax(116px, 0.8fr) minmax(178px, 1.2fr) minmax(78px, 0.45fr) minmax(124px, 0.62fr);
+    gap: 6px;
+  }
+
+  .mode-card,
+  .score-card,
+  .brand-lockup {
+    min-height: 48px;
+  }
+
+  .mode-card,
+  .score-card {
+    padding: 6px 8px;
+  }
+
+  .mode-card img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .mode-card strong,
+  .objective-panel strong {
+    font-size: 0.72rem;
+    line-height: 1.15;
+  }
+
+  .score-card strong {
+    font-size: 1.45rem;
+  }
+
+  .brand-lockup {
+    grid-template-columns: 36px 1fr 36px;
+  }
+
+  .brand-lockup img {
+    width: 34px;
+    height: 34px;
+  }
+
+  .brand-lockup .brand-shield {
+    width: 38px;
+    height: 38px;
+  }
+
+  .brand-lockup h2 {
+    font-size: clamp(1.1rem, 3vw, 1.55rem);
+  }
+
+  .brand-lockup p {
+    margin-top: 1px;
+    font-size: clamp(0.72rem, 2vw, 0.95rem);
+  }
+
+  .game-quick-actions {
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+  }
+
+  .hunter-top .pause-button,
+  .hunter-top .game-fullscreen-button {
+    min-height: 48px;
+    font-size: 0.7rem;
+  }
+
+  .arena-panel {
+    align-content: start;
+  }
+
+  .game-view .canvas-wrap {
+    width: min(100%, calc((100dvh - 78px) * 1.25));
+    max-height: calc(100dvh - 78px);
+  }
+
+  .arena-status {
+    top: 6px;
+    max-width: calc(100% - 18px);
+    padding: 5px 8px;
+    font-size: 0.64rem;
+  }
+
+  .game-view .game-controls {
+    width: 146px;
+    grid-template-columns: repeat(3, 46px);
+    grid-template-rows: repeat(3, 42px);
+    align-self: center;
+    justify-self: center;
+    gap: 3px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .game-view .control {
+    min-height: 42px;
+  }
+
+  .game-view .control img {
+    width: 52px;
+    height: 52px;
+  }
+
+  .hunter-side {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .hud-panel {
+    padding: 8px;
+  }
+
+  .ranking-panel,
+  .trophies-panel,
+  .objective-panel {
+    display: none;
+  }
+
+  .player-panel {
+    grid-template-columns: 44px minmax(0, 1fr);
+    justify-items: start;
+    text-align: left;
+  }
+
+  .player-panel .eyebrow,
+  .player-roster,
+  .player-actions {
+    grid-column: 1 / -1;
+  }
+
+  .player-panel img {
+    width: 44px;
+    height: 44px;
+  }
+
+  .record-panel strong {
+    font-size: 1rem;
+  }
+
+  .record-panel img {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Accesibilidad: si el sistema pide menos movimiento, se apagan transiciones. */
 @media (prefers-reduced-motion: reduce) {
   * {
     scroll-behavior: auto !important;

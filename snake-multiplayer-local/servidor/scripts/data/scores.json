@@ -625,5 +625,115 @@
     "score": 20,
     "result": "finalizado",
     "createdAt": "2026-06-11T02:58:10.471Z"
+  },
+  {
+    "id": "score_9dd87079fac8dcc1",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_b79115c1f49480e0",
+    "email": "alexisvallejos805@gmail.com",
+    "score": 190,
+    "result": "finalizado",
+    "createdAt": "2026-06-11T18:16:57.398Z"
+  },
+  {
+    "id": "score_1e151fde21bc4ce2",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_b79115c1f49480e0",
+    "email": "alexisvallejos805@gmail.com",
+    "score": 30,
+    "result": "finalizado",
+    "createdAt": "2026-06-11T18:32:41.031Z"
+  },
+  {
+    "id": "score_fcdc725e921396c3",
+    "game": "snake",
+    "mode": "multiplayer",
+    "matchCode": "3PMJG",
+    "userId": "user_b79115c1f49480e0",
+    "email": "alexisvallejos805@gmail.com",
+    "score": 10,
+    "result": "perdió",
+    "createdAt": "2026-06-11T18:39:27.176Z"
+  },
+  {
+    "id": "score_03532fe797fa11f9",
+    "game": "snake",
+    "mode": "multiplayer",
+    "matchCode": "3PMJG",
+    "userId": "user_6a8c7eb08bcf173c",
+    "email": "alexisvallejos803@gmail.com",
+    "score": 20,
+    "result": "ganó",
+    "createdAt": "2026-06-11T18:39:27.179Z"
+  },
+  {
+    "id": "score_78b342c2e03b460b",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_b79115c1f49480e0",
+    "email": "alexisvallejos805@gmail.com",
+    "score": 10,
+    "result": "finalizado",
+    "createdAt": "2026-06-11T18:48:59.827Z"
+  },
+  {
+    "id": "score_fb0f6142d1d4e87e",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_b79115c1f49480e0",
+    "email": "alexisvallejos805@gmail.com",
+    "score": 0,
+    "result": "finalizado",
+    "createdAt": "2026-06-11T19:06:29.774Z"
+  },
+  {
+    "id": "score_cc3b99567a46e026",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_6a8c7eb08bcf173c",
+    "email": "alexisvallejos803@gmail.com",
+    "score": 0,
+    "result": "finalizado",
+    "createdAt": "2026-06-11T19:07:25.793Z"
+  },
+  {
+    "id": "score_d6f7e52732af8aa3",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_6a8c7eb08bcf173c",
+    "email": "alexisvallejos803@gmail.com",
+    "score": 100,
+    "result": "finalizado",
+    "createdAt": "2026-06-11T19:08:51.146Z"
+  },
+  {
+    "id": "score_209d9505580bdac2",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_6a8c7eb08bcf173c",
+    "email": "alexisvallejos803@gmail.com",
+    "score": 20,
+    "result": "finalizado",
+    "createdAt": "2026-06-11T19:09:30.316Z"
+  },
+  {
+    "id": "score_4ae52454647af73b",
+    "game": "snake",
+    "mode": "singleplayer",
+    "matchCode": null,
+    "userId": "user_6a8c7eb08bcf173c",
+    "email": "alexisvallejos803@gmail.com",
+    "score": 0,
+    "result": "finalizado",
+    "createdAt": "2026-06-11T19:10:39.309Z"
   }
 ]
