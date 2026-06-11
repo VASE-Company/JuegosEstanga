@@ -1,0 +1,41 @@
+.rankings-page {
+  min-height: 100dvh;
+}
+
+.rankings-shell {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  padding: clamp(18px, 4vw, 40px);
+}
+
+.rankings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.rankings-header h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  line-height: 1;
+}
+
+.rankings-grid-page {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 760px) {
+  .rankings-header,
+  .rankings-grid-page {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .rankings-header {
+    display: grid;
+  }
+}

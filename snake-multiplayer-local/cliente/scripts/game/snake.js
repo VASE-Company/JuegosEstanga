@@ -8,12 +8,18 @@ const DIRECTIONS = {
 const OPPOSITES = { up: "down", down: "up", left: "right", right: "left" };
 const TROPHY_KEYS = ["champions", "worldCup", "laLiga"];
 const ATLAS_URL = "/assets/julian-trophy-hunter/sprites.json";
-const TROPHY_GROWTH = 3;
-const BASE_TICK_MS = 190;
-const MIN_TICK_MS = 125;
+const TROPHY_GROWTH = 1;
+const BASE_TICK_MS = 380;
+const MIN_TICK_MS = 220;
+const LEVEL_SPEED_STEP_MS = 40;
 const GRID_WIDTH = 18;
 const GRID_HEIGHT = 12;
-const HEAD_SCALE_INSET = -0.32;
+const LEVEL_SCORE_STEP = 50;
+const MAX_LEVEL = 5;
+const COMPLETION_SCORE = MAX_LEVEL * LEVEL_SCORE_STEP;
+const MAX_OBSTACLES = 14;
+const OBSTACLES_PER_LEVEL = 2;
+const HEAD_SCALE_INSET = -1.00;
 const TROPHY_SCALE_INSET = -0.2;
 const MAP_FIELD = {
   left: 96 / 1402,
@@ -108,6 +114,14 @@ function normalizeVector(vector) {
   return { x: vector.x / length, y: vector.y / length };
 }
 
+function levelFromScore(score) {
+  return Math.min(MAX_LEVEL, Math.floor(score / LEVEL_SCORE_STEP) + 1);
+}
+
+function tickMsForLevel(level) {
+  return Math.max(MIN_TICK_MS, BASE_TICK_MS - (level - 1) * LEVEL_SPEED_STEP_MS);
+}
+
 export class SnakeGame {
   constructor(canvas, options = {}) {
     this.canvas = canvas;
@@ -127,6 +141,8 @@ export class SnakeGame {
     this.pendingGrowth = 0;
     this.pickupEffect = null;
     this.collisionEffect = null;
+    this.level = 1;
+    this.obstacles = [];
     loadSprites().then(() => this.draw());
     this.reset();
   }
@@ -144,8 +160,11 @@ export class SnakeGame {
     this.direction = "left";
     this.nextDirection = "left";
     this.score = 0;
-    this.tickMs = BASE_TICK_MS;
+    this.level = 1;
+    this.obstacles = [];
+    this.tickMs = tickMsForLevel(this.level);
     this.gameOver = false;
+    this.completed = false;
     this.waitingForInput = true;
     this.pendingGrowth = 0;
     this.pickupEffect = null;
@@ -225,7 +244,7 @@ export class SnakeGame {
     const next = { x: head.x + vector.x, y: head.y + vector.y };
     const willEat = next.x === this.food.x && next.y === this.food.y;
 
-    if (this.hitWall(next) || this.hitSelf(next, willEat)) {
+    if (this.hitWall(next) || this.hitSelf(next, willEat) || this.hitObstacle(next)) {
       this.gameOver = true;
       this.playCollisionEffect(head);
       this.options.onGameOver?.(this.score);
@@ -235,12 +254,28 @@ export class SnakeGame {
     this.previousSnake = previousSnake;
     this.snake.unshift(next);
     if (willEat) {
+      const previousLevel = this.level;
       this.score += 10;
+      this.level = levelFromScore(this.score);
       this.pendingGrowth += TROPHY_GROWTH;
       this.pickupEffect = { x: next.x, y: next.y, frame: 0 };
-      this.food = this.createFood();
-      this.tickMs = Math.max(MIN_TICK_MS, BASE_TICK_MS - Math.floor(this.score / 90) * 4);
+      if (this.level > previousLevel) {
+        this.tickMs = tickMsForLevel(this.level);
+        this.updateObstacles();
+        this.options.onLevelUp?.(this.level, this.score);
+      }
       this.options.onScore?.(this.score);
+      if (this.score >= COMPLETION_SCORE) {
+        this.completed = true;
+        this.gameOver = true;
+        this.active = false;
+        this.food = null;
+        this.startMoveAnimation();
+        this.emitState();
+        this.options.onGameComplete?.(this.score, this.level);
+        return;
+      }
+      this.food = this.createFood();
     } else if (this.pendingGrowth > 0) {
       this.pendingGrowth -= 1;
     } else {
@@ -254,7 +289,7 @@ export class SnakeGame {
   startMoveAnimation() {
     cancelAnimationFrame(this.animationFrame);
     this.animationStart = performance.now();
-    this.animationDuration = Math.max(120, Math.min(210, this.tickMs * 0.92));
+    this.animationDuration = Math.max(120, this.tickMs * 0.94);
     this.renderProgress = 0;
 
     const animate = (time) => {
@@ -308,15 +343,59 @@ export class SnakeGame {
     return body.some((segment) => segment.x === cell.x && segment.y === cell.y);
   }
 
+  hitObstacle(cell) {
+    return this.obstacles.some((obstacle) => obstacle.x === cell.x && obstacle.y === cell.y);
+  }
+
+  updateObstacles() {
+    const obstacleCount = Math.min(MAX_OBSTACLES, Math.max(0, (this.level - 1) * OBSTACLES_PER_LEVEL));
+    this.obstacles = this.createObstacles(obstacleCount);
+  }
+
+  createObstacles(count) {
+    if (count <= 0) return [];
+
+    const obstacles = [];
+    const occupied = new Set(this.snake.map((segment) => `${segment.x},${segment.y}`));
+    if (this.food) occupied.add(`${this.food.x},${this.food.y}`);
+
+    const centerSafeZone = new Set([
+      "7,5", "8,5", "9,5", "10,5",
+      "7,6", "8,6", "9,6", "10,6",
+      "7,7", "8,7", "9,7", "10,7"
+    ]);
+    centerSafeZone.forEach((cell) => occupied.add(cell));
+
+    let attempts = 0;
+    while (obstacles.length < count && attempts < 600) {
+      attempts += 1;
+      const candidate = {
+        x: Math.floor(Math.random() * this.gridWidth),
+        y: Math.floor(Math.random() * this.gridHeight)
+      };
+      const key = `${candidate.x},${candidate.y}`;
+      if (occupied.has(key)) continue;
+      occupied.add(key);
+      obstacles.push(candidate);
+    }
+
+    return obstacles;
+  }
+
   createFood() {
     let food;
+    let attempts = 0;
     do {
+      attempts += 1;
       food = {
         x: Math.floor(Math.random() * this.gridWidth),
         y: Math.floor(Math.random() * this.gridHeight),
         trophy: randomTrophyKey()
       };
-    } while (this.snake?.some((segment) => segment.x === food.x && segment.y === food.y));
+    } while (
+      attempts < 600 &&
+      (this.snake?.some((segment) => segment.x === food.x && segment.y === food.y) || this.hitObstacle(food))
+    );
     return food;
   }
 
@@ -327,9 +406,12 @@ export class SnakeGame {
       gridHeight: this.gridHeight,
       snake: this.snake,
       food: this.food,
+      obstacles: this.obstacles,
       score: this.score,
+      level: this.level,
       direction: this.direction,
       gameOver: this.gameOver,
+      completed: this.completed,
       pendingGrowth: this.pendingGrowth,
       pickupEffect: this.pickupEffect,
       collisionEffect: this.collisionEffect
@@ -346,10 +428,14 @@ export class SnakeGame {
     this.gridHeight = state.gridHeight || state.grid || this.gridHeight;
     this.grid = this.gridWidth;
     this.snake = state.snake || [];
-    this.food = state.food || { x: 0, y: 0, trophy: "champions" };
+    this.food = state.food === null ? null : state.food || { x: 0, y: 0, trophy: "champions" };
+    this.obstacles = state.obstacles || [];
     this.score = Number(state.score) || 0;
+    this.level = Number(state.level) || levelFromScore(this.score);
+    this.tickMs = tickMsForLevel(this.level);
     this.direction = state.direction || this.direction;
     this.gameOver = Boolean(state.gameOver);
+    this.completed = Boolean(state.completed);
     this.pendingGrowth = Number(state.pendingGrowth) || 0;
     this.pickupEffect = state.pickupEffect || null;
     this.collisionEffect = state.collisionEffect || null;
@@ -371,6 +457,7 @@ export class SnakeGame {
     this.drawBoardGrid(board, gridLine);
     this.ctx.save();
     this.clipToBoard(board);
+    this.drawObstacles(board);
     this.drawTrophy(board);
     this.drawEffect(this.collisionEffect, "effects.collision", board);
     this.drawSnake(board);
@@ -436,6 +523,7 @@ export class SnakeGame {
   }
 
   drawTrophy(board) {
+    if (!this.food) return;
     const trophy = this.food?.trophy || "champions";
     const path = trophy === "worldCup" ? "trophies.worldCup" : trophy === "laLiga" ? "trophies.laLiga" : "trophies.champions";
     const image = getImage(path);
@@ -446,6 +534,37 @@ export class SnakeGame {
     }
     this.ctx.fillStyle = "#efb52d";
     this.roundCell(this.food.x, this.food.y, board, board.cell * 0.28);
+  }
+
+  drawObstacles(board) {
+    this.obstacles.forEach((obstacle) => this.drawObstacle(obstacle, board));
+  }
+
+  drawObstacle(obstacle, board) {
+    const cell = board.cell;
+    const gap = Math.max(2, cell * 0.08);
+    const left = board.x + obstacle.x * cell + gap;
+    const top = board.y + obstacle.y * cell + gap;
+    const size = cell - gap * 2;
+    const radius = Math.max(3, cell * 0.08);
+    const stripeHeight = Math.max(3, size * 0.16);
+
+    this.ctx.save();
+    this.ctx.shadowColor = "rgba(0, 0, 0, 0.32)";
+    this.ctx.shadowBlur = cell * 0.12;
+    this.ctx.shadowOffsetY = cell * 0.08;
+    this.roundedRectPath(left, top, size, size, radius);
+    this.ctx.fillStyle = "#0b1f55";
+    this.ctx.fill();
+    this.ctx.shadowColor = "transparent";
+    this.ctx.lineWidth = Math.max(1, cell * 0.035);
+    this.ctx.strokeStyle = "#f8f1e7";
+    this.ctx.stroke();
+
+    this.ctx.fillStyle = "#d3152e";
+    this.ctx.fillRect(left + size * 0.12, top + size * 0.26, size * 0.76, stripeHeight);
+    this.ctx.fillRect(left + size * 0.12, top + size * 0.58, size * 0.76, stripeHeight);
+    this.ctx.restore();
   }
 
   drawTrophyGlow(x, y, board) {

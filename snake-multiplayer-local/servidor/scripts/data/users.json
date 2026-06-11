@@ -1,0 +1,26 @@
+[
+  {
+    "id": "user_95b87498df54834a",
+    "email": "darianseselovsky@gmail.com",
+    "createdAt": "2026-05-22T22:46:06.624Z",
+    "verified": true
+  },
+  {
+    "id": "user_49fd9e155fdb70e0",
+    "email": "franciscorobledo0012@gmail.com",
+    "createdAt": "2026-05-22T22:50:38.662Z",
+    "verified": true
+  },
+  {
+    "id": "user_b79115c1f49480e0",
+    "email": "alexisvallejos805@gmail.com",
+    "createdAt": "2026-06-04T12:56:37.624Z",
+    "verified": true
+  },
+  {
+    "id": "user_6a8c7eb08bcf173c",
+    "email": "alexisvallejos803@gmail.com",
+    "createdAt": "2026-06-04T19:04:02.118Z",
+    "verified": true
+  }
+]

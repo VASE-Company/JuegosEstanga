@@ -1,7 +1,7 @@
-import { getCurrentUser, logout, requestCode, verifyCode } from "./auth.js";
-import { fetchRankings, renderRanking, saveSingleplayerScore } from "./rankings.js";
+import { getCurrentUser, logout, requestCode, verifyCode } from "../core/auth.js";
+import { fetchRankings, renderRanking, saveSingleplayerScore } from "../core/rankings.js";
 import { askRankings, createRoom, finishTurn, getSocket, joinRoom, leaveRoom, sendSnakeState } from "./socket.js";
-import { SnakeGame } from "./snake.js";
+import { SnakeGame } from "../game/snake.js";
 import {
   applyTheme,
   closeRoomModal,
@@ -14,7 +14,7 @@ import {
   setScore,
   showToast,
   showView
-} from "./ui.js";
+} from "../core/ui.js";
 
 const authForm = document.getElementById("authForm");
 const codeForm = document.getElementById("codeForm");
@@ -38,6 +38,7 @@ const fullscreenToggle = document.getElementById("fullscreenToggle");
 const gameMusic = document.getElementById("gameMusic");
 const joinForm = document.getElementById("joinForm");
 const joinCodeInput = document.getElementById("joinCodeInput");
+const instructionsModal = document.getElementById("instructionsModal");
 
 let authType = "register";
 let pendingEmail = "";
@@ -91,6 +92,38 @@ function setPauseButton(isPaused, enabled = controlsActive) {
   pauseBtn.disabled = !enabled;
   pauseBtn.textContent = isPaused ? "Seguir" : "Pausa";
   pauseBtn.classList.toggle("paused", isPaused);
+}
+
+function announceLevelUp(level) {
+  const status = currentMode === "multiplayer"
+    ? `Subiste al nivel ${level}. Ahora hay muros en tu turno.`
+    : `Subiste al nivel ${level}. Esquiva los muros.`;
+  setGameStatus(status);
+  showToast(`Subiste al nivel ${level}. Esquiva los muros.`);
+}
+
+async function completeSingleplayer(score) {
+  setControlsEnabled(false);
+  setPauseButton(false, false);
+  setGameStatus(`Felicitaciones por haber completado todos los niveles. Sos un verdadero ganador. Score final: ${score}`);
+  showToast("Felicitaciones por haber completado todos los niveles. Sos un verdadero ganador.");
+  try {
+    await saveSingleplayerScore(user.email, score);
+    await loadRankings();
+  } catch (error) {
+    showToast(error.message, "error");
+  }
+}
+
+async function completeMultiplayerTurn(score) {
+  if (turnFinished) return;
+  turnFinished = true;
+  setControlsEnabled(false);
+  setPauseButton(false, false);
+  setGameStatus(`Felicitaciones por haber completado todos los niveles. Sos un verdadero ganador. Score: ${score}`);
+  showToast("Felicitaciones por haber completado todos los niveles. Sos un verdadero ganador.");
+  const result = await finishTurn(activeRoomCode, score);
+  if (!result?.ok) showToast(result?.error || "No se pudo finalizar el turno.", "error");
 }
 
 function togglePause() {
@@ -161,6 +194,8 @@ function startSingleplayer() {
   setupGame({ mode: "singleplayer", status: "Caza trofeos con Julian", controls: true });
   game = new SnakeGame(canvas, {
     onScore: setScore,
+    onLevelUp: announceLevelUp,
+    onGameComplete: completeSingleplayer,
     onGameOver: async (score) => {
       setGameStatus(`Fin de la caza. Score final: ${score}`);
       setControlsEnabled(false);
@@ -183,6 +218,8 @@ function startActiveMultiplayerTurn(room) {
   setupGame({ mode: "multiplayer", status: "Tu turno: caza trofeos hasta caer", controls: true });
   game = new SnakeGame(canvas, {
     onScore: setScore,
+    onLevelUp: announceLevelUp,
+    onGameComplete: completeMultiplayerTurn,
     onState: (state) => sendSnakeState(activeRoomCode, state),
     onGameOver: async (score) => {
       if (turnFinished) return;
@@ -215,6 +252,16 @@ function returnToMenu() {
   controlsActive = false;
   setPauseButton(false, false);
   showDashboard();
+}
+
+function openInstructions() {
+  instructionsModal.classList.remove("hidden");
+  document.getElementById("closeInstructionsBtn").focus();
+}
+
+function closeInstructions() {
+  instructionsModal.classList.add("hidden");
+  document.getElementById("howToPlayBtn")?.focus();
 }
 
 authForm.addEventListener("submit", async (event) => {
@@ -282,6 +329,8 @@ document.getElementById("joinRoomBtn").addEventListener("click", () => {
   });
 });
 
+document.getElementById("howToPlayBtn").addEventListener("click", openInstructions);
+
 joinForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!requireUser()) return;
@@ -331,16 +380,33 @@ document.getElementById("closeModalBtn").addEventListener("click", closeRoomModa
 document.getElementById("roomModal").addEventListener("click", (event) => {
   if (event.target.id === "roomModal") closeRoomModal();
 });
+document.getElementById("closeInstructionsBtn").addEventListener("click", closeInstructions);
+instructionsModal.addEventListener("click", (event) => {
+  if (event.target.id === "instructionsModal") closeInstructions();
+});
 
 restartBtn.addEventListener("click", startSingleplayer);
 backMenuBtn.addEventListener("click", returnToMenu);
 pauseBtn.addEventListener("click", togglePause);
 
 document.querySelectorAll("[data-direction]").forEach((button) => {
-  button.addEventListener("click", () => game?.setDirection(button.dataset.direction));
+  const pressDirection = (event) => {
+    event.preventDefault();
+    if (button.disabled) return;
+    game?.setDirection(button.dataset.direction);
+  };
+
+  button.addEventListener("pointerdown", pressDirection);
+  button.addEventListener("touchstart", pressDirection, { passive: false });
+  button.addEventListener("click", pressDirection);
 });
 
 window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !instructionsModal.classList.contains("hidden")) {
+    closeInstructions();
+    return;
+  }
+
   const gameViewVisible = !document.getElementById("gameView").classList.contains("hidden");
   const canUseKeyboard =
     gameViewVisible &&

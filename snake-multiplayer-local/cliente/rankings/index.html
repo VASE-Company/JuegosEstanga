@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Julian Alvarez Trophy Hunter · Rankings</title>
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/layout.css">
+  <link rel="stylesheet" href="../styles/modals.css">
+  <link rel="stylesheet" href="../styles/responsive.css">
+  <link rel="stylesheet" href="../styles/rankings.css">
+</head>
+<body class="rankings-page">
+  <main class="rankings-shell">
+    <header class="rankings-header">
+      <div>
+        <p class="eyebrow">rankings</p>
+        <h1>Julian Alvarez Trophy Hunter</h1>
+      </div>
+      <a class="secondary action-button" href="../">Volver al juego</a>
+    </header>
+
+    <section class="panel hero-band">
+      <div>
+        <p class="eyebrow">perfil activo</p>
+        <h2 id="rankingsUserEmail">jugador</h2>
+      </div>
+      <button class="secondary" id="refreshRankingsBtn" type="button">Actualizar</button>
+    </section>
+
+    <section class="rankings-grid-page">
+      <article class="panel">
+        <div class="section-heading">
+          <p class="eyebrow">tus mejores</p>
+          <h2>Top 3 personal</h2>
+        </div>
+        <ol class="ranking-list" id="personalRanking"></ol>
+      </article>
+
+      <article class="panel">
+        <div class="section-heading">
+          <p class="eyebrow">servidor local</p>
+          <h2>Top 10 general</h2>
+        </div>
+        <ol class="ranking-list" id="generalRanking"></ol>
+      </article>
+    </section>
+  </main>
+
+  <script type="module" src="../scripts/pages/rankings-page.js"></script>
+</body>
+</html>

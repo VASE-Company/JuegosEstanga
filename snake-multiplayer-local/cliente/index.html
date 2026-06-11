@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Julian Alvarez Trophy Hunter</title>
-  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="./styles/base.css">
+  <link rel="stylesheet" href="./styles/layout.css">
+  <link rel="stylesheet" href="./styles/game.css">
+  <link rel="stylesheet" href="./styles/modals.css">
+  <link rel="stylesheet" href="./styles/responsive.css">
 </head>
 <body>
   <div class="app-shell">
@@ -47,45 +51,80 @@
         </form>
       </section>
 
-      <section class="dashboard hidden" id="dashboardView">
-        <div class="hero-band">
-          <div>
-            <p class="eyebrow">jugador conectado</p>
-            <h2 id="userEmail">jugador</h2>
+      <section class="dashboard dashboard-home hidden" id="dashboardView">
+        <div class="home-shell">
+          <header class="home-header">
+            <div class="home-user">
+              <p class="eyebrow">jugador conectado</p>
+              <h2 id="userEmail">jugador</h2>
+            </div>
+            <div class="home-badges" aria-hidden="true">
+              <span class="home-badge">
+                <img src="./assets/julian-trophy-hunter/branding/atleti_shield.png" alt="">
+              </span>
+              <span class="home-badge">
+                <img src="./assets/julian-trophy-hunter/trophies/trophy_champions.png" alt="">
+              </span>
+            </div>
+            <button class="ghost home-logout" id="logoutBtn">Cerrar sesion</button>
+          </header>
+
+          <div class="home-stage">
+            <section class="home-actions" aria-label="Modos de juego">
+              <div class="home-title">
+                <h1>Julián Álvarez</h1>
+                <h2><span aria-hidden="true">★</span> Trophy Hunter <span aria-hidden="true">★</span></h2>
+                <p>Colecciona trofeos, supera récords y conviértete en leyenda.</p>
+              </div>
+
+              <div class="home-action-stack">
+                <button class="primary action-button home-action home-action-primary" id="singleBtn">
+                  <span class="action-icon icon-target" aria-hidden="true"></span>
+                  <span>Jugar caza individual</span>
+                </button>
+                <button class="secondary action-button home-action" id="createRoomBtn">
+                  <span class="action-icon icon-players" aria-hidden="true"></span>
+                  <span>Crear duelo 2 jugadores</span>
+                </button>
+                <button class="secondary action-button home-action" id="joinRoomBtn">
+                  <span class="action-icon icon-code" aria-hidden="true"></span>
+                  <span>Unirse con codigo</span>
+                </button>
+                <button class="ghost action-button home-action" id="howToPlayBtn" type="button">
+                  <span class="action-icon icon-info" aria-hidden="true">i</span>
+                  <span>Como jugar</span>
+                </button>
+              </div>
+            </section>
+
+            <figure class="home-player-art" aria-label="Julian Alvarez corriendo">
+              <img src="./assets/julian-trophy-hunter/branding/home_player_reference.png" alt="Julian Alvarez con camiseta del Atletico">
+            </figure>
+
+            <aside class="home-rankings" aria-label="Rankings de puntaje">
+              <section class="panel home-ranking-card">
+                <div class="section-heading">
+                  <p class="eyebrow">tus mejores</p>
+                  <h2>Top 3 personal</h2>
+                </div>
+                <ol class="ranking-list" id="personalRanking"></ol>
+              </section>
+
+              <section class="panel home-ranking-card">
+                <div class="section-heading">
+                  <p class="eyebrow">servidor local</p>
+                  <h2>Top 10 general</h2>
+                </div>
+                <ol class="ranking-list" id="generalRanking"></ol>
+              </section>
+            </aside>
           </div>
-          <div class="hero-sprites" aria-hidden="true">
-            <img src="./assets/julian-trophy-hunter/branding/atleti_shield.png" alt="">
-            <img src="./assets/julian-trophy-hunter/trophies/trophy_champions.png" alt="">
+
+          <div class="home-banner" aria-hidden="true">
+            <span>★</span>
+            <strong>A la gloria con Julián</strong>
+            <span>★</span>
           </div>
-          <button class="ghost" id="logoutBtn">Cerrar sesion</button>
-        </div>
-
-        <div class="dashboard-grid">
-          <section class="panel actions-panel">
-            <div class="section-heading">
-              <p class="eyebrow">modos</p>
-              <h2>Elegi partida</h2>
-            </div>
-            <button class="primary action-button" id="singleBtn">Jugar caza individual</button>
-            <button class="secondary action-button" id="createRoomBtn">Crear duelo 2 jugadores</button>
-            <button class="secondary action-button" id="joinRoomBtn">Unirse con codigo</button>
-          </section>
-
-          <section class="panel">
-            <div class="section-heading">
-              <p class="eyebrow">tus mejores</p>
-              <h2>Top 3 personal</h2>
-            </div>
-            <ol class="ranking-list" id="personalRanking"></ol>
-          </section>
-
-          <section class="panel">
-            <div class="section-heading">
-              <p class="eyebrow">servidor local</p>
-              <h2>Top 10 general</h2>
-            </div>
-            <ol class="ranking-list" id="generalRanking"></ol>
-          </section>
         </div>
       </section>
 
@@ -111,6 +150,7 @@
               <p class="eyebrow">Score</p>
               <strong id="scoreValue">0</strong>
             </div>
+            <button class="pause-button" id="pauseBtn" type="button">Pausa</button>
           </header>
 
           <aside class="hunter-side hunter-left">
@@ -145,7 +185,6 @@
               <p class="eyebrow">Mejor partida</p>
               <strong><span class="ball-icon" aria-hidden="true"></span> <span id="bestMatchValue">0</span></strong>
             </section>
-            <button class="pause-button" id="pauseBtn" type="button">Pausa</button>
           </aside>
 
           <div class="game-controls" id="touchControls" aria-label="Controles tactiles">
@@ -193,6 +232,23 @@
     </div>
   </div>
 
+  <div class="modal hidden" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsTitle">
+    <div class="modal-card instructions-card">
+      <button class="modal-close" id="closeInstructionsBtn" aria-label="Cerrar">x</button>
+      <p class="eyebrow">guia rapida</p>
+      <h2 id="instructionsTitle">Como jugar</h2>
+      <div class="instructions-list">
+        <p><strong>Objetivo:</strong> junta trofeos, suma puntos y evita paredes, tu propio cuerpo y los muros.</p>
+        <p><strong>Controles en compu:</strong> usa flechas o WASD. La tecla P pausa o reanuda.</p>
+        <p><strong>Controles en celular:</strong> usa los botones de direccion que aparecen debajo del tablero.</p>
+        <p><strong>Niveles:</strong> cada 50 puntos subis de nivel. Hay 5 niveles y cada uno va mas rapido.</p>
+        <p><strong>Final:</strong> si completas todos los niveles, ganas la partida y se guarda tu score.</p>
+        <p><strong>Multijugador:</strong> un jugador crea sala y el otro entra con codigo. Juegan por turnos y gana el mayor puntaje.</p>
+        <p><strong>Opciones:</strong> podes cambiar claro/oscuro, activar o mutear musica y usar pantalla completa.</p>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast" aria-live="polite"></div>
   <button class="scroll-top-button" id="scrollTopBtn" type="button" aria-label="Volver arriba" title="Volver arriba">
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -203,6 +259,6 @@
   <audio id="gameMusic" preload="auto" loop src="./assets/julian-trophy-hunter/audio/game-theme.mp3"></audio>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script type="module" src="./js/app.js"></script>
+  <script type="module" src="./scripts/network/app.js"></script>
 </body>
 </html>
