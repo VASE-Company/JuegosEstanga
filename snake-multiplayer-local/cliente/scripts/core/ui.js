@@ -61,7 +61,9 @@ export function closeRoomModal() {
 }
 
 export function setGameStatus(text) {
-  document.getElementById("gameStatus").textContent = text;
+  const status = document.getElementById("gameStatus");
+  status.textContent = text;
+  status.classList.toggle("hidden", !text);
 }
 
 export function setScore(score) {

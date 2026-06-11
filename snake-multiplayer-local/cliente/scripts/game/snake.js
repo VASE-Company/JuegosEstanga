@@ -131,6 +131,7 @@ export class SnakeGame {
     this.grid = this.gridWidth;
     this.timer = null;
     this.animationFrame = null;
+    this.lastStepTime = 0;
     this.previousSnake = null;
     this.renderProgress = 1;
     this.animationStart = 0;
@@ -182,14 +183,16 @@ export class SnakeGame {
       this.startIdleAnimation();
       return;
     }
+    this.lastStepTime = performance.now() - this.tickMs;
     this.loop();
   }
 
   stop() {
-    clearTimeout(this.timer);
+    cancelAnimationFrame(this.timer);
     cancelAnimationFrame(this.animationFrame);
     this.timer = null;
     this.animationFrame = null;
+    this.lastStepTime = 0;
   }
 
   startIdleAnimation() {
@@ -211,10 +214,23 @@ export class SnakeGame {
     this.active = active;
   }
 
-  loop() {
+  loop(time = performance.now()) {
     if (!this.gameOver && this.active) {
+      if (!this.lastStepTime) this.lastStepTime = time - this.tickMs;
+      if (time - this.lastStepTime >= this.tickMs) {
+        this.lastStepTime = time;
+        this.step();
+      }
+      if (this.gameOver || !this.active) return;
+      this.timer = requestAnimationFrame((nextTime) => this.loop(nextTime));
+    }
+  }
+
+  runImmediateStep() {
+    if (!this.gameOver && this.active) {
+      this.lastStepTime = performance.now();
       this.step();
-      this.timer = setTimeout(() => this.loop(), this.tickMs);
+      if (!this.gameOver && this.active) this.timer = requestAnimationFrame((time) => this.loop(time));
     }
   }
 
@@ -228,7 +244,7 @@ export class SnakeGame {
       this.nextDirection = direction;
       this.waitingForInput = false;
       this.draw();
-      this.loop();
+      this.runImmediateStep();
       return;
     }
     if (OPPOSITES[direction] === this.direction) return;
@@ -289,12 +305,12 @@ export class SnakeGame {
   startMoveAnimation() {
     cancelAnimationFrame(this.animationFrame);
     this.animationStart = performance.now();
-    this.animationDuration = Math.max(120, this.tickMs * 0.94);
+    this.animationDuration = Math.max(120, this.tickMs);
     this.renderProgress = 0;
 
     const animate = (time) => {
       const rawProgress = Math.min(1, (time - this.animationStart) / this.animationDuration);
-      this.renderProgress = 1 - Math.pow(1 - rawProgress, 3);
+      this.renderProgress = rawProgress;
       this.draw();
       if (rawProgress < 1) {
         this.animationFrame = requestAnimationFrame(animate);
@@ -452,7 +468,8 @@ export class SnakeGame {
     const dark = document.body.classList.contains("dark");
     const gridLine = dark ? "rgba(255, 255, 255, 0.07)" : "rgba(255, 255, 255, 0.07)";
 
-    this.ctx.imageSmoothingEnabled = false;
+    this.ctx.imageSmoothingEnabled = true;
+    this.ctx.imageSmoothingQuality = "high";
     this.drawMapBackground(width, height);
     this.drawBoardGrid(board, gridLine);
     this.ctx.save();
